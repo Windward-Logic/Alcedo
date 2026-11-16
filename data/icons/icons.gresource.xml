@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/dev/alcedo/Mail/icons">
+    <file>hicolor/scalable/apps/dev.alcedo.Mail.svg</file>
+    <file>hicolor/scalable/actions/alcedo-rail-symbolic.svg</file>
+    <file>hicolor/scalable/actions/alcedo-rail-hide-symbolic.svg</file>
+    <file>hicolor/scalable/actions/alcedo-folder-pane-symbolic.svg</file>
+    <file>hicolor/scalable/actions/alcedo-compose-symbolic.svg</file>
+    <file>hicolor/scalable/actions/alcedo-mail-preview-symbolic.svg</file>
+    <file>hicolor/scalable/actions/alcedo-columns-symbolic.svg</file>
+    <file>hicolor/scalable/actions/alcedo-reading-layout-symbolic.svg</file>
+    <file>hicolor/scalable/actions/alcedo-send-symbolic.svg</file>
+    <file>hicolor/scalable/actions/alcedo-rules-symbolic.svg</file>
+    <file>hicolor/scalable/actions/alcedo-server-scan-symbolic.svg</file>
+    <file>hicolor/scalable/actions/alcedo-sidebar-archive-symbolic.svg</file>
+    <file>hicolor/scalable/actions/alcedo-sidebar-attachment-symbolic.svg</file>
+    <file>hicolor/scalable/actions/alcedo-sidebar-drafts-symbolic.svg</file>
+    <file>hicolor/scalable/actions/alcedo-sidebar-everything-symbolic.svg</file>
+    <file>hicolor/scalable/actions/alcedo-sidebar-folder-symbolic.svg</file>
+    <file>hicolor/scalable/actions/alcedo-sidebar-followup-symbolic.svg</file>
+    <file>hicolor/scalable/actions/alcedo-sidebar-inbox-symbolic.svg</file>
+    <file>hicolor/scalable/actions/alcedo-sidebar-junk-symbolic.svg</file>
+    <file>hicolor/scalable/actions/alcedo-sidebar-outbox-symbolic.svg</file>
+    <file>hicolor/scalable/actions/alcedo-sidebar-people-symbolic.svg</file>
+    <file>hicolor/scalable/actions/alcedo-sidebar-saved-search-symbolic.svg</file>
+    <file>hicolor/scalable/actions/alcedo-sidebar-search-symbolic.svg</file>
+    <file>hicolor/scalable/actions/alcedo-sidebar-sent-symbolic.svg</file>
+    <file>hicolor/scalable/actions/alcedo-sidebar-snooze-symbolic.svg</file>
+    <file>hicolor/scalable/actions/alcedo-sidebar-star-symbolic.svg</file>
+    <file>hicolor/scalable/actions/alcedo-sidebar-trash-symbolic.svg</file>
+    <file>hicolor/scalable/actions/alcedo-sidebar-unread-symbolic.svg</file>
+    <file alias="hicolor/scalable/apps/alcedo-rail-symbolic.svg">hicolor/scalable/actions/alcedo-rail-symbolic.svg</file>
+    <file alias="hicolor/scalable/apps/alcedo-rail-hide-symbolic.svg">hicolor/scalable/actions/alcedo-rail-hide-symbolic.svg</file>
+    <file alias="hicolor/scalable/apps/alcedo-folder-pane-symbolic.svg">hicolor/scalable/actions/alcedo-folder-pane-symbolic.svg</file>
+    <file alias="hicolor/scalable/apps/alcedo-compose-symbolic.svg">hicolor/scalable/actions/alcedo-compose-symbolic.svg</file>
+    <file alias="hicolor/scalable/apps/alcedo-mail-preview-symbolic.svg">hicolor/scalable/actions/alcedo-mail-preview-symbolic.svg</file>
+    <file alias="hicolor/scalable/apps/alcedo-columns-symbolic.svg">hicolor/scalable/actions/alcedo-columns-symbolic.svg</file>
+    <file alias="hicolor/scalable/apps/alcedo-reading-layout-symbolic.svg">hicolor/scalable/actions/alcedo-reading-layout-symbolic.svg</file>
+    <file alias="hicolor/scalable/apps/alcedo-send-symbolic.svg">hicolor/scalable/actions/alcedo-send-symbolic.svg</file>
+    <file alias="hicolor/scalable/apps/alcedo-rules-symbolic.svg">hicolor/scalable/actions/alcedo-rules-symbolic.svg</file>
+    <file>hicolor/48x48/actions/alcedo-mail.png</file>
+    <file>hicolor/48x48/actions/alcedo-contacts.png</file>
+    <file>hicolor/48x48/actions/alcedo-compose.png</file>
+    <file>hicolor/256x256/actions/alcedo-mail.png</file>
+    <file>hicolor/256x256/actions/alcedo-contacts.png</file>
+    <file>hicolor/256x256/actions/alcedo-compose.png</file>
+  </gresource>
+</gresources>

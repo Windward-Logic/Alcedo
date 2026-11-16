@@ -1,0 +1,48 @@
+{
+  "app-id": "dev.alcedo.Mail",
+  "runtime": "org.gnome.Platform",
+  "runtime-version": "50",
+  "sdk": "org.gnome.Sdk",
+  "sdk-version": "50",
+  "sdk-extensions": [
+    "org.freedesktop.Sdk.Extension.rust-stable"
+  ],
+  "command": "alcedo",
+  "finish-args": [
+    "--share=network",
+    "--socket=wayland",
+    "--socket=fallback-x11",
+    "--device=dri",
+    "--talk-name=org.freedesktop.secrets",
+    "--talk-name=org.freedesktop.Notifications",
+    "--talk-name=org.kde.StatusNotifierWatcher",
+    "--filesystem=xdg-download:ro"
+  ],
+  "build-options": {
+    "append-path": "/usr/lib/sdk/rust-stable/bin",
+    "env": {
+      "RUST_BACKTRACE": "1"
+    }
+  },
+  "modules": [
+    {
+      "name": "alcedo",
+      "buildsystem": "simple",
+      "build-commands": [
+        "cargo build --release -p alcedo",
+        "install -Dm755 target/release/alcedo /app/bin/alcedo",
+        "install -Dm644 data/dev.alcedo.Mail.desktop /app/share/applications/dev.alcedo.Mail.desktop",
+        "bash scripts/render-metainfo.sh dev.alcedo.Mail.metainfo.xml",
+        "install -Dm644 dev.alcedo.Mail.metainfo.xml /app/share/metainfo/dev.alcedo.Mail.metainfo.xml",
+        "install -Dm644 data/dev.alcedo.Mail.gschema.xml /app/share/glib-2.0/schemas/dev.alcedo.Mail.gschema.xml",
+        "install -Dm644 data/icons/hicolor/scalable/apps/dev.alcedo.Mail.svg /app/share/icons/hicolor/scalable/apps/dev.alcedo.Mail.svg"
+      ],
+      "sources": [
+        {
+          "type": "dir",
+          "path": ".."
+        }
+      ]
+    }
+  ]
+}

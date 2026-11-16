@@ -1,0 +1,22 @@
+From: Testy <testy@example.org>
+Subject: MIME signed fixture
+MIME-Version: 1.0
+Content-Type: multipart/signed; protocol="application/pgp-signature"; micalg="pgp-sha256"; boundary="alcedo-fixture-signed"
+
+--alcedo-fixture-signed
+Content-Type: text/plain; charset=utf-8
+
+Hello from fixture
+--alcedo-fixture-signed
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+wr0EABYIAG8FgmrvZUoJEK3yYQV3dbVqRxQAAAAAAB4AIHNhbHRAbm90YXRpb25z
+LnNlcXVvaWEtcGdwLm9yZ7128jNOH6OLKGOyXLnvfc4xOdMiFVKJCYt8FCJveJzu
+FiEEQVFi4qdKQHI4A192rfJhBXd1tWoAADE0AQCuPEizGxDae7UpC8OyVqELQ4CX
+fmPIPQ47XNRTTWhO6gD+NlxU1yhn6+83+fps1khFcnhdau0F2UYazn0dSB1Nuwc=
+=BX5P
+-----END PGP SIGNATURE-----
+
+--alcedo-fixture-signed--

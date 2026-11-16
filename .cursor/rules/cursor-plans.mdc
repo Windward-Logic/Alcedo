@@ -1,0 +1,11 @@
+---
+description: Where Cursor plan files live and how to @-reference them in chat
+alwaysApply: true
+---
+
+# Cursor plans
+
+- **Path in this repo:** `.cursor/plans/` is a symlink to `~/.cursor/plans` (where Cursor usually writes plan mode output).
+- **@-reference:** Use `@.cursor/plans/<name>.plan.md` or paths under subfolders (e.g. `@.cursor/plans/inthecrack-v3/...`).
+- **Write new plans:** Prefer `~/.cursor/plans/` (same as `.cursor/plans/` here). Do not copy plans into the repo root unless the user asks.
+- **Recreate symlink after clone:** `ln -sfn ~/.cursor/plans .cursor/plans` from the repo root (merge any local `.cursor/plans/` directory into `~/.cursor/plans` first if it exists).

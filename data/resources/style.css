@@ -1,0 +1,1489 @@
+:root {
+  --alcedo-rail-width: 56px;
+  --alcedo-rail-expanded-width: 240px;
+  --alcedo-rail-pad: 8px;
+  --alcedo-rail-bg: var(--sidebar-bg-color);
+  --alcedo-avatar-size: 36px;
+  --alcedo-avatar-radius: 8px;
+  --alcedo-hover-ms: 180ms;
+
+  --alcedo-list-pad: 10px;
+  --alcedo-card-gap: 8px;
+  --alcedo-card-pad: 12px;
+  --alcedo-card-radius: 12px;
+  --alcedo-card-shadow: 0 2px 10px color-mix(in srgb, black 12%, transparent);
+  --alcedo-card-bg: color-mix(in srgb, var(--card-bg-color) 92%, transparent);
+
+  --alcedo-reader-pad: 16px;
+  --alcedo-reader-title-size: 1.0625rem;
+  --alcedo-reader-pad-bottom: 10px;
+
+  --alcedo-msg-row-min-height: 32px;
+  --alcedo-msg-row-pad-y: 4px;
+  --alcedo-msg-row-pad-x: 8px;
+
+  --alcedo-msg-avatar-size: calc(var(--alcedo-avatar-size) - 4px);
+  --alcedo-rail-hover-bg: color-mix(in srgb, currentColor 8%, transparent);
+  --alcedo-rail-active-bg: color-mix(in srgb, var(--accent-bg-color) 18%, transparent);
+  --alcedo-card-hover-shadow: 0 4px 16px color-mix(in srgb, black 18%, transparent);
+  --alcedo-card-selected-border: color-mix(in srgb, var(--accent-bg-color) 70%, transparent);
+  --alcedo-card-selected-bg: color-mix(in srgb, var(--accent-bg-color) 14%, var(--alcedo-card-bg));
+  --alcedo-msg-row-hover-bg: color-mix(in srgb, currentColor 6%, transparent);
+  --alcedo-msg-row-focus-ring: color-mix(in srgb, var(--accent-bg-color) 55%, transparent);
+}
+
+.alcedo-density-compact {
+  --alcedo-msg-row-min-height: 24px;
+  --alcedo-msg-row-pad-y: 1px;
+  --alcedo-reader-pad: 12px;
+  --alcedo-reader-title-size: 1rem;
+  --alcedo-reader-pad-bottom: 8px;
+}
+
+.alcedo-density-comfortable {
+  --alcedo-msg-row-min-height: 32px;
+  --alcedo-msg-row-pad-y: 4px;
+  --alcedo-reader-pad: 16px;
+  --alcedo-reader-title-size: 1.0625rem;
+  --alcedo-reader-pad-bottom: 10px;
+}
+
+.alcedo-density-relaxed {
+  --alcedo-msg-row-min-height: 44px;
+  --alcedo-msg-row-pad-y: 8px;
+  --alcedo-reader-pad: 24px;
+  --alcedo-reader-title-size: 1.1875rem;
+  --alcedo-reader-pad-bottom: 16px;
+}
+
+.alcedo-layout-bottom {
+  --alcedo-msg-row-min-height: 26px;
+  --alcedo-msg-row-pad-y: 2px;
+}
+
+/* ── Theme switcher ──────────────────────────────────────────────────── */
+
+.alcedo-swatch {
+  min-width: 22px;
+  min-height: 22px;
+  padding: 0;
+  border-radius: 9999px;
+}
+
+/* Accent picker in Preferences → Appearance: a flat circular toggle wraps each swatch. */
+.alcedo-swatch-btn:checked {
+  background: none;
+}
+
+.alcedo-swatch-btn:checked .alcedo-swatch {
+  box-shadow:
+    0 0 0 2px var(--card-bg-color),
+    0 0 0 4px var(--accent-color);
+}
+
+.alcedo-swatch-default {
+  background-color: color-mix(in srgb, currentColor 18%, transparent);
+}
+
+.alcedo-swatch-blue { background-color: var(--accent-blue); }
+.alcedo-swatch-teal { background-color: var(--accent-teal); }
+.alcedo-swatch-green { background-color: var(--accent-green); }
+.alcedo-swatch-yellow { background-color: var(--accent-yellow); }
+.alcedo-swatch-orange { background-color: var(--accent-orange); }
+.alcedo-swatch-red { background-color: var(--accent-red); }
+.alcedo-swatch-pink { background-color: var(--accent-pink); }
+.alcedo-swatch-purple { background-color: var(--accent-purple); }
+.alcedo-swatch-slate { background-color: var(--accent-slate); }
+
+/* ── Rail ─────────────────────────────────────────────────────────────── */
+
+.alcedo-rail {
+  min-width: var(--alcedo-rail-width);
+  padding: var(--alcedo-rail-pad);
+  background-color: var(--alcedo-rail-bg);
+}
+
+.alcedo-rail:backdrop {
+  background-color: var(--sidebar-backdrop-color);
+}
+
+.alcedo-rail-label {
+  padding-right: 4px;
+  font-size: 0.9em;
+}
+
+.alcedo-rail button,
+.alcedo-rail-btn {
+  min-width: var(--alcedo-avatar-size);
+  min-height: var(--alcedo-avatar-size);
+  padding: 0;
+  border-radius: var(--alcedo-avatar-radius);
+  transition:
+    background-color var(--alcedo-hover-ms) ease,
+    transform var(--alcedo-hover-ms) ease;
+}
+
+.alcedo-rail-expanded .alcedo-rail-btn {
+  min-width: 0;
+  padding: 6px 10px;
+}
+
+.alcedo-rail button.circular,
+.alcedo-rail-btn.circular {
+  border-radius: var(--alcedo-avatar-radius);
+}
+
+.alcedo-rail button:hover,
+.alcedo-rail-btn:hover {
+  background-color: var(--alcedo-rail-hover-bg);
+}
+
+.alcedo-rail:not(.alcedo-rail-expanded) button:hover,
+.alcedo-rail:not(.alcedo-rail-expanded) .alcedo-rail-btn:hover {
+  transform: scale(1.06);
+}
+
+.alcedo-rail-active {
+  background-color: var(--alcedo-rail-active-bg);
+  box-shadow: inset 3px 0 0 0 var(--accent-bg-color);
+  border-radius: var(--alcedo-avatar-radius);
+}
+
+.alcedo-rail-badge {
+  min-width: 1.4em;
+  padding: 1px 4px;
+  margin: -4px -4px 0 0;
+  border-radius: 999px;
+  font-size: 0.8em;
+  font-weight: 700;
+  background-color: var(--accent-bg-color);
+  color: var(--accent-fg-color);
+  border: 2px solid var(--alcedo-rail-bg);
+}
+
+.alcedo-rail:backdrop .alcedo-rail-badge {
+  border-color: var(--sidebar-backdrop-color);
+}
+
+/* ── Message list & columns ───────────────────────────────────────────── */
+
+.alcedo-msg-list {
+  background: transparent;
+  padding: 0;
+}
+
+columnview.alcedo-msg-list,
+columnview.alcedo-msg-list listview,
+columnview.alcedo-msg-list header,
+columnview.alcedo-msg-list row {
+  min-width: 0;
+}
+
+columnview.alcedo-msg-list row {
+  min-height: var(--alcedo-msg-row-min-height);
+  padding: var(--alcedo-msg-row-pad-y) 0;
+  border-radius: var(--alcedo-avatar-radius);
+  transition:
+    background-color var(--alcedo-hover-ms) ease,
+    box-shadow var(--alcedo-hover-ms) ease;
+}
+
+/* Hairline row rules beat Adwaita/Yaru's 1px #d6d6d6 grid line. */
+columnview.alcedo-msg-list listview.separators:not(.horizontal) > row:not(.separator) {
+  border-bottom: 0.5px solid color-mix(in srgb, currentColor 7%, transparent);
+}
+
+columnview.alcedo-msg-list listview.separators:not(.horizontal) > row:not(.separator):selected {
+  border-bottom-color: transparent;
+}
+
+columnview.alcedo-msg-list row:hover {
+  background-color: var(--alcedo-msg-row-hover-bg);
+}
+
+/* Expanded thread: one visual block (Thunderbird/Outlook grouping). */
+columnview.alcedo-msg-list row.alcedo-msg-thread-parent {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+columnview.alcedo-msg-list row.alcedo-msg-thread-child {
+  border-radius: 0;
+  background-color: color-mix(in srgb, currentColor 4%, transparent);
+  box-shadow: inset 3px 0 0 0 color-mix(in srgb, currentColor 18%, transparent);
+}
+
+columnview.alcedo-msg-list listview.separators:not(.horizontal) > row.alcedo-msg-thread-parent:not(.separator) {
+  border-bottom-color: transparent;
+}
+
+columnview.alcedo-msg-list row:selected {
+  background-color: var(--alcedo-card-selected-bg);
+  box-shadow: inset 3px 0 0 0 var(--accent-bg-color);
+}
+
+columnview.alcedo-msg-list row:selected:hover {
+  background-color: var(--alcedo-card-selected-bg);
+}
+
+/* Adwaita pads every columnview cell 8px 6px. Padding here is not a hit
+   target — those clicks start a rubberband — so it stays 0 and the filling
+   box is the grab area. A spacer in that box end-aligns the glyph, clear of
+   the selected row's left accent bar. */
+columnview.alcedo-msg-list > listview > row > cell.alcedo-msg-drag-column {
+  padding: 0;
+}
+
+.alcedo-msg-drag-cell {
+  min-width: 48px;
+}
+
+.alcedo-msg-drag-handle {
+  opacity: 0;
+  transition: opacity var(--alcedo-hover-ms) ease;
+}
+
+columnview.alcedo-msg-list row:hover .alcedo-msg-drag-handle,
+columnview.alcedo-msg-list row:selected .alcedo-msg-drag-handle {
+  opacity: 0.55;
+}
+
+columnview.alcedo-msg-list row:hover .alcedo-msg-drag-cell:hover .alcedo-msg-drag-handle,
+columnview.alcedo-msg-list row:selected .alcedo-msg-drag-cell:hover .alcedo-msg-drag-handle {
+  opacity: 0.9;
+}
+
+columnview.alcedo-msg-list row:focus {
+  box-shadow: inset 0 0 0 2px var(--alcedo-msg-row-focus-ring);
+}
+
+columnview.alcedo-msg-list row.alcedo-msg-thread-child:focus {
+  box-shadow:
+    inset 0 0 0 2px var(--alcedo-msg-row-focus-ring),
+    inset 3px 0 0 0 color-mix(in srgb, currentColor 18%, transparent);
+}
+
+columnview.alcedo-msg-list row:selected:focus {
+  box-shadow:
+    inset 0 0 0 2px var(--alcedo-msg-row-focus-ring),
+    inset 3px 0 0 0 var(--accent-bg-color);
+}
+
+columnview.alcedo-msg-list header {
+  min-height: 28px;
+  padding: 0;
+}
+
+.alcedo-msg-list-scroll {
+  margin-left: 8px;
+}
+
+.alcedo-new-mail-chip {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding: 6px 14px;
+  font-weight: 600;
+  box-shadow: var(--alcedo-card-shadow);
+  transition: background-color var(--alcedo-hover-ms) ease;
+}
+
+columnview.alcedo-msg-list header .alcedo-col-header-end {
+  padding-right: 14px;
+}
+
+columnview.alcedo-msg-list.alcedo-last-col-unread .alcedo-msg-unread-cell,
+columnview.alcedo-msg-list.alcedo-last-col-attachments .alcedo-msg-attachment,
+columnview.alcedo-msg-list.alcedo-last-col-star .alcedo-msg-star-cell,
+columnview.alcedo-msg-list.alcedo-last-col-size .alcedo-msg-size,
+columnview.alcedo-msg-list.alcedo-last-col-date .alcedo-msg-date,
+columnview.alcedo-msg-list.alcedo-last-col-deleted .alcedo-msg-deleted,
+columnview.alcedo-msg-list.alcedo-last-col-from .alcedo-msg-from,
+columnview.alcedo-msg-list.alcedo-last-col-folder .alcedo-msg-folder,
+columnview.alcedo-msg-list.alcedo-last-col-account .alcedo-msg-account,
+columnview.alcedo-msg-list.alcedo-last-col-account-chip .alcedo-msg-account-chip-cell,
+columnview.alcedo-msg-list.alcedo-last-col-subject .alcedo-msg-subject-cell,
+columnview.alcedo-msg-list.alcedo-last-col-drag .alcedo-msg-drag-cell {
+  padding-right: 14px;
+}
+
+.alcedo-selection-bar {
+  padding: 0 8px;
+  min-height: 36px;
+  background: var(--headerbar-bg-color, var(--card-bg-color));
+}
+
+.alcedo-selection-bar button.flat:checked {
+  background: transparent;
+  color: var(--accent-color, var(--accent-bg-color));
+}
+
+.alcedo-selection-bar button.flat.alcedo-sel-star:checked {
+  color: var(--warning-color, #f6d32d);
+}
+
+.alcedo-selection-bar button.flat.mixed {
+  opacity: 0.55;
+}
+
+.alcedo-search-filter-bar {
+  padding: 0 8px;
+  min-height: 36px;
+  background: var(--headerbar-bg-color, var(--card-bg-color));
+}
+
+.alcedo-search-filter-bar button.flat:checked {
+  background: transparent;
+  color: var(--accent-color, var(--accent-bg-color));
+}
+
+.alcedo-msg-folder {
+  font-size: 0.85em;
+  min-width: 0;
+}
+
+.alcedo-msg-folder-icon {
+  -gtk-icon-size: 16px;
+}
+
+.unread-sender {
+  font-weight: 700;
+}
+
+.alcedo-pip {
+  min-width: 6px;
+  min-height: 6px;
+  border-radius: 999px;
+  background-color: var(--accent-bg-color);
+}
+
+.alcedo-unread-count {
+  min-width: 0;
+}
+
+.alcedo-msg-from,
+.alcedo-msg-subject,
+.alcedo-msg-subject-cell,
+.alcedo-msg-preview,
+.alcedo-msg-date,
+.alcedo-msg-size,
+.alcedo-msg-deleted {
+  min-width: 0;
+}
+
+.alcedo-msg-thread-expand {
+  min-width: 16px;
+  min-height: 16px;
+  padding: 0;
+}
+
+.alcedo-msg-thread-expand-slot {
+  min-width: 16px;
+}
+
+.alcedo-msg-date,
+.alcedo-msg-size,
+.alcedo-msg-deleted {
+  font-size: 0.8em;
+  font-weight: 400;
+  opacity: 0.55;
+  letter-spacing: 0.01em;
+}
+
+/* ── Reader ───────────────────────────────────────────────────────────── */
+
+.alcedo-reader {
+  padding: var(--alcedo-reader-pad);
+  min-width: 0;
+}
+
+.alcedo-layout-bottom .alcedo-reader {
+  padding: var(--alcedo-reader-pad-bottom);
+}
+
+.alcedo-reader-header {
+  margin-bottom: 0;
+}
+
+.alcedo-reader-title,
+.alcedo-reader .title {
+  font-size: var(--alcedo-reader-title-size);
+  font-weight: 600;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.alcedo-reader-from,
+.alcedo-reader-meta,
+.alcedo-reader .dim-label {
+  opacity: 0.65;
+  font-size: 0.9em;
+}
+
+.alcedo-reader-meta {
+  margin-bottom: 0;
+}
+
+.alcedo-reader-from {
+  margin-bottom: 4px;
+}
+
+.alcedo-reader-attachments {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  min-width: 0;
+}
+
+.alcedo-meeting-banner {
+  margin: 0 var(--alcedo-reader-pad) 8px;
+  padding: var(--alcedo-card-pad);
+  border-radius: var(--alcedo-card-radius);
+  background: color-mix(in srgb, var(--window-fg-color) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--window-fg-color) 10%, transparent);
+}
+.alcedo-meeting-banner-title { font-weight: 600; }
+.alcedo-meeting-banner-meta { font-size: 0.9em; opacity: 0.65; }
+.alcedo-meeting-banner-cancelled {
+  opacity: 0.85;
+}
+.alcedo-meeting-banner-cancelled .alcedo-meeting-banner-title {
+  text-decoration: line-through;
+}
+
+.alcedo-otp-banner {
+  margin: 0 var(--alcedo-reader-pad) 8px;
+  padding: var(--alcedo-card-pad);
+  border-radius: var(--alcedo-card-radius);
+  background: color-mix(in srgb, var(--accent-bg-color) 14%, var(--card-bg-color));
+  border: 1px solid color-mix(in srgb, var(--accent-bg-color) 32%, transparent);
+  transition:
+    background-color var(--alcedo-hover-ms) ease,
+    border-color var(--alcedo-hover-ms) ease;
+}
+.alcedo-otp-banner:hover {
+  background: color-mix(in srgb, var(--accent-bg-color) 20%, var(--card-bg-color));
+}
+.alcedo-otp-banner.alcedo-otp-copied {
+  background: color-mix(in srgb, var(--accent-green) 14%, var(--card-bg-color));
+  border-color: color-mix(in srgb, var(--accent-green) 40%, transparent);
+}
+.alcedo-otp-banner-title {
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
+.alcedo-reader-bar {
+  margin: 0 var(--alcedo-reader-pad) 8px;
+  padding: var(--alcedo-card-pad);
+  border-radius: var(--alcedo-card-radius);
+  background: color-mix(in srgb, var(--accent-bg-color) 14%, var(--card-bg-color));
+  border: 1px solid color-mix(in srgb, var(--accent-bg-color) 32%, transparent);
+  transition:
+    background-color var(--alcedo-hover-ms) ease,
+    border-color var(--alcedo-hover-ms) ease;
+}
+.alcedo-reader-bar-title {
+  font-weight: 600;
+  font-size: 0.9em;
+}
+.alcedo-otp-code {
+  font-family: monospace;
+  font-size: 1.35em;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  font-variant-numeric: tabular-nums;
+}
+
+.alcedo-contacts-page {
+  margin: var(--alcedo-reader-pad);
+}
+
+.alcedo-attachment-card {
+  padding: 4px 10px 4px 8px;
+  border-radius: var(--alcedo-avatar-radius);
+  background: color-mix(in srgb, var(--window-fg-color) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--window-fg-color) 10%, transparent);
+  min-width: 0;
+  transition: background-color var(--alcedo-hover-ms) ease-in-out;
+}
+
+.alcedo-attachment-card:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--window-fg-color) 12%, transparent);
+}
+
+.alcedo-attachment-card:disabled {
+  opacity: 0.55;
+}
+
+.alcedo-attachment-card-risky {
+  border-color: color-mix(in srgb, var(--warning-color) 55%, transparent);
+}
+
+.alcedo-attachment-card-icon {
+  -gtk-icon-size: 32px;
+  opacity: 0.85;
+}
+
+.alcedo-attachment-card .alcedo-attachment-card-icon {
+  -gtk-icon-size: 16px;
+  opacity: 0.7;
+}
+
+.alcedo-attachment-card-name {
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+.alcedo-attachment-card-size {
+  font-size: 0.8em;
+  opacity: 0.6;
+}
+
+.alcedo-attachment-save-all {
+  padding: 4px 10px;
+  border-radius: var(--alcedo-avatar-radius);
+  min-width: 0;
+}
+
+.alcedo-attachment-save-all-label {
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+.alcedo-reader-actions splitbutton.alcedo-reader-reply,
+.alcedo-reader-actions splitbutton.alcedo-reader-forward {
+  min-height: 26px;
+}
+
+.alcedo-reader-actions splitbutton.alcedo-reader-reply > button,
+.alcedo-reader-actions splitbutton.alcedo-reader-forward > button {
+  min-height: 26px;
+  min-width: 0;
+  padding: 0 8px;
+  font-size: 0.9em;
+}
+
+.alcedo-reader-actions splitbutton.alcedo-reader-reply > button.image-button,
+.alcedo-reader-actions splitbutton.alcedo-reader-forward > button.image-button {
+  padding: 0 5px;
+  min-width: 22px;
+}
+
+.alcedo-reader-actions splitbutton.alcedo-reader-reply image,
+.alcedo-reader-actions splitbutton.alcedo-reader-forward image {
+  -gtk-icon-size: 12px;
+}
+
+.alcedo-reader-actions button.alcedo-reader-icon {
+  min-height: 26px;
+  min-width: 26px;
+  padding: 0 4px;
+}
+
+.alcedo-reaction-row {
+  margin-top: 8px;
+}
+
+.alcedo-reaction-chip {
+  min-height: 26px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--window-fg-color) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--window-fg-color) 16%, transparent);
+}
+
+.alcedo-reaction-chip label {
+  font-size: 0.9em;
+}
+
+.alcedo-remote-banner {
+  margin: 0 0 8px;
+  padding: 6px 10px;
+  border-radius: var(--alcedo-card-radius);
+  background: color-mix(in srgb, var(--warning-bg-color) 18%, var(--card-bg-color));
+  border: 1px solid color-mix(in srgb, var(--warning-bg-color) 36%, transparent);
+}
+
+.alcedo-remote-banner-icon {
+  -gtk-icon-size: 16px;
+  opacity: 0.8;
+}
+
+.alcedo-remote-banner-title {
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+.alcedo-pgp-banner {
+  margin: 0 0 8px;
+  padding: 6px 10px;
+  border-radius: var(--alcedo-card-radius);
+  background: color-mix(in srgb, var(--accent-bg-color) 18%, var(--card-bg-color));
+  border: 1px solid color-mix(in srgb, var(--accent-bg-color) 36%, transparent);
+}
+
+.alcedo-pgp-banner-warning {
+  margin: 0 0 8px;
+  padding: 6px 10px;
+  border-radius: var(--alcedo-card-radius);
+  background: color-mix(in srgb, var(--warning-bg-color) 18%, var(--card-bg-color));
+  border: 1px solid color-mix(in srgb, var(--warning-bg-color) 36%, transparent);
+}
+
+.alcedo-pgp-banner-title {
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+.alcedo-composer-disclosure {
+  padding: 6px 10px;
+  border-radius: var(--alcedo-card-radius);
+}
+
+splitbutton.alcedo-reader-remote {
+  min-height: 28px;
+}
+
+.alcedo-reader-recipients {
+  min-width: 0;
+  margin-top: 1px;
+  margin-bottom: 1px;
+}
+
+.alcedo-reader-recipients-first {
+  margin-top: 2px;
+}
+
+.alcedo-reader-addr-clip,
+.alcedo-reader-addr-chips {
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.alcedo-reader-recipients .alcedo-reader-meta {
+  min-width: 0;
+  line-height: 1.2;
+  padding-top: 1px;
+}
+
+.alcedo-reader-recipients-expand {
+  min-width: 16px;
+  min-height: 16px;
+  padding: 0;
+  margin-top: 1px;
+  border-radius: var(--alcedo-avatar-radius);
+  transition: background-color var(--alcedo-hover-ms) ease;
+}
+
+.alcedo-reader-recipients-expand:hover {
+  background-color: color-mix(in srgb, var(--accent-bg-color) 14%, transparent);
+}
+
+button.alcedo-reader-unsubscribe {
+  padding: 0 4px;
+  min-height: 1px;
+  font-size: 0.9em;
+  opacity: 0.65;
+}
+button.alcedo-reader-unsubscribe:hover {
+  opacity: 1;
+}
+button.alcedo-reader-unsubscribe:disabled {
+  opacity: 0.5;
+}
+
+/* ── Folders & misc ───────────────────────────────────────────────────── */
+
+.alcedo-folder-pane {
+  min-width: 180px;
+}
+
+.alcedo-folder-list.navigation-sidebar {
+  padding: 0;
+}
+
+.alcedo-folder-list.navigation-sidebar.alcedo-folder-list-top {
+  padding-top: 6px;
+}
+
+.alcedo-folder-list.navigation-sidebar.alcedo-folder-list-bottom {
+  padding-bottom: 6px;
+}
+
+list.alcedo-folder-list.navigation-sidebar > row > box.alcedo-folder-row {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+list.alcedo-folder-list.navigation-sidebar > row > separator.alcedo-folder-sep,
+.alcedo-folder-sep {
+  margin-top: 6px;
+  margin-bottom: 6px;
+}
+
+list.alcedo-folder-list.navigation-sidebar > row {
+  margin: 0 6px;
+  padding: 0;
+  min-height: 0;
+  border-radius: var(--alcedo-avatar-radius);
+  border: 1px solid transparent;
+  transition: background-color var(--alcedo-hover-ms) ease,
+    border-color var(--alcedo-hover-ms) ease;
+}
+
+list.alcedo-folder-list.navigation-sidebar > row:hover {
+  background-color: color-mix(in srgb, var(--accent-bg-color) 8%, transparent);
+}
+
+list.alcedo-folder-list.navigation-sidebar > row:selected {
+  background-color: var(--alcedo-card-selected-bg);
+  border-color: var(--alcedo-card-selected-border);
+}
+
+list.alcedo-folder-list.navigation-sidebar > row.alcedo-folder-drop-target {
+  background-color: color-mix(in srgb, var(--accent-bg-color) 18%, transparent);
+  border-color: var(--accent-bg-color);
+}
+
+list.alcedo-folder-list.navigation-sidebar > row.alcedo-folder-inert {
+  opacity: 1;
+}
+
+list.alcedo-folder-list.navigation-sidebar > row.alcedo-folder-inert .alcedo-folder-icon {
+  opacity: 0.55;
+}
+
+list.alcedo-folder-list.navigation-sidebar > row.alcedo-folder-section {
+  padding: 0;
+}
+
+list.alcedo-folder-list.navigation-sidebar > row:selected .alcedo-folder-icon {
+  color: var(--accent-color);
+  opacity: 1;
+}
+
+.alcedo-folder-icon {
+  -gtk-icon-size: 18px;
+}
+
+/* Sidebar glyphs are tinted per folder kind. The mix with currentColor keeps contrast in both light and dark. */
+list.alcedo-folder-list.navigation-sidebar .alcedo-folder-icon-folder {
+  color: color-mix(in srgb, currentColor 65%, transparent);
+}
+
+list.alcedo-folder-list.navigation-sidebar .alcedo-folder-icon-everything {
+  color: color-mix(in srgb, var(--accent-blue) 85%, currentColor);
+}
+
+list.alcedo-folder-list.navigation-sidebar .alcedo-folder-icon-inbox {
+  color: color-mix(in srgb, var(--accent-blue) 85%, currentColor);
+}
+
+list.alcedo-folder-list.navigation-sidebar .alcedo-folder-icon-outbox {
+  color: color-mix(in srgb, var(--accent-blue) 85%, currentColor);
+}
+
+list.alcedo-folder-list.navigation-sidebar .alcedo-folder-icon-archive {
+  color: color-mix(in srgb, var(--accent-teal) 85%, currentColor);
+}
+
+list.alcedo-folder-list.navigation-sidebar .alcedo-folder-icon-sent {
+  color: color-mix(in srgb, var(--accent-green) 85%, currentColor);
+}
+
+list.alcedo-folder-list.navigation-sidebar .alcedo-folder-icon-snoozed {
+  color: color-mix(in srgb, var(--accent-yellow) 85%, currentColor);
+}
+
+list.alcedo-folder-list.navigation-sidebar .alcedo-folder-icon-junk {
+  color: color-mix(in srgb, var(--accent-orange) 85%, currentColor);
+}
+
+list.alcedo-folder-list.navigation-sidebar .alcedo-folder-icon-trash {
+  color: color-mix(in srgb, var(--accent-red) 85%, currentColor);
+}
+
+list.alcedo-folder-list.navigation-sidebar .alcedo-folder-icon-extension {
+  color: color-mix(in srgb, var(--accent-purple) 85%, currentColor);
+}
+
+list.alcedo-folder-list.navigation-sidebar .alcedo-folder-icon-drafts {
+  color: color-mix(in srgb, var(--accent-slate) 85%, currentColor);
+}
+
+.alcedo-folder-expand {
+  min-width: 16px;
+  min-height: 16px;
+  padding: 0;
+}
+
+.alcedo-folder-expand-slot {
+  min-width: 16px;
+}
+
+.alcedo-folder-unread {
+  min-width: 1.25em;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 0.8em;
+  font-weight: 600;
+  background-color: color-mix(in srgb, var(--accent-bg-color) 22%, transparent);
+  color: var(--accent-color);
+}
+
+/* Count includes unread hidden inside a collapsed folder. */
+.alcedo-folder-unread-nested {
+  box-shadow: inset 0 0 0 1px var(--accent-color);
+}
+
+list.alcedo-folder-list.navigation-sidebar > row:selected .alcedo-folder-unread {
+  background-color: color-mix(in srgb, var(--accent-bg-color) 32%, transparent);
+}
+
+.alcedo-account-switcher {
+  margin: 6px 6px 2px;
+}
+
+.alcedo-account-row {
+  padding: 6px 8px;
+  border-radius: var(--alcedo-avatar-radius);
+}
+
+list.alcedo-folder-list.navigation-sidebar > row.alcedo-account-section-start {
+  margin-top: 6px;
+}
+
+list.alcedo-folder-list.navigation-sidebar > row.alcedo-add-account-row {
+  margin-top: 6px;
+}
+
+list.alcedo-folder-list.navigation-sidebar > row.alcedo-hidden-accounts-row {
+  margin-top: 6px;
+  opacity: 0.8;
+}
+
+.alcedo-sync-spinner {
+  min-width: 16px;
+  min-height: 16px;
+}
+
+@keyframes alcedo-spin {
+  from {
+    -gtk-icon-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -gtk-icon-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+.alcedo-sync-btn,
+.alcedo-sync-btn image,
+.alcedo-view-toggle,
+.alcedo-view-toggle image {
+  animation: none;
+}
+
+.alcedo-sync-spinning,
+.alcedo-sync-spinning image {
+  animation: alcedo-spin 1s linear infinite;
+}
+
+.alcedo-status-bar {
+  min-height: 26px;
+  padding: 2px 10px;
+  border-top: 1px solid color-mix(in srgb, var(--headerbar-border-color, currentColor) 40%, transparent);
+}
+
+.alcedo-status-bar label {
+  font-size: 0.8em;
+}
+
+.alcedo-status-bar button.alcedo-status-activity {
+  min-height: 0;
+  min-width: 0;
+  padding: 0 2px;
+  font-size: 0.8em;
+}
+
+.alcedo-status-sep {
+  min-height: 12px;
+  margin: 4px 2px;
+  opacity: 0.35;
+}
+
+/* ── Composer ─────────────────────────────────────────────────────────── */
+
+.alcedo-composer-sending-banner {
+  background-color: color-mix(in srgb, var(--accent-bg-color) 14%, transparent);
+}
+
+.alcedo-composer {
+  padding: 4px 12px 8px 12px;
+  min-width: 0;
+}
+
+.alcedo-composer-file-drop .alcedo-composer,
+.alcedo-composer-file-drop headerbar.alcedo-composer-headerbar {
+  background-color: color-mix(in srgb, var(--accent-bg-color) 14%, transparent);
+}
+
+headerbar.alcedo-composer-headerbar,
+toolbarview > .top-bar headerbar.alcedo-composer-headerbar {
+  min-height: 48px;
+  padding: 0 6px;
+  box-shadow: inset 0 -1px 0
+    color-mix(in srgb, var(--headerbar-border-color, currentColor) 40%, transparent);
+}
+
+headerbar.alcedo-composer-headerbar > windowhandle,
+headerbar.alcedo-composer-headerbar > windowhandle > centerbox,
+headerbar.alcedo-composer-headerbar > windowhandle > box {
+  min-height: 32px;
+}
+
+.alcedo-composer-title {
+  padding: 0 12px;
+  margin: 0;
+}
+
+.alcedo-composer-title .title {
+  font-size: 0.9375em;
+  font-weight: 600;
+}
+
+headerbar.alcedo-composer-headerbar button.alcedo-help-btn,
+headerbar.alcedo-composer-headerbar button.alcedo-composer-icon-btn {
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  margin: 0 1px;
+}
+
+headerbar.alcedo-composer-headerbar button.alcedo-composer-cc-toggle {
+  min-width: 0;
+  min-height: 32px;
+  padding: 0 10px;
+  margin: 0 1px;
+  font-weight: 600;
+  font-size: 0.8125em;
+}
+
+headerbar.alcedo-composer-headerbar button.alcedo-composer-send {
+  min-height: 32px;
+  min-width: 0;
+  padding: 0 14px 0 12px;
+  margin: 0;
+  font-weight: 600;
+}
+
+headerbar.alcedo-composer-headerbar splitbutton.alcedo-composer-send {
+  min-height: 32px;
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: 10px;
+  margin-right: 12px;
+}
+
+headerbar.alcedo-composer-headerbar splitbutton.alcedo-composer-send > button {
+  min-height: 32px;
+  min-width: 0;
+  margin: 0;
+  padding: 0 14px 0 12px;
+  font-weight: 600;
+}
+
+headerbar.alcedo-composer-headerbar splitbutton.alcedo-composer-send > button.image-button {
+  padding: 0 8px;
+  min-width: 28px;
+}
+
+headerbar.alcedo-composer-headerbar button.alcedo-composer-send .alcedo-composer-send-icon,
+headerbar.alcedo-composer-headerbar splitbutton.alcedo-composer-send .alcedo-composer-send-icon {
+  -gtk-icon-size: 16px;
+  margin: 0;
+}
+
+.alcedo-compose-toolbar {
+  padding: 0;
+  min-width: 0;
+}
+.alcedo-compose-toolbar button.flat {
+  min-width: 26px;
+  min-height: 26px;
+  padding: 1px;
+  border-radius: var(--alcedo-avatar-radius);
+  transition: background-color var(--alcedo-hover-ms) ease;
+}
+.alcedo-compose-toolbar button.flat:hover {
+  background-color: color-mix(in srgb, var(--accent-bg-color) 8%, transparent);
+}
+.alcedo-compose-toolbar button.flat:checked {
+  background-color: color-mix(in srgb, var(--accent-bg-color) 18%, transparent);
+}
+.alcedo-compose-toolbar button.flat:disabled {
+  opacity: 0.45;
+}
+.alcedo-compose-toolbar separator {
+  min-width: 1px;
+  margin: 2px 4px;
+  opacity: 0.4;
+}
+.alcedo-compose-toolbar dropdown,
+.alcedo-compose-toolbar dropdown > button,
+.alcedo-compose-toolbar dropdown button,
+.alcedo-compose-toolbar menubutton > button {
+  min-height: 26px;
+  padding: 0 8px;
+}
+.alcedo-compose-toolbar menubutton.alcedo-compose-line-spacing > button {
+  min-width: 36px;
+}
+.alcedo-composer-chrome {
+  min-width: 0;
+  padding: 12px 0 10px 0;
+}
+.alcedo-composer-source textview.view {
+  font-family: monospace;
+}
+.alcedo-composer-preview {
+  min-height: 200px;
+}
+.alcedo-composer-attachments {
+  margin: 0;
+}
+.alcedo-attachment-chip {
+  background: color-mix(in srgb, var(--window-fg-color) 10%, transparent);
+  padding: 0 2px 0 8px;
+  border-radius: 999px;
+  min-height: 22px;
+  min-width: 0;
+}
+.alcedo-attachment-chip-label {
+  font-size: 0.85em;
+  padding: 0 4px 0 6px;
+}
+.alcedo-composer-inline-image {
+  margin: 8px 0;
+}
+.alcedo-composer textview.view {
+  font-family: inherit;
+}
+.alcedo-composer-markdown textview.view {
+  font-family: monospace;
+}
+
+.alcedo-composer textview {
+  padding: 8px 6px 8px 6px;
+}
+
+frame.alcedo-composer-body {
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+}
+
+frame.alcedo-composer-body > border {
+  border: none;
+}
+
+.alcedo-composer-headers {
+  min-width: 0;
+}
+
+.alcedo-recipient-field,
+.alcedo-composer-subject-field,
+.alcedo-composer-account-field,
+.alcedo-composer-from-field {
+  min-height: 0;
+  min-width: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--window-fg-color) 10%, transparent);
+  border-radius: 0;
+  transition:
+    box-shadow var(--alcedo-hover-ms) ease-in-out,
+    background-color var(--alcedo-hover-ms) ease-in-out,
+    border-radius var(--alcedo-hover-ms) ease-in-out;
+}
+
+.alcedo-recipient-field {
+  padding: 6px 6px 2px 6px;
+}
+
+.alcedo-composer-subject-field {
+  padding: 4px 6px 6px 6px;
+}
+
+.alcedo-recipient-field:focus-within,
+.alcedo-composer-subject-field:focus-within,
+.alcedo-composer-account-field:focus-within,
+.alcedo-composer-from-field:focus-within {
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent-bg-color) 6%, transparent);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent-bg-color) 70%, transparent);
+}
+
+dropdown.alcedo-composer-from-dropdown {
+  min-width: 0;
+}
+
+entry.alcedo-composer-subject-entry,
+entry.alcedo-composer-from-entry,
+entry.alcedo-recipient-entry {
+  background: transparent;
+  min-width: 0;
+  min-height: 22px;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  padding: 0 4px;
+  margin: 0;
+  border-spacing: 0;
+}
+
+entry.alcedo-recipient-entry {
+  min-width: 4em;
+}
+
+entry.alcedo-composer-subject-entry:focus,
+entry.alcedo-composer-subject-entry:focus-within,
+entry.alcedo-composer-subject-entry:focus-visible,
+entry.alcedo-composer-from-entry:focus,
+entry.alcedo-composer-from-entry:focus-within,
+entry.alcedo-composer-from-entry:focus-visible,
+entry.alcedo-recipient-entry:focus,
+entry.alcedo-recipient-entry:focus-within,
+entry.alcedo-recipient-entry:focus-visible {
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+
+.alcedo-recipient-label {
+  min-width: 4.75em;
+  font-weight: 600;
+  font-size: 0.8125em;
+  margin: 4px 0 0 0;
+  opacity: 0.85;
+}
+
+.alcedo-recipient-row {
+  padding: 0 2px;
+  min-width: 0;
+}
+
+.alcedo-recipient-row:focus-within {
+  box-shadow: none;
+}
+
+.alcedo-recipient-picker-btn {
+  min-width: 26px;
+  min-height: 26px;
+  padding: 1px;
+  margin: 2px 0 0 0;
+  border-radius: var(--alcedo-avatar-radius);
+  transition: background-color var(--alcedo-hover-ms) ease;
+}
+
+.alcedo-recipient-picker-btn:hover {
+  background-color: color-mix(in srgb, var(--accent-bg-color) 8%, transparent);
+}
+
+.alcedo-picker-group-icon {
+  min-width: 32px;
+  min-height: 32px;
+  border-radius: var(--alcedo-avatar-radius);
+  background: color-mix(in srgb, var(--accent-bg-color) 14%, transparent);
+  color: var(--accent-color);
+}
+
+.alcedo-picker-group-icon image {
+  -gtk-icon-size: 16px;
+}
+
+.alcedo-picker-empty {
+  -gtk-icon-size: 32px;
+  opacity: 0.35;
+}
+
+/* AdwEntryRow shows an edit icon when unfocused; hide it app-wide. Do not use
+   -gtk-icon-size: 0 — GTK asserts on zero-sized icon lookups. Keep
+   apply-button visible: rows with show-apply-button only save through it. */
+row.entry image.edit-icon,
+row.entry image.indicator {
+  opacity: 0;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+}
+
+/* Overflow / chrome tooltips: Adwaita popover colors, Superhuman-compact metrics */
+tooltip {
+  padding: 0;
+}
+
+tooltip.background {
+  background-color: var(--popover-bg-color);
+  color: var(--popover-fg-color);
+  border-radius: var(--alcedo-avatar-radius);
+  box-shadow: var(--alcedo-card-shadow);
+}
+
+tooltip > box {
+  padding: 6px 10px;
+}
+
+tooltip label {
+  font-size: 0.8125em;
+}
+
+/* Folder context menu is a GtkPopover of GtkButtons; Adwaita bolds buttons. */
+popover.menu.alcedo-folder-menu button,
+popover.menu.alcedo-folder-menu button label {
+  font-weight: 400;
+}
+
+.alcedo-recipient-chip {
+  background: color-mix(in srgb, var(--window-fg-color) 10%, transparent);
+  padding: 0 1px 0 8px;
+  border-radius: 999px;
+  min-height: 22px;
+  transition: background-color var(--alcedo-hover-ms) ease-in-out;
+}
+
+.alcedo-recipient-chip:hover {
+  background: color-mix(in srgb, var(--window-fg-color) 16%, transparent);
+}
+
+.alcedo-recipient-chip-group {
+  border: 1px solid color-mix(in srgb, var(--accent-bg-color) 55%, transparent);
+  background: var(--alcedo-rail-active-bg);
+}
+
+.alcedo-recipient-chip-group:hover {
+  background: color-mix(in srgb, var(--accent-bg-color) 26%, transparent);
+}
+
+.alcedo-recipient-chip-label {
+  font-size: 0.85em;
+  padding-right: 2px;
+}
+
+/* Chip name: a flat button so it is keyboard-focusable; keep the pill compact. */
+button.alcedo-recipient-chip-name {
+  min-height: 0;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 999px;
+}
+
+.alcedo-recipient-chip:focus-within {
+  outline: 2px solid color-mix(in srgb, var(--accent-color) 50%, transparent);
+  outline-offset: 1px;
+}
+
+@media (prefers-contrast: more) {
+  .alcedo-recipient-chip {
+    border: 1px solid var(--window-fg-color);
+  }
+
+  .alcedo-recipient-chip:focus-within {
+    outline-color: var(--accent-color);
+  }
+}
+
+button.alcedo-recipient-chip-remove {
+  min-width: 18px;
+  min-height: 18px;
+  padding: 0;
+  margin: 0;
+  border-radius: 999px;
+  background: transparent;
+}
+
+button.alcedo-recipient-chip-remove image {
+  -gtk-icon-size: 12px;
+}
+
+button.alcedo-recipient-chip-remove:hover {
+  background: color-mix(in srgb, var(--window-fg-color) 14%, transparent);
+}
+
+button.alcedo-recipient-chip-remove:active {
+  background: color-mix(in srgb, var(--window-fg-color) 22%, transparent);
+}
+
+popover.alcedo-autocomplete-popover {
+  padding: 4px;
+}
+
+.alcedo-autocomplete {
+  background: transparent;
+}
+
+.alcedo-autocomplete row {
+  min-height: 0;
+  padding: 0;
+}
+
+.alcedo-autocomplete-row {
+  padding: 4px 8px;
+}
+
+.alcedo-autocomplete row:selected .alcedo-autocomplete-row {
+  background: color-mix(in srgb, var(--accent-bg-color) 18%, transparent);
+  border-radius: 6px;
+}
+
+.alcedo-autocomplete-icon {
+  -gtk-icon-size: 16px;
+  opacity: 0.7;
+}
+
+.alcedo-autocomplete-label {
+  font-weight: 400;
+}
+
+button.alcedo-reader-addr-chip {
+  min-height: 0;
+  min-width: 0;
+  padding: 0 4px;
+  margin: 0;
+  border-radius: 999px;
+  color: var(--accent-color);
+  background: color-mix(in srgb, var(--window-fg-color) 8%, transparent);
+  transition: background-color var(--alcedo-hover-ms) ease-in-out;
+}
+
+button.alcedo-reader-addr-chip label {
+  padding: 0;
+  margin: 0;
+}
+
+button.alcedo-reader-addr-chip:hover {
+  background: color-mix(in srgb, var(--window-fg-color) 14%, transparent);
+}
+
+.alcedo-addr-email-row {
+  min-width: 0;
+}
+
+.alcedo-addr-email {
+  min-width: 0;
+}
+
+button.alcedo-addr-copy {
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+}
+
+.alcedo-rules-empty {
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+/* ComboRow otherwise keeps the value suffix tiny, so emails ellipsize. */
+.alcedo-rules-account-row dropdown,
+.alcedo-rules-account-row dropdown > button,
+dropdown.alcedo-rules-account-dropdown,
+dropdown.alcedo-rules-account-dropdown > button {
+  min-width: 22em;
+}
+.alcedo-rules-account-row dropdown label,
+dropdown.alcedo-rules-account-dropdown label {
+  min-width: 18em;
+}
+.alcedo-rules-account-row dropdown popover.menu contents,
+dropdown.alcedo-rules-account-dropdown popover.menu contents {
+  min-width: 22em;
+}
+.alcedo-rule-row {
+  transition: background-color var(--alcedo-hover-ms) ease;
+}
+.alcedo-rule-row:hover {
+  background-color: var(--alcedo-msg-row-hover-bg);
+}
+.alcedo-rule-row.alcedo-folder-drop-target {
+  background-color: color-mix(in srgb, var(--accent-bg-color) 18%, transparent);
+}
+.alcedo-rule-row.alcedo-rule-row-dragging {
+  opacity: 0.55;
+  transition: opacity var(--alcedo-hover-ms) ease;
+}
+.alcedo-rule-drag-handle {
+  opacity: 0.55;
+}
+.alcedo-rule-row:hover .alcedo-rule-drag-handle {
+  opacity: 0.9;
+}
+.alcedo-rule-summary {
+  font-size: 0.9em;
+}
+.alcedo-rule-row-server {
+  opacity: 0.92;
+}
+.alcedo-rule-clause-group list.boxed-list > row {
+  padding: 0;
+}
+.alcedo-rule-folder-btn {
+  min-height: 34px;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.alcedo-command-palette .alcedo-palette-accel {
+  opacity: 0.7;
+  margin-left: 12px;
+}
+
+.alcedo-help-btn {
+  opacity: 0.75;
+}
+
+.alcedo-help-btn:hover,
+.alcedo-help-btn:focus {
+  opacity: 1;
+}
+
+.alcedo-help-view {
+  background: transparent;
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --alcedo-msg-row-hover-bg: color-mix(in srgb, currentColor 28%, transparent);
+    --alcedo-rail-hover-bg: color-mix(in srgb, currentColor 28%, transparent);
+  }
+
+  columnview.alcedo-msg-list listview.separators:not(.horizontal) > row:not(.separator) {
+    border-bottom-color: color-mix(in srgb, currentColor 28%, transparent);
+  }
+
+  columnview.alcedo-msg-list row:hover,
+  list.alcedo-folder-list.navigation-sidebar > row:hover {
+    background-color: color-mix(in srgb, currentColor 28%, transparent);
+  }
+
+  .alcedo-msg-date,
+  .alcedo-msg-size,
+  .alcedo-msg-deleted,
+  .alcedo-reader-from,
+  .alcedo-reader-meta,
+  .alcedo-reader .dim-label,
+  .alcedo-status-bar label,
+  .alcedo-status-sep,
+  .alcedo-rail-badge,
+  .alcedo-folder-unread,
+  .alcedo-attachment-card-size,
+  .dim-label {
+    opacity: 1;
+  }
+}

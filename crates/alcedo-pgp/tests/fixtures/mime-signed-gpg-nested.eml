@@ -1,0 +1,31 @@
+From: Nina <nina@example.org>
+Subject: GnuPG nested signed fixture
+MIME-Version: 1.0
+Content-Type: multipart/signed; protocol="application/pgp-signature"; micalg=pgp-sha256; boundary="gpg-nested-signed"
+
+--gpg-nested-signed
+Content-Type: multipart/alternative; boundary="alt"
+
+--alt
+Content-Type: text/plain; charset=utf-8
+
+Hello from gpg nested
+
+--alt
+Content-Type: text/html; charset=utf-8
+
+<p>Hello from gpg nested</p>
+
+--alt--
+
+--gpg-nested-signed
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iHUEABYIAB0WIQRG1un9YCEmE5ijfHllUGDwMlUVxAUCau9uiQAKCRBlUGDwMlUV
+xCSxAP9T+c3g88KveFkGdHIwcsmXIXkIlxR/wJ35v0Ab5sAsPwEA711UuM+rklDX
+6DM5qJFoqEzQCUq9uBx3XkD3yxqI4w0=
+=J38l
+-----END PGP SIGNATURE-----
+--gpg-nested-signed--

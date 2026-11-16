@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Alcedo Help</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #fafafa;
+        --fg: #1c1c1c;
+        --muted: #5e5e5e;
+        --border: color-mix(in srgb, currentColor 12%, transparent);
+        --accent: #1c71d8;
+        --card: #ffffff;
+        --code-bg: color-mix(in srgb, currentColor 8%, transparent);
+        --nav-w: 200px;
+        font-family: Cantarell, "Noto Sans", system-ui, sans-serif;
+      }
+      html.dark {
+        --bg: #242424;
+        --fg: #eeeeee;
+        --muted: #c0bfbc;
+        --accent: #62a0ea;
+        --card: #303030;
+      }
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: var(--bg);
+        color: var(--fg);
+      }
+      body {
+        display: grid;
+        grid-template-columns: var(--nav-w) minmax(0, 1fr);
+        min-height: 100vh;
+      }
+      nav {
+        position: sticky;
+        top: 0;
+        align-self: start;
+        height: 100vh;
+        overflow: auto;
+        padding: 20px 12px 32px 16px;
+        border-right: 1px solid var(--border);
+        background: var(--bg);
+      }
+      nav h1 {
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin: 0 8px 12px;
+      }
+      nav a {
+        display: block;
+        color: var(--fg);
+        text-decoration: none;
+        font-size: 13px;
+        line-height: 1.3;
+        padding: 6px 8px;
+        border-radius: 8px;
+      }
+      nav a:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+      nav a.active {
+        background: color-mix(in srgb, var(--accent) 18%, transparent);
+        font-weight: 600;
+      }
+      main {
+        padding: 28px 40px 64px;
+        max-width: 46rem;
+      }
+      h2 {
+        font-size: 22px;
+        font-weight: 800;
+        margin: 0 0 8px;
+        scroll-margin-top: 20px;
+      }
+      h3 {
+        font-size: 16px;
+        font-weight: 700;
+        margin: 22px 0 8px;
+        scroll-margin-top: 20px;
+      }
+      p, li { font-size: 14.5px; line-height: 1.55; color: var(--fg); }
+      p { margin: 0 0 12px; }
+      .lead { color: var(--muted); font-size: 15px; margin-bottom: 20px; }
+      section {
+        margin: 0 0 40px;
+        padding-top: 8px;
+        border-top: 1px solid var(--border);
+      }
+      section:first-of-type { border-top: none; padding-top: 0; }
+      ul, ol { margin: 0 0 12px; padding-left: 1.3em; }
+      li { margin: 0 0 6px; }
+      code, kbd {
+        font-family: "Source Code Pro", ui-monospace, monospace;
+        font-size: 0.9em;
+        background: var(--code-bg);
+        border-radius: 4px;
+        padding: 0.08em 0.35em;
+      }
+      kbd { border: 1px solid var(--border); }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        margin: 0 0 16px;
+      }
+      th, td {
+        text-align: left;
+        padding: 6px 8px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+      }
+      th { color: var(--muted); font-weight: 600; }
+      .tip {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin: 0 0 16px;
+        font-size: 14px;
+      }
+      a { color: var(--accent); }
+    </style>
+  </head>
+  <body>
+    <nav aria-label="Help topics">
+      <h1>Alcedo</h1>
+      <a href="#overview">Overview</a>
+      <a href="#layout">Layout</a>
+      <a href="#accounts">Accounts</a>
+      <a href="#folders">Folders</a>
+      <a href="#search">Search</a>
+      <a href="#reading">Reading mail</a>
+      <a href="#conversations">Conversations</a>
+      <a href="#compose">Compose</a>
+      <a href="#identities">From addresses</a>
+      <a href="#snippets">Snippets &amp; signatures</a>
+      <a href="#openpgp">OpenPGP</a>
+      <a href="#rules">Message rules</a>
+      <a href="#contacts">Contacts</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#notifications">Notifications</a>
+      <a href="#appearance">Appearance</a>
+      <a href="#keyboard">Keyboard</a>
+      <a href="#shortcuts">Shortcuts</a>
+    </nav>
+    <main>
+      <section id="overview">
+        <h2>Overview</h2>
+        <p class="lead">Alcedo is a native GNOME mail client with a unified inbox and contacts. Open this guide anytime from <strong>Help → Contents</strong> or <kbd>F1</kbd>. Question-mark buttons jump to the matching section.</p>
+        <p>Mail and Contacts are separate spaces. Preferences, accounts, and keyboard shortcuts live under <strong>Edit → Preferences</strong> (<kbd>Ctrl</kbd>+<kbd>,</kbd>).</p>
+      </section>
+
+      <section id="layout">
+        <h2>Layout</h2>
+        <p>The far-left <strong>app rail</strong> switches spaces: Compose, Mail, and Contacts. Hide it with <kbd>F9</kbd> or <strong>View → Show app rail</strong>.</p>
+        <p>While Mail is active, the <strong>folder pane</strong> lists Everything (unified inbox) and any extra views, then this account’s IMAP folders. Mail scope lives here, not on the rail.</p>
+        <ul>
+          <li>The message list sits in the middle. Toggle folder visibility from the list header. The <strong>Size</strong> column is the whole message, including attachments; an em dash means the size is not known until the mailbox sync records it.</li>
+          <li>The reading pane can sit to the right or below the list (layout button in the list header).</li>
+          <li>Drag the splits to resize. Widths are remembered.</li>
+        </ul>
+      </section>
+
+      <section id="accounts">
+        <h2>Accounts</h2>
+        <p>Add accounts from <strong>File → Add Account</strong> or Preferences → Accounts.</p>
+        <ul>
+          <li><strong>Google</strong> and <strong>Microsoft</strong> sign in with OAuth in your browser. Put client IDs in <code>~/.config/alcedo/oauth.toml</code> (see <code>oauth.toml.example</code>).</li>
+          <li><strong>Yahoo</strong> and generic IMAP use an app password stored in the system keyring, not in Alcedo’s database.</li>
+          <li>Each account has IMAP, SMTP, a display name, a chip (blank for automatic initials, with a background color or a photo cropped to a circle), optional extra From addresses, a signature, and OpenPGP keys.</li>
+        </ul>
+        <p>The folder pane account switcher picks which account’s folders you are browsing. Unified views still combine mail across accounts.</p>
+      </section>
+
+      <section id="folders">
+        <h2>Folders</h2>
+        <p>Right-click a folder to sync, mark all read, search, create a subfolder, empty it, or delete messages on or before a date. Inbox, Sent, Drafts, Junk, and Trash cannot be renamed or deleted.</p>
+        <ul>
+          <li><strong>File → New Folder</strong> creates a mailbox on the current account.</li>
+          <li>Drag a message onto a folder to <strong>move</strong> it. Hold <kbd>Ctrl</kbd> or right-click-drag to <strong>copy</strong>.</li>
+          <li>Some servers treat COPY as a move. Gmail copies as expected.</li>
+          <li><kbd>F5</kbd> syncs the current folder.</li>
+        </ul>
+      </section>
+
+      <section id="search">
+        <h2>Search</h2>
+        <p>Type in the search field above the message list. Filters appear for this folder vs all mail, plus unread, starred, and attachment toggles.</p>
+        <table>
+          <thead><tr><th>Operator</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td><code>from:</code></td><td>Sender address or name</td></tr>
+            <tr><td><code>to:</code></td><td>To recipient</td></tr>
+            <tr><td><code>subject:</code></td><td>Subject text</td></tr>
+            <tr><td><code>folder:</code> / <code>in:</code></td><td>Folder name, or <code>in:anywhere</code></td></tr>
+            <tr><td><code>after:</code> / <code>before:</code></td><td>Date (YYYY-MM-DD)</td></tr>
+            <tr><td><code>larger:</code> / <code>smaller:</code></td><td>Whole message size, including attachments (<code>larger:10M</code>, <code>smaller:500K</code>). K, M, and G are 1024-based.</td></tr>
+            <tr><td><code>is:unread</code> / <code>is:read</code></td><td>Read state</td></tr>
+            <tr><td><code>is:starred</code> / <code>is:unstarred</code></td><td>Starred flag</td></tr>
+            <tr><td><code>has:attachment</code></td><td>Has a file attached</td></tr>
+            <tr><td><code>-term</code></td><td>Exclude a word</td></tr>
+            <tr><td><code>"exact phrase"</code></td><td>Quoted phrase</td></tr>
+          </tbody>
+        </table>
+        <p>The search field suggests operators and values as you type. Tab or a click inserts a suggestion; Enter still runs the search unless a suggestion is selected. The command palette (<kbd>Ctrl</kbd>+<kbd>K</kbd>) can insert operators too.</p>
+      </section>
+
+      <section id="reading">
+        <h2>Reading mail</h2>
+        <ul>
+          <li>HTML is shown in a sandboxed view. Remote images stay blocked until you allow the message or sender, unless you turn on <strong>Load remote images</strong> in Preferences → Privacy.</li>
+          <li>Sign-in codes can appear in a banner for one-click copy. Optionally move that message to Trash after copy.</li>
+          <li>Mailing lists with <code>List-Unsubscribe</code> show an Unsubscribe button.</li>
+          <li>OpenPGP status appears above the body when a message is signed or encrypted.</li>
+          <li>Calendar invitations show Accept, Tentative, and Decline when someone invited you. Your reply is emailed to the organizer. Other invitations show Add to Calendar, which opens them in your calendar app.</li>
+          <li>Click an attachment to open it. Right-click for <strong>Save to File…</strong>. Types that can run code (configured in Preferences → Privacy) stay stored, but you must confirm before Alcedo enables them.</li>
+          <li>Archive, star, and delete for the open message sit next to Reply on the reader. Selecting several messages shows a toolbar above the list instead.</li>
+          <li>View → Show message previews toggles list snippets. List density (compact / comfortable / relaxed) is in Preferences → General.</li>
+        </ul>
+      </section>
+
+      <section id="conversations">
+        <h2>Conversations</h2>
+        <p><strong>View → Group by conversation</strong> folds replies into threads. Expand a thread in the list to see each message. Turn it off to show one row per message.</p>
+      </section>
+
+      <section id="compose">
+        <h2>Compose</h2>
+        <p><kbd>Ctrl</kbd>+<kbd>N</kbd> or Compose on the app rail opens a draft. Reply, Reply All, and Forward are on the Message menu and the reader. Pop the composer into its own window with the window button.</p>
+        <ul>
+          <li>Formats: <strong>plain text</strong>, <strong>HTML</strong>, and <strong>Markdown</strong>. Default format is in Preferences → Composing.</li>
+          <li>Account chooses the mailbox that sends. From is the address recipients see. It lists that account’s address and any extra addresses saved on the account.</li>
+          <li>HTML has a formatting toolbar, source view, and image insert. Markdown has a preview.</li>
+          <li>HTML line spacing starts at 1.5, the usual body default in HTML mail. Line spacing sets Single (1), 1.15, 1.5, or Double on the paragraph at the cursor, or on each paragraph in the selection.</li>
+          <li>Attachments: drag files onto the composer. There is a count limit. Inserting an image that some clients cannot display shows a warning; Alcedo still adds it.</li>
+          <li><kbd>Ctrl</kbd>+<kbd>Enter</kbd> sends.</li>
+          <li>Drafts sync to the account’s Drafts folder when the server provides one. After send, Alcedo can copy to Sent.</li>
+        </ul>
+        <p>Alcedo handles <code>mailto:</code> links when installed as the default mail app.</p>
+      </section>
+
+      <section id="identities">
+        <h2>From addresses</h2>
+        <p>The composer has an Account row and a From row. Account chooses the mailbox. From starts as that account’s address. Type an address, or open the list, to use a saved extra address. An address you type that is not saved is used for this message only; add it under Preferences → Accounts → From addresses to keep it. Saved addresses are listed there, oldest first. Click a row to edit it, or use the delete button to remove it.</p>
+        <p>Every email has two “senders”. One is the From address that people see. The other is the address your mail server uses behind the scenes to send the message and to receive any “could not be delivered” replies. Normally the second one is your account address.</p>
+        <p>The switch “Send from the saved address itself” (Preferences → Accounts → the account → From addresses) controls this. When it is on, and you send from a saved address on the same domain as the account, that saved address is used for both. Replies about failed delivery then come back to that address. When it is off, or when you use a typed address or an address on a different domain, the server still sends as your account address, and Alcedo adds a “Sender” line so the message stays honest about where it came from. You still sign in with the account either way.</p>
+        <p>This switch is on by default for password accounts. It is off for Gmail and Outlook, because they only accept it if you have set up the extra address with them. Changes to this switch and to Catch-all domains are applied when you press Save at the bottom of the account page.</p>
+        <p>Gmail and some other providers only send as your account address or an address you have verified with them. If a message is rejected or shows a different From, check the address with your provider.</p>
+      </section>
+
+      <section id="snippets">
+        <h2>Snippets &amp; signatures</h2>
+        <p>Snippets are reusable compose inserts. Manage them in Preferences → Composing. In the composer, use the snippets button. Placeholders:</p>
+        <ul>
+          <li><code>{{first_name}}</code> — first word of the first To contact, or the local part of the address</li>
+          <li><code>{{full_name}}</code> — display name</li>
+          <li><code>{{email}}</code> — address</li>
+        </ul>
+        <p>Each account has a signature. Toggle “Include signature” on the compose toolbar. Signature format follows the compose format.</p>
+      </section>
+
+      <section id="openpgp">
+        <h2>OpenPGP</h2>
+        <p>Generate or import a key on the account page under OpenPGP. Private keys and passphrases stay in the system keyring. You can sign outgoing mail by default, and sign or encrypt per message in the composer.</p>
+        <ul>
+          <li>Encrypt is available when every recipient has a known public key.</li>
+          <li>Incoming signed or encrypted mail shows a status banner. Autocrypt headers can offer to save a sender’s public key.</li>
+          <li>Export copies your public key to the clipboard.</li>
+        </ul>
+      </section>
+
+      <section id="rules">
+        <h2>Message rules</h2>
+        <p>Open <strong>Edit → Message Rules</strong> or create a rule from a message. Conditions match From, To, Cc, recipient, subject, or attachments. Actions can file, copy, star, mark read/unread, or delete.</p>
+        <ul>
+          <li>Rules run on this computer as mail is stored in the Inbox.</li>
+          <li>Rule order matters. Stop processing prevents later rules from running.</li>
+          <li>Drag the handle on a rule, or use Move Up / Move Down, to change processing order. Order is top to bottom.</li>
+        </ul>
+      </section>
+
+      <section id="contacts">
+        <h2>Contacts</h2>
+        <p>The Contacts space lists people as Approved, Unapproved, or Blocked. Search, filter, multi-select, and group them. Add someone from a message address.</p>
+        <p>Preferences → Contacts can automatically save outgoing recipients as Unapproved until you keep them.</p>
+      </section>
+
+      <section id="privacy">
+        <h2>Privacy</h2>
+        <ul>
+          <li>Remote images and tracking pixels in incoming HTML are blocked by default.</li>
+          <li>Attachments that may be unsafe to open stay in the message; you confirm before enabling them. The type lists are in Preferences → Privacy.</li>
+          <li><strong>Request read receipts</strong> and <strong>Insert tracking pixel</strong> are off unless you enable them in Preferences → Privacy. Outbound tracking requires an HTTPS pixel URL, and Alcedo discloses it before send.</li>
+          <li>Secrets (passwords, OAuth tokens, API keys, OpenPGP private keys) use the system keyring. Mail metadata lives in a local SQLite database.</li>
+        </ul>
+      </section>
+
+      <section id="notifications">
+        <h2>Notifications &amp; tray</h2>
+        <p><strong>Close to tray</strong> hides the window instead of quitting. The tray icon can show unread count.</p>
+        <p>Click a notification to open the message; verification notifications can copy the code. <strong>Mark as read</strong> and <strong>Delete</strong> act on that message without opening the window. Delete also marks the message read.</p>
+      </section>
+
+      <section id="appearance">
+        <h2>Appearance</h2>
+        <p>Preferences → Appearance sets light, dark, or system color scheme, plus accent color. List density and conversation grouping are under General (Message list) and the View menu.</p>
+      </section>
+
+      <section id="keyboard">
+        <h2>Keyboard &amp; command palette</h2>
+        <p><kbd>Ctrl</kbd>+<kbd>K</kbd> (or <kbd>K</kbd> when the list is focused) opens the command palette: jump to actions, searches, and operators. It also works while the mail search field is focused.</p>
+        <p>Remap shortcuts in Preferences → Keyboard. List-focus keys (such as <kbd>E</kbd> to archive) apply when the message list has focus, so they do not steal typing in search or compose. <kbd>F10</kbd> opens the main menu. <kbd>Ctrl</kbd>+<kbd>?</kbd> opens the shortcut list.</p>
+      </section>
+
+      <section id="shortcuts">
+        <h2>Shortcuts</h2>
+        <p>Defaults (override in Preferences → Keyboard):</p>
+        <table>
+          <thead><tr><th>Action</th><th>Shortcut</th></tr></thead>
+          <tbody>
+            <tr><td>Help</td><td><kbd>F1</kbd></td></tr>
+            <tr><td>New message</td><td><kbd>Ctrl</kbd>+<kbd>N</kbd></td></tr>
+            <tr><td>Preferences</td><td><kbd>Ctrl</kbd>+<kbd>,</kbd></td></tr>
+            <tr><td>Command palette</td><td><kbd>Ctrl</kbd>+<kbd>K</kbd></td></tr>
+            <tr><td>Reply / Reply All / Forward</td><td><kbd>Ctrl</kbd>+<kbd>R</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> / <kbd>Ctrl</kbd>+<kbd>L</kbd></td></tr>
+            <tr><td>List: reply / reply all / forward</td><td><kbd>R</kbd> / <kbd>A</kbd> / <kbd>F</kbd></td></tr>
+            <tr><td>Archive</td><td><kbd>E</kbd></td></tr>
+            <tr><td>Mark read / unread</td><td><kbd>Shift</kbd>+<kbd>I</kbd> / <kbd>U</kbd></td></tr>
+            <tr><td>Keyboard shortcuts</td><td><kbd>Ctrl</kbd>+<kbd>?</kbd></td></tr>
+            <tr><td>Main menu</td><td><kbd>F10</kbd></td></tr>
+            <tr><td>Star</td><td><kbd>S</kbd></td></tr>
+            <tr><td>Move to folder</td><td><kbd>V</kbd></td></tr>
+            <tr><td>Delete</td><td><kbd>#</kbd></td></tr>
+            <tr><td>Sync folder</td><td><kbd>F5</kbd></td></tr>
+            <tr><td>Show app rail</td><td><kbd>F9</kbd></td></tr>
+            <tr><td>Send</td><td><kbd>Ctrl</kbd>+<kbd>Enter</kbd></td></tr>
+            <tr><td>Quit</td><td><kbd>Ctrl</kbd>+<kbd>Q</kbd></td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+    <script>
+      (function () {
+        var links = document.querySelectorAll("nav a");
+        function mark() {
+          var id = (location.hash || "#overview").slice(1);
+          links.forEach(function (a) {
+            a.classList.toggle("active", a.getAttribute("href") === "#" + id);
+          });
+        }
+        window.addEventListener("hashchange", mark);
+        mark();
+      })();
+    </script>
+  </body>
+</html>

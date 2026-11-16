@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="alcedo">
+  <schema id="dev.alcedo.Mail" path="/dev/alcedo/Mail/">
+    <key name="window-width" type="i">
+      <default>1280</default>
+      <summary>Main window width</summary>
+      <description>Width of the main application window in pixels.</description>
+    </key>
+    <key name="window-height" type="i">
+      <default>800</default>
+      <summary>Main window height</summary>
+      <description>Height of the main application window in pixels.</description>
+    </key>
+    <key name="last-folder" type="s">
+      <default>''</default>
+      <summary>Last selected folder</summary>
+      <description>
+        Restored when the app opens. Empty or "unified" is Unified Inbox.
+        "view" followed by unit separator U+001F and a UUID restores an extension
+        view (the form earlier builds wrote is read the same way).
+        Otherwise account UUID, unit separator U+001F, then the IMAP mailbox name.
+      </description>
+    </key>
+    <key name="last-account" type="s">
+      <default>''</default>
+      <summary>Last selected account</summary>
+      <description>
+        Account UUID shown in the account switcher. Restored when the app opens so
+        views that span accounts (such as Unified Inbox) keep the
+        account you last picked. Empty means the first account.
+      </description>
+    </key>
+    <key name="load-remote-images" type="b">
+      <default>false</default>
+      <summary>Load remote images by default</summary>
+      <description>
+        When true, remote images in HTML mail are loaded automatically.
+        Defaults to false for privacy.
+      </description>
+    </key>
+    <key name="show-verification-codes" type="b">
+      <default>true</default>
+      <summary>Show verification codes</summary>
+      <description>
+        When a message contains a one-time sign-in or verification code, show it
+        in the reader with a copy button. Detection stays on this device.
+      </description>
+    </key>
+    <key name="cleanup-verification-codes" type="b">
+      <default>false</default>
+      <summary>Move verification messages to Trash after copy</summary>
+      <description>
+        After the user copies a verification code from the reader, move that
+        message to Trash. Has no effect when Show verification codes is off,
+        when the message is already in Trash, or when the account has no Trash
+        folder. Undo is offered from the toast.
+      </description>
+    </key>
+    <key name="show-message-preview" type="b">
+      <default>true</default>
+      <summary>Show message previews in the list</summary>
+      <description>
+        When true, each message row shows a snippet preview below the subject.
+      </description>
+    </key>
+    <key name="list-density" type="s">
+      <default>'comfortable'</default>
+      <summary>List density</summary>
+      <description>
+        Spacing in the message list and reading pane: compact, comfortable, or relaxed.
+      </description>
+      <choices>
+        <choice value='compact'/>
+        <choice value='comfortable'/>
+        <choice value='relaxed'/>
+      </choices>
+    </key>
+    <key name="message-list-mode" type="s">
+      <default>'conversation'</default>
+      <summary>Message list mode</summary>
+      <description>
+        Group replies into conversations, or show one row per message.
+      </description>
+      <choices>
+        <choice value='conversation'/>
+        <choice value='flat'/>
+      </choices>
+    </key>
+    <key name="color-scheme" type="s">
+      <default>'system'</default>
+      <summary>Color scheme</summary>
+      <description>
+        Follow the system color scheme, or force light or dark.
+      </description>
+      <choices>
+        <choice value='system'/>
+        <choice value='light'/>
+        <choice value='dark'/>
+      </choices>
+    </key>
+    <key name="accent-color" type="s">
+      <default>'default'</default>
+      <summary>Accent color</summary>
+      <description>
+        Accent color used for buttons, links, and highlights. "default" follows
+        the system accent color.
+      </description>
+      <choices>
+        <choice value='default'/>
+        <choice value='blue'/>
+        <choice value='teal'/>
+        <choice value='green'/>
+        <choice value='yellow'/>
+        <choice value='orange'/>
+        <choice value='red'/>
+        <choice value='pink'/>
+        <choice value='purple'/>
+        <choice value='slate'/>
+      </choices>
+    </key>
+    <key name="application-font-size" type="i">
+      <default>14</default>
+      <range min="10" max="24"/>
+      <summary>Application font size</summary>
+      <description>GTK interface text size in pixels (10–24). Default 14.</description>
+    </key>
+    <key name="reader-font-size" type="i">
+      <default>14</default>
+      <range min="10" max="24"/>
+      <summary>Reader font size</summary>
+      <description>Mail body text size in the reading pane, in pixels (10–24). Default 14.</description>
+    </key>
+    <key name="editor-font-size" type="i">
+      <default>14</default>
+      <range min="10" max="24"/>
+      <summary>Editor font size</summary>
+      <description>Compose body text size in pixels (10–24). Default 14.</description>
+    </key>
+    <key name="close-to-tray" type="b">
+      <default>false</default>
+      <summary>Close to tray</summary>
+      <description>
+        When true, closing the window hides it in the notification area instead of quitting.
+      </description>
+    </key>
+    <key name="reading-pane" type="s">
+      <default>'right'</default>
+      <summary>Reading pane position</summary>
+      <description>
+        When set to right, the reading pane appears beside the message list.
+        When set to bottom, it appears below the list.
+      </description>
+      <choices>
+        <choice value='right'/>
+        <choice value='bottom'/>
+      </choices>
+    </key>
+    <key name="compose-format" type="s">
+      <default>'plain'</default>
+      <summary>Default compose format</summary>
+      <description>
+        Default body format for new messages and replies: plain, html, or markdown.
+      </description>
+      <choices>
+        <choice value='plain'/>
+        <choice value='html'/>
+        <choice value='markdown'/>
+      </choices>
+    </key>
+    <key name="spell-check-inline" type="b">
+      <default>true</default>
+      <summary>Check spelling while typing</summary>
+      <description>Underline misspelled words in the compose body as you type.</description>
+    </key>
+    <key name="spell-check-autocomplete" type="b">
+      <default>false</default>
+      <summary>Show spelling suggestions while typing</summary>
+      <description>Show a suggestion popover when the caret rests on a misspelled word in plain text or Markdown.</description>
+    </key>
+    <key name="spell-check-autocorrect" type="b">
+      <default>false</default>
+      <summary>Correct spelling automatically</summary>
+      <description>Replace a misspelled word with the top dictionary suggestion when a word boundary is typed. Plain text and Markdown only.</description>
+    </key>
+    <key name="spell-check-before-send" type="b">
+      <default>false</default>
+      <summary>Check spelling before sending</summary>
+      <description>Review misspelled words in a dialog before the message is sent.</description>
+    </key>
+    <key name="spell-check-language" type="s">
+      <default>''</default>
+      <summary>Spell-check language</summary>
+      <description>Enchant language code (for example en_US). Empty follows the system language.</description>
+    </key>
+    <key name="send-delay-seconds" type="i">
+      <range min="0" max="60"/>
+      <default>0</default>
+      <summary>Undo send delay</summary>
+      <description>
+        Seconds to hold an outgoing message so it can be taken back. 0 sends immediately.
+      </description>
+    </key>
+    <key name="request-mdn" type="b">
+      <default>false</default>
+      <summary>Request read receipts</summary>
+      <description>
+        When true, outgoing mail requests a read receipt (MDN).
+      </description>
+    </key>
+    <key name="collect-outgoing-contacts" type="b">
+      <default>true</default>
+      <summary>Add outgoing addresses to Unapproved</summary>
+      <description>
+        When true, addresses you send to are saved as unapproved contacts until you keep them.
+      </description>
+    </key>
+    <key name="insert-tracking-pixel" type="b">
+      <default>false</default>
+      <summary>Insert tracking pixel</summary>
+      <description>
+        Off by default. When true, a hidden remote image from tracking-pixel-url
+        is inserted into outgoing HTML mail so opens can be detected; the
+        composer shows a disclosure banner while it is on.
+      </description>
+    </key>
+    <key name="tracking-pixel-url" type="s">
+      <default>''</default>
+      <summary>Tracking pixel URL</summary>
+      <description>
+        HTTPS URL for the outbound tracking pixel image.
+      </description>
+    </key>
+    <key name="collapsed-folders" type="as">
+      <default>[]</default>
+      <summary>Collapsed folder IMAP names</summary>
+      <description>
+        Per-account collapsed sidebar folders. Each entry is
+        account-uuid, unit separator U+001F, then the IMAP mailbox name.
+      </description>
+    </key>
+    <key name="compose-format-by-account" type="as">
+      <default>[]</default>
+      <summary>Per-account compose format overrides</summary>
+      <description>
+        Each entry is account-uuid, unit separator U+001F, then plain, html, or markdown.
+        Accounts not listed use the global default compose format preference.
+      </description>
+    </key>
+    <key name="folder-pane-accounts" type="s">
+      <default>'picker'</default>
+      <summary>Accounts in the folder pane</summary>
+      <description>
+        picker shows one account at a time behind the account picker.
+        stacked shows every account as a collapsible section with its folders
+        when there are two or more accounts.
+      </description>
+      <choices>
+        <choice value='picker'/>
+        <choice value='stacked'/>
+      </choices>
+    </key>
+    <key name="collapsed-accounts" type="as">
+      <default>[]</default>
+      <summary>Collapsed account sections</summary>
+      <description>
+        Account UUIDs whose section is collapsed in the stacked folder pane.
+      </description>
+    </key>
+    <key name="collapsed-personal-folders" type="as">
+      <default>[]</default>
+      <summary>Collapsed Folders groups</summary>
+      <description>
+        Account UUIDs whose Folders group (the user-created IMAP folders) is
+        collapsed to a single row in the folder pane. Default expanded.
+      </description>
+    </key>
+    <key name="hidden-accounts" type="as">
+      <default>[]</default>
+      <summary>Hidden accounts</summary>
+      <description>
+        Account UUIDs moved into the Hidden Accounts area at the bottom of the
+        stacked folder pane.
+      </description>
+    </key>
+    <key name="account-order" type="as">
+      <default>[]</default>
+      <summary>Account order</summary>
+      <description>
+        Account UUIDs in the order shown in the stacked folder pane and the
+        account picker. Accounts not listed follow in their existing order.
+      </description>
+    </key>
+    <key name="keyboard-shortcut-overrides" type="as">
+      <default>[]</default>
+      <summary>Keyboard shortcut overrides</summary>
+      <description>
+        Custom accelerators. Each entry is a GIO action name, unit separator U+001F,
+        then a GTK shortcut trigger (for example app.command-palette then Ctrl+K).
+        Empty means all defaults.
+      </description>
+    </key>
+    <key name="recent-move-folders" type="as">
+      <default>[]</default>
+      <summary>Recent move/copy destination folders</summary>
+      <description>
+        Most-recent-first FolderId integers as decimal strings. Max 5.
+      </description>
+    </key>
+    <key name="message-list-column-widths" type="as">
+      <default>[]</default>
+      <summary>Message list column widths</summary>
+      <description>
+        Pixel widths for resizable message-list columns.
+        Each entry is column-id, colon, then a positive integer
+        (from, folder, subject, size, date).
+        A per-mailbox row is view-key, U+001F, then id:width pairs separated
+        by commas. Mailboxes without a row use the unscoped widths.
+      </description>
+    </key>
+    <key name="folder-pane-width" type="i">
+      <default>240</default>
+      <summary>Folder pane width</summary>
+      <description>
+        Width in pixels of the folders column in the main window.
+        Clamped to 180–560.
+      </description>
+    </key>
+    <key name="rail-expanded" type="b">
+      <default>false</default>
+      <summary>Expanded app rail</summary>
+      <description>
+        When true, the far-left app rail shows icon and label.
+        When false, it shows icons only.
+      </description>
+    </key>
+    <key name="rail-width" type="i">
+      <default>0</default>
+      <summary>App rail width</summary>
+      <description>
+        Width in pixels of the far-left app rail (56–280).
+        Zero means derive from rail-expanded.
+      </description>
+    </key>
+    <key name="rail-visible" type="b">
+      <default>true</default>
+      <summary>Show app rail</summary>
+      <description>
+        When false, the far-left app rail is hidden.
+      </description>
+    </key>
+    <key name="message-list-column-order" type="as">
+      <default>['unread','from','subject','attachments','star','size','date']</default>
+      <summary>Message list column order</summary>
+      <description>
+        User-facing column ids left to right (unread, from, folder, subject,
+        attachments, star, size, date). Unknown ids are ignored.
+        A per-mailbox row is view-key, U+001F, then column ids separated by
+        commas. Mailboxes without a row use the unscoped order.
+      </description>
+    </key>
+    <key name="message-list-column-visible" type="as">
+      <default>['unread','from','subject','attachments','star','size','date']</default>
+      <summary>Visible message list columns</summary>
+      <description>
+        Column ids that are shown (unread, from, folder, subject, attachments,
+        star, size, date). Omitted ids are hidden.
+        A per-mailbox row is view-key, U+001F, then column ids separated by
+        commas. Mailboxes without a row use the unscoped list.
+      </description>
+    </key>
+    <key name="message-list-sort-column" type="s">
+      <default>'date'</default>
+      <summary>Message list sort column</summary>
+      <description>from, subject, date, or size. Trash Deleted sort is not stored.</description>
+    </key>
+    <key name="message-list-sort-order" type="s">
+      <default>'descending'</default>
+      <summary>Message list sort direction</summary>
+      <description>ascending or descending.</description>
+    </key>
+    <key name="activity-log-limit" type="i">
+      <default>200</default>
+      <range min="50" max="2000"/>
+      <summary>Activity log maximum lines</summary>
+      <description>
+        Maximum in-memory activity log entries. Oldest rows are dropped when full.
+      </description>
+    </key>
+    <key name="activity-log-filter" type="i">
+      <default>63</default>
+      <summary>Activity log category filter</summary>
+      <description>
+        Bit mask of visible activity kinds: mail 1, sync 2, accounts 4,
+        contacts 16, failures 32 (8 is unused). Default 63 is all. Zero hides every row.
+      </description>
+    </key>
+    <key name="risky-attachment-extensions" type="as">
+      <default>['exe','com','bat','cmd','scr','msi','html','htm','js','svg','wasm','dll','so']</default>
+      <summary>Risky attachment extensions</summary>
+      <description>
+        File extensions that need confirmation before an attachment is opened or saved.
+      </description>
+    </key>
+    <key name="risky-attachment-mime-types" type="as">
+      <default>['text/html','application/javascript','text/javascript','image/svg+xml','application/wasm','application/x-msdownload','application/vnd.microsoft.portable-executable','application/vnd.ms-msi','application/x-msi','application/x-sharedlib','application/x-executable','application/x-dosexec']</default>
+      <summary>Risky attachment MIME types</summary>
+      <description>
+        MIME types that need confirmation before an attachment is opened or saved.
+      </description>
+    </key>
+    <key name="typical-inline-image-extensions" type="as">
+      <default>['jpg','jpeg','png','gif','webp']</default>
+      <summary>Typical inline image extensions</summary>
+      <description>
+        Image types most email clients can display inline. Other image types can
+        still be inserted; Alcedo warns that some clients may not show them.
+      </description>
+    </key>
+  </schema>
+</schemalist>

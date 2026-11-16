@@ -1,0 +1,19 @@
+[package]
+name = "alcedo-pgp"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "OpenPGP sign/encrypt/verify/decrypt for Alcedo (Sequoia + Nettle)"
+
+[dependencies]
+alcedo-core = { workspace = true }
+chrono = { workspace = true }
+mail-parser = { workspace = true }
+sequoia-autocrypt = { version = "0.26", default-features = false }
+sequoia-openpgp = { version = "2", default-features = false, features = ["crypto-nettle", "compression-deflate"] }
+thiserror = { workspace = true }
+uuid = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

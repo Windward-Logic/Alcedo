@@ -1,0 +1,38 @@
+From: Carter <carter@codeinfusion.com>
+To: claims@example.com
+Subject: Goodwill claim fixture
+Date: Wed, 23 Sep 2026 12:57:15 -0400
+Message-ID: <fixture-mixed-jpegs@codeinfusion.com>
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="fixbound"
+
+--fixbound
+Content-Type: multipart/alternative; boundary="altbound"
+
+--altbound
+Content-Type: text/plain; charset=utf-8
+
+See attached photos.
+
+--altbound
+Content-Type: text/html; charset=utf-8
+
+<p>See attached photos.</p>
+
+--altbound--
+--fixbound
+Content-Type: image/jpeg; name="A01_sample.jpg"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="A01_sample.jpg"
+
+anBlZy1h
+
+--fixbound
+Content-Type: image/jpeg; name="D01_sample.jpg"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="D01_sample.jpg"
+Content-ID: <photo-d@codeinfusion.com>
+
+anBlZy1i
+
+--fixbound--

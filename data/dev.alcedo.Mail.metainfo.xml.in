@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>dev.alcedo.Mail</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <name>Alcedo</name>
+  <summary>Native IMAP/SMTP mail client for GNOME</summary>
+  <description>
+    <p>
+      Alcedo is a premium native mail client for GNOME with a unified inbox,
+      multi-account support, and privacy-first defaults. Remote images and
+      tracking pixels are blocked until you opt in; read receipts and outbound
+      tracking pixels require explicit disclosure before sending.
+    </p>
+    <p>
+      Supports Gmail and Microsoft OAuth, Yahoo app passwords, and generic
+      IMAP/SMTP accounts over TLS.
+    </p>
+  </description>
+  <launchable type="desktop-id">dev.alcedo.Mail.desktop</launchable>
+  <url type="homepage">@REPOSITORY_URL@</url>
+  <developer id="dev.alcedo">
+    <name>Alcedo Contributors</name>
+  </developer>
+  <screenshots>
+    <screenshot type="default">
+      <image>@SCREENSHOT_BASE_URL@/01-mail.png</image>
+      <caption>Unified inbox with folders, the message list, and reader</caption>
+    </screenshot>
+    <screenshot>
+      <image>@SCREENSHOT_BASE_URL@/02-reader.png</image>
+      <caption>Read a message beside the conversation list</caption>
+    </screenshot>
+    <screenshot>
+      <image>@SCREENSHOT_BASE_URL@/03-compose.png</image>
+      <caption>Compose a new message in the reading pane</caption>
+    </screenshot>
+    <screenshot>
+      <image>@SCREENSHOT_BASE_URL@/05-contacts.png</image>
+      <caption>People and groups in the contacts view</caption>
+    </screenshot>
+  </screenshots>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="0.1.0" date="2026-08-13">
+      <description>
+        <p>Initial development release.</p>
+      </description>
+    </release>
+  </releases>
+</component>

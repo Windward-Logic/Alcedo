@@ -1,0 +1,1 @@
+ALTER TABLE accounts ADD COLUMN sender_name TEXT NOT NULL DEFAULT '';

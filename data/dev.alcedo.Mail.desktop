@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=Alcedo
+GenericName=Mail Client
+Comment=Native IMAP/SMTP mail client for GNOME
+Exec=alcedo %u
+Icon=dev.alcedo.Mail
+Terminal=false
+StartupNotify=true
+X-GNOME-UsesNotifications=true
+Categories=Network;Email;
+MimeType=x-scheme-handler/mailto;
+StartupWMClass=dev.alcedo.Mail

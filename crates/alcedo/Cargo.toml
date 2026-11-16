@@ -1,0 +1,32 @@
+[package]
+name = "alcedo"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "Alcedo mail client"
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "alcedo"
+path = "src/main.rs"
+
+
+[dependencies]
+alcedo-core = { workspace = true }
+alcedo-store = { workspace = true }
+alcedo-imap = { workspace = true }
+alcedo-smtp = { workspace = true }
+alcedo-oauth = { workspace = true }
+alcedo-sync = { workspace = true }
+alcedo-html = { workspace = true }
+alcedo-widgets = { workspace = true }
+alcedo-ui = { workspace = true }
+tokio = { workspace = true }
+rustls = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+relm4 = { workspace = true }
+flume = "0.11"

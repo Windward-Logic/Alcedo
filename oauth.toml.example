@@ -1,0 +1,10 @@
+# Copy to $XDG_CONFIG_HOME/alcedo/oauth.toml (e.g. ~/.config/alcedo/oauth.toml).
+# Google Desktop clients need both client_id and client_secret (the secret is
+# not confidential for installed apps). Microsoft public clients use client_id only.
+
+[google]
+client_id = "xxxxx.apps.googleusercontent.com"
+client_secret = "GOCSPX-xxxxx"
+
+[microsoft]
+client_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"

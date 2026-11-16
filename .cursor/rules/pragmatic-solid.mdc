@@ -1,0 +1,39 @@
+---
+description: Pragmatic SOLID for Alcedo — Relm4/GTK crate graph, no speculative layers
+alwaysApply: true
+---
+
+# Pragmatic SOLID (Alcedo)
+
+This repo is Rust + Relm4 + GTK4/libadwaita. Do **not** apply Vue, .NET, or web UI rules. Prefer a direct edit that matches a neighbor file over a new trait, crate, or framework.
+
+## SOLID, only when it is a real issue
+
+Lock a SOLID change only if you can name the failure **and** the exact edit:
+
+- God method / 200-line `update` arm that should split like an existing helper
+- UI doing store or IMAP work (belongs in `alcedo-store` / `alcedo-sync`)
+- Duplicated logic already solved next door (`wire_folder_pane_persist`, badge helpers, GSettings clamps)
+
+Otherwise skip it. No interfaces “for the future,” no wide renames, no new crate for one screen.
+
+**Pragmatic OCP:** extend by copying an existing pattern (another `AppMsg`, a `gtk::Paned` like `folder_split`, a GSettings key next to `rail-width`). Do not invent a plugin host, widget toolkit, or CSS design system.
+
+## Crate graph (do not flatten)
+
+`alcedo-core` types → `alcedo-store` (rusqlite writer thread) / protocol crates → `alcedo-sync` (Tokio) → `alcedo-ui` (GTK thread). Secrets stay in oo7, never SQLite.
+
+- GTK thread: Relm4, widgets, `AppMsg`. No blocking IMAP/SQLite.
+- Do not move reader WebKit sandbox (`alcedo-widgets` sandbox) into UI helpers.
+
+## UI
+
+- Stock Adwaita symbolic icons and existing CSS tokens only. No Material, Gmail-web, or Electron chrome.
+- Far-left rail = app spaces + primary action (Compose, Mail, Contacts, any extension spaces, chrome). Mail scope (Unified Inbox, accounts, folders) lives once, in the folder pane, and only while Mail is active.
+- One Compose control. Copy `folder_split` / existing GSettings persist; do not add a second width mechanism.
+
+## Context and verify
+
+- Do not dump all of `app.rs`. Open the named module plus its analog (the Paned, settings helper, or test you are copying).
+- `cargo test -p <touched-crate>` and `cargo build -p <touched-crate>`. Do not run the whole workspace unless the change crosses crates.
+- Leave unrelated dirty files untouched. Do not commit unless asked.

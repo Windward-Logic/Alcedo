@@ -1,0 +1,20 @@
+From: Gina <gina@example.org>
+Subject: GnuPG signed fixture
+MIME-Version: 1.0
+Content-Type: multipart/signed; protocol="application/pgp-signature"; micalg=pgp-sha512; boundary="gpg-fixture-signed"
+
+--gpg-fixture-signed
+Content-Type: text/plain; charset=utf-8
+
+Hello from gpg
+--gpg-fixture-signed
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iHUEABYKAB0WIQTYrBQpXIm5NKqHgOCmSs+ZPioxVQUCau9lSgAKCRCmSs+ZPiox
+VYcSAP481+IQQR7BJmf0hfL3Dk6b7hLQzY2n+pJ8f4wP7fgd7QEAlv+xPNdEM1dD
+QKcKu7Bd8OIXwAFDE0khimjzh1prOwU=
+=4cqR
+-----END PGP SIGNATURE-----
+--gpg-fixture-signed--

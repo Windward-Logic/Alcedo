@@ -1,0 +1,15 @@
+/target
+oauth.toml
+client_secret*.json
+*.db
+.flatpak-builder
+flatpak_app
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/**
+!.cursor/plans
+
+# Personal editor plan link (points into a home directory)
+/plans
+# Compiled GSettings schema (built by crates/alcedo/build.rs and at install)
+data/gschemas.compiled

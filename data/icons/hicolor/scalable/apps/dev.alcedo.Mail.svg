@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="plate" x1="8" y1="4" x2="124" y2="126" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0a78d6"/>
+      <stop offset="0.5" stop-color="#0d928e"/>
+      <stop offset="1" stop-color="#16a56c"/>
+    </linearGradient>
+    <linearGradient id="crown" x1="48" y1="10" x2="96" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6ad0f8"/>
+      <stop offset="1" stop-color="#0196e4"/>
+    </linearGradient>
+    <linearGradient id="wing" x1="18" y1="32" x2="80" y2="110" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2eb0ee"/>
+      <stop offset="0.52" stop-color="#0186d4"/>
+      <stop offset="1" stop-color="#0158b0"/>
+    </linearGradient>
+    <linearGradient id="breast" x1="40" y1="50" x2="86" y2="118" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffd34a"/>
+      <stop offset="0.4" stop-color="#fdbd18"/>
+      <stop offset="1" stop-color="#ef8600"/>
+    </linearGradient>
+    <clipPath id="tile">
+      <rect width="128" height="128" rx="28" ry="28"/>
+    </clipPath>
+  </defs>
+
+  <rect width="128" height="128" rx="28" ry="28" fill="url(#plate)"/>
+  <rect x="1.5" y="1.5" width="125" height="125" rx="26.5" ry="26.5"
+        fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1.5"/>
+
+  <g clip-path="url(#tile)">
+    <!-- Breast sits under the wing, lower-right -->
+    <path fill="url(#breast)" d="
+      M 40 72
+      C 46 54 70 48 88 58
+      C 102 66 104 88 92 106
+      C 80 122 52 124 38 110
+      C 28 100 30 86 40 72 Z"/>
+
+    <!-- Wing / back, profile mass with scalloped lower edge -->
+    <path fill="url(#wing)" d="
+      M 18 70
+      C 16 46 32 26 56 22
+      C 72 20 86 30 90 48
+      C 92 62 84 78 70 90
+      C 60 98 52 98 44 94
+      C 52 102 46 108 38 104
+      C 44 112 34 114 26 106
+      C 18 94 18 82 18 70 Z"/>
+
+    <path fill="#014e9c" opacity="0.38" d="
+      M 26 92
+      C 36 102 52 106 66 98
+      C 56 108 44 110 34 104
+      C 40 112 30 114 22 106
+      C 22 100 24 94 26 92 Z"/>
+
+    <!-- Head in profile -->
+    <path fill="url(#crown)" d="
+      M 50 38
+      C 52 16 76 8 94 18
+      C 106 26 110 42 100 54
+      C 92 62 74 62 60 54
+      C 48 46 48 42 50 38 Z"/>
+
+    <g fill="#c5f0ff" opacity="0.92">
+      <ellipse cx="62" cy="24" rx="3.4" ry="2.5"/>
+      <ellipse cx="72" cy="19" rx="3.7" ry="2.7"/>
+      <ellipse cx="82" cy="21" rx="3.3" ry="2.4"/>
+      <ellipse cx="66" cy="32" rx="3.0" ry="2.2"/>
+      <ellipse cx="77" cy="29" rx="3.1" ry="2.3"/>
+    </g>
+
+    <!-- Mask: dark band only through the eye, not around it -->
+    <path fill="#0a3a72" d="
+      M 62 40
+      C 74 33 92 34 102 42
+      C 98 47 88 48 76 47
+      C 66 46 60 44 62 40 Z"/>
+
+    <!-- White neck streak, separate from the eye -->
+    <path fill="#ffffff" d="
+      M 56 52
+      C 68 46 86 48 96 56
+      C 86 60 70 60 58 56
+      C 54 54 54 53 56 52 Z"/>
+
+    <!-- Orange cheek behind the head, clearly below the eye -->
+    <path fill="#fd8c00" d="
+      M 68 48
+      C 76 45 88 48 92 54
+      C 86 58 76 58 68 55
+      C 64 53 64 50 68 48 Z"/>
+
+    <!-- Long pointed beak -->
+    <path fill="#1a222c" d="
+      M 98 37
+      C 106 38 114 42 122 47
+      L 98 53
+      C 100 46 100 41 98 37 Z"/>
+
+    <circle cx="84" cy="41" r="5.4" fill="#141b24"/>
+    <circle cx="86" cy="39.2" r="1.85" fill="#ffffff"/>
+
+    <path fill="#e06810" d="
+      M 44 108
+      C 54 114 68 118 78 114
+      C 70 120 56 120 44 116
+      C 40 114 42 108 44 108 Z"/>
+  </g>
+</svg>

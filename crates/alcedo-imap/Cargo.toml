@@ -1,0 +1,25 @@
+[package]
+name = "alcedo-imap"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "IMAP client for Alcedo"
+
+[dependencies]
+alcedo-core = { workspace = true }
+alcedo-tls = { workspace = true }
+alcedo-html = { workspace = true }
+async-imap = { workspace = true, features = ["runtime-tokio"] }
+base64 = { workspace = true }
+chrono = { workspace = true }
+futures = "0.3"
+mail-parser = { workspace = true }
+rustls = { workspace = true }
+sha2 = { workspace = true }
+tokio = { workspace = true }
+tokio-rustls = { workspace = true }
+socket2 = "0.6"
+stop-token = "0.7"
+tracing = { workspace = true }
+uuid = { workspace = true }

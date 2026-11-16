@@ -1,0 +1,2 @@
+ALTER TABLE accounts ADD COLUMN split_credentials INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE accounts ADD COLUMN smtp_username TEXT NOT NULL DEFAULT '';

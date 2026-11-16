@@ -1,0 +1,20 @@
+[package]
+name = "alcedo-html"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "HTML sanitization for Alcedo"
+
+[dependencies]
+alcedo-core = { workspace = true }
+ammonia = { workspace = true }
+linkify = { workspace = true }
+tracing = { workspace = true }
+url = { workspace = true }
+pulldown-cmark = { workspace = true }
+base64 = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+uuid = { workspace = true }

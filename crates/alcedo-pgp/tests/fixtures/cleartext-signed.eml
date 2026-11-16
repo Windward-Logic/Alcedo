@@ -1,0 +1,15 @@
+From: Testy <testy@example.org>
+Subject: Cleartext signed fixture
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
+
+Hello from fixture
+-----BEGIN PGP SIGNATURE-----
+
+wr0EABYIAG8FgmqWUd0JEK3yYQV3dbVqRxQAAAAAAB4AIHNhbHRAbm90YXRpb25z
+LnNlcXVvaWEtcGdwLm9yZ/M6vICLgUK+El2Ry9m3kxoibcVFjIb0xIFdWBwmpNHt
+FiEEQVFi4qdKQHI4A192rfJhBXd1tWoAACrIAQDGeJ9SJcngQ3OQseZVh9ZoBIR3
++yY2Nm44YIEKXyGQqgEA4k6icJh29F3dJ++KQtZok831URf2KA8cIIk1NMAyjQU=
+=lGz3
+-----END PGP SIGNATURE-----

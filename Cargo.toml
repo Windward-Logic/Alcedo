@@ -1,0 +1,71 @@
+[workspace]
+members = ["crates/*"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "GPL-3.0-or-later"
+rust-version = "1.93"
+# Single source for the project URL: scripts/render-metainfo.sh copies it into
+# the AppStream metainfo (homepage) at install time.
+repository = "https://github.com/Windward-Logic/Alcedo"
+
+[workspace.dependencies]
+relm4 = { version = "0.11", features = ["libadwaita", "gnome_50"] }
+relm4-components = { version = "0.11" }
+gtk4 = { version = "0.11" }
+libadwaita = { version = "0.9" }
+webkit6 = { version = "0.6.1", features = ["v2_52"] }
+sourceview5 = { version = "0.11" }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "time", "sync", "io-util"] }
+tokio-rustls = { version = "0.26" }
+rustls = { version = "0.23", default-features = false, features = ["std", "tls12", "aws_lc_rs"] }
+webpki-roots = { version = "0.26" }
+rustls-native-certs = { version = "0.8" }
+tokio-util = { version = "0.7", features = ["compat"] }
+async-imap = { version = "0.11", default-features = false }
+lettre = { version = "0.11", default-features = false, features = ["tokio1-rustls-tls", "smtp-transport", "builder", "hostname", "pool"] }
+mail-parser = { version = "0.11", features = ["full_encoding"] }
+mail-builder = { version = "0.4" }
+oauth2 = { version = "5", features = ["reqwest", "rustls-tls"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "rustls-tls-native-roots", "json"] }
+oo7 = { version = "0.6" }
+rusqlite = { version = "0.43", features = ["bundled", "functions"] }
+ammonia = { version = "4.1" }
+infer = { version = "0.19" }
+sha2 = { version = "0.10" }
+uuid = { version = "1", features = ["v4", "v5", "serde"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1" }
+toml = { version = "0.8" }
+thiserror = { version = "2" }
+tracing = { version = "0.1" }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+chrono = { version = "0.4", features = ["serde"] }
+chrono-tz = "0.10"
+rrule = "0.14"
+iana-time-zone = "0.1"
+icalendar = { version = "0.16" }
+url = { version = "2" }
+base64 = { version = "0.22" }
+directories = { version = "6" }
+nucleo = { version = "0.5" }
+tempfile = { version = "3" }
+linkify = { version = "0.11" }
+ksni = { version = "0.3", features = ["blocking"] }
+pulldown-cmark = { version = "0.13", default-features = false, features = ["html"] }
+unicode-general-category = "1"
+unicode-segmentation = "1"
+
+alcedo-core = { path = "crates/alcedo-core" }
+alcedo-store = { path = "crates/alcedo-store" }
+alcedo-imap = { path = "crates/alcedo-imap" }
+alcedo-smtp = { path = "crates/alcedo-smtp" }
+alcedo-oauth = { path = "crates/alcedo-oauth" }
+alcedo-sync = { path = "crates/alcedo-sync" }
+alcedo-html = { path = "crates/alcedo-html" }
+alcedo-widgets = { path = "crates/alcedo-widgets" }
+alcedo-ui = { path = "crates/alcedo-ui" }
+alcedo-pgp = { path = "crates/alcedo-pgp" }
+alcedo-tls = { path = "crates/alcedo-tls" }

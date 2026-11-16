@@ -1,0 +1,1 @@
+ALTER TABLE accounts ADD COLUMN avatar_image BLOB NOT NULL DEFAULT x'';

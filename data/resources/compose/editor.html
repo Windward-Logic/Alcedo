@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Compose</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        max-width: 100%;
+        background: transparent;
+        color: inherit;
+        overflow-wrap: anywhere;
+        word-wrap: break-word;
+        overflow-anchor: none;
+      }
+      body {
+        /* 1.5 is the usual HTML-mail body default (Gmail’s reading pane,
+           and the 1.4–1.6 range mail templates use). CSS 1 is the em box
+           with no leading, which is tighter than Outlook “Single”. */
+        font: 14px/1.5 system-ui, "Segoe UI", sans-serif;
+        padding: 12px;
+        box-sizing: border-box;
+      }
+      body.dark {
+        background: #242424;
+        color: #eeeeee;
+      }
+      #editor {
+        min-height: 160px;
+        max-width: 100%;
+        outline: none;
+        overflow-wrap: anywhere;
+        word-wrap: break-word;
+        overflow-anchor: none;
+      }
+      #editor:focus {
+        outline: none;
+      }
+      #editor p,
+      #editor div,
+      #editor h1,
+      #editor h2,
+      #editor h3,
+      #editor li,
+      #editor td,
+      #editor th {
+        margin: 0;
+        line-height: 1.5;
+      }
+      table {
+        border-collapse: collapse;
+        max-width: 100%;
+      }
+      th,
+      td {
+        border: 1px solid rgba(127, 127, 127, 0.45);
+        padding: 4px 8px;
+      }
+      blockquote {
+        margin: 0.5em 0;
+        padding-left: 0.75em;
+        border-left: 3px solid rgba(127, 127, 127, 0.45);
+      }
+      /* Resized images carry width/height attributes. height:auto here keeps the editor proportional and matches the inline style we write for recipients. */
+      img {
+        max-width: 100%;
+        height: auto;
+      }
+      #alcedo-img-resize {
+        position: fixed;
+        display: none;
+        box-sizing: border-box;
+        border: 2px solid #3584e4;
+        pointer-events: none;
+        z-index: 10;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      #alcedo-img-resize.visible {
+        display: block;
+      }
+      .alcedo-img-handle {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        box-sizing: border-box;
+        background: #ffffff;
+        border: 2px solid #3584e4;
+        pointer-events: auto;
+        touch-action: none;
+      }
+      .alcedo-img-handle[data-corner="nw"] {
+        left: -6px;
+        top: -6px;
+        cursor: nwse-resize;
+      }
+      .alcedo-img-handle[data-corner="ne"] {
+        right: -6px;
+        top: -6px;
+        cursor: nesw-resize;
+      }
+      .alcedo-img-handle[data-corner="sw"] {
+        left: -6px;
+        bottom: -6px;
+        cursor: nesw-resize;
+      }
+      .alcedo-img-handle[data-corner="se"] {
+        right: -6px;
+        bottom: -6px;
+        cursor: nwse-resize;
+      }
+      .alcedo-img-handle:hover {
+        background: #3584e4;
+      }
+      .alcedo-signature {
+        opacity: 0.92;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="editor"
+      contenteditable="true"
+      role="textbox"
+      aria-label="Message body"
+    ></div>
+    <div id="alcedo-img-resize" aria-hidden="true" contenteditable="false">
+      <div class="alcedo-img-handle" data-corner="nw"></div>
+      <div class="alcedo-img-handle" data-corner="ne"></div>
+      <div class="alcedo-img-handle" data-corner="sw"></div>
+      <div class="alcedo-img-handle" data-corner="se"></div>
+    </div>
+    <script>
+      var editor = document.getElementById("editor");
+
+      var BLOCK_TAGS = { P: 1, DIV: 1, LI: 1, H1: 1, H2: 1, H3: 1, TD: 1, TH: 1 };
+      var MARKERS = {
+        "────────────────────────": 1,
+        "---------- Forwarded message ---------": 1,
+      };
+
+      function blockForNode(node) {
+        var el = node && node.nodeType === 1 ? node : node && node.parentElement;
+        while (el && el !== editor) {
+          if (BLOCK_TAGS[el.tagName]) {
+            return el;
+          }
+          el = el.parentElement;
+        }
+        return null;
+      }
+
+      function isMarker(block) {
+        if (!block || block.tagName !== "P") {
+          return false;
+        }
+        var text = (block.textContent || "").replace(/\u00a0/g, " ").trim();
+        return Object.prototype.hasOwnProperty.call(MARKERS, text);
+      }
+
+      // Written inline so the sent fragment keeps the same leading. Recipient
+      // clients drop the editor stylesheet.
+      var DEFAULT_LINE_HEIGHT = "1.5";
+
+      function stampDefaultLineHeight(block) {
+        if (!block || isMarker(block) || block.closest("blockquote") || block.closest(".alcedo-signature")) {
+          return;
+        }
+        if (block.style.lineHeight) {
+          return;
+        }
+        block.style.margin = "0";
+        block.style.lineHeight = DEFAULT_LINE_HEIGHT;
+      }
+
+      // The spacing menu lives outside the web view. Opening it blurs the
+      // editor and WebKit collapses the selection before the command runs.
+      var savedRange = null;
+      var editorSelecting = false;
+
+      function inEditor(node) {
+        return !!node && (node === editor || editor.contains(node));
+      }
+
+      function rememberSelection() {
+        var sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0 || !inEditor(sel.anchorNode)) {
+          return;
+        }
+        var range = sel.getRangeAt(0);
+        if (range.collapsed && savedRange && !savedRange.collapsed && !editorSelecting) {
+          return;
+        }
+        if (!inEditor(range.startContainer)) {
+          return;
+        }
+        savedRange = range.cloneRange();
+      }
+
+      function restoreRange(range) {
+        if (!range) {
+          return;
+        }
+        var sel = window.getSelection();
+        if (!sel) {
+          return;
+        }
+        try {
+          sel.removeAllRanges();
+          sel.addRange(range);
+        } catch (e) {}
+      }
+
+      function rangeForSpacing() {
+        var live = null;
+        var sel = window.getSelection();
+        if (sel && sel.rangeCount > 0 && inEditor(sel.anchorNode)) {
+          live = sel.getRangeAt(0);
+        }
+        var saved =
+          savedRange && savedRange.startContainer && inEditor(savedRange.startContainer)
+            ? savedRange
+            : null;
+        if (saved && (!live || (live.collapsed && !saved.collapsed))) {
+          return saved;
+        }
+        return live;
+      }
+
+      function blocksForRange(range) {
+        if (!range || !inEditor(range.startContainer)) {
+          return [];
+        }
+        var found = [];
+        function add(block) {
+          if (block && found.indexOf(block) === -1) {
+            found.push(block);
+          }
+        }
+        add(blockForNode(range.startContainer));
+        if (!range.collapsed) {
+          add(blockForNode(range.endContainer));
+          var walker = document.createTreeWalker(editor, NodeFilter.SHOW_ELEMENT, null);
+          var node;
+          while ((node = walker.nextNode())) {
+            if (!BLOCK_TAGS[node.tagName]) {
+              continue;
+            }
+            try {
+              if (range.intersectsNode(node)) {
+                add(node);
+              }
+            } catch (e) {}
+          }
+        }
+        return found.filter(function (block) {
+          return !found.some(function (other) {
+            return other !== block && block.contains(other);
+          });
+        });
+      }
+
+      function postHtml() {
+        if (
+          window.webkit &&
+          window.webkit.messageHandlers &&
+          window.webkit.messageHandlers.compose
+        ) {
+          window.webkit.messageHandlers.compose.postMessage(
+            JSON.stringify({ type: "html", html: editor.innerHTML })
+          );
+        }
+      }
+
+      function scrollEditorToTop() {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      }
+
+      function placeCaretAtStart() {
+        var sel = window.getSelection();
+        if (!sel) {
+          return;
+        }
+        var range = document.createRange();
+        range.selectNodeContents(editor);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+
+      // focus() scrolls the caret into view. On the first map the view has no
+      // real height yet, so that scroll lands a line or two down and stays there.
+      function focusAtStart() {
+        editor.focus({ preventScroll: true });
+        placeCaretAtStart();
+        scrollEditorToTop();
+        var frames = 0;
+        function settle() {
+          scrollEditorToTop();
+          frames += 1;
+          if (frames < 8) {
+            requestAnimationFrame(settle);
+          }
+        }
+        requestAnimationFrame(settle);
+      }
+
+      var MIN_IMG_WIDTH = 32;
+      var imgOverlay = document.getElementById("alcedo-img-resize");
+      var activeImg = null;
+      var resizeState = null;
+
+      function isResizableImg(img) {
+        if (!img || img.tagName !== "IMG") {
+          return false;
+        }
+        if (!editor.contains(img)) {
+          return false;
+        }
+        var src = img.getAttribute("src") || "";
+        if (src.indexOf("alcedo-cid://") !== 0) {
+          return false;
+        }
+        if (!img.hasAttribute("data-cid")) {
+          return false;
+        }
+        if (img.naturalWidth <= 0) {
+          return false;
+        }
+        if (img.closest("blockquote")) {
+          return false;
+        }
+        if (img.closest(".alcedo-signature")) {
+          return false;
+        }
+        return true;
+      }
+
+      function selectedResizableImg() {
+        if (document.activeElement !== editor) {
+          return null;
+        }
+        var sel = window.getSelection();
+        if (!sel || sel.rangeCount !== 1) {
+          return null;
+        }
+        var r = sel.getRangeAt(0);
+        if (
+          r.collapsed ||
+          r.startContainer !== r.endContainer ||
+          r.endOffset !== r.startOffset + 1
+        ) {
+          return null;
+        }
+        var node = r.startContainer.childNodes[r.startOffset];
+        if (isResizableImg(node)) {
+          return node;
+        }
+        return null;
+      }
+
+      function hideImgOverlay() {
+        imgOverlay.classList.remove("visible");
+        activeImg = null;
+      }
+
+      function positionImgOverlay() {
+        if (!activeImg || !editor.contains(activeImg)) {
+          hideImgOverlay();
+          return;
+        }
+        var rect = activeImg.getBoundingClientRect();
+        imgOverlay.style.left = rect.left + "px";
+        imgOverlay.style.top = rect.top + "px";
+        imgOverlay.style.width = rect.width + "px";
+        imgOverlay.style.height = rect.height + "px";
+        imgOverlay.classList.add("visible");
+      }
+
+      function updateImgOverlay() {
+        if (resizeState) {
+          return;
+        }
+        activeImg = selectedResizableImg();
+        positionImgOverlay();
+      }
+
+      function selectImgNode(img) {
+        var range = document.createRange();
+        range.selectNode(img);
+        var sel = window.getSelection();
+        if (!sel) {
+          return;
+        }
+        try {
+          sel.removeAllRanges();
+          sel.addRange(range);
+        } catch (e) {}
+      }
+
+      function imgMaxWidth(img) {
+        return Math.min(img.naturalWidth, Math.floor(editor.clientWidth));
+      }
+
+      function stripInlineSize(img) {
+        img.style.removeProperty("width");
+        img.style.removeProperty("height");
+      }
+
+      function applyImgSize(img, w) {
+        img.setAttribute("width", String(w));
+        img.setAttribute(
+          "height",
+          String(Math.round((w * img.naturalHeight) / img.naturalWidth))
+        );
+      }
+
+      function restoreImgOrig(img, orig) {
+        if (orig.width !== null) {
+          img.setAttribute("width", orig.width);
+        } else {
+          img.removeAttribute("width");
+        }
+        if (orig.height !== null) {
+          img.setAttribute("height", orig.height);
+        } else {
+          img.removeAttribute("height");
+        }
+        if (orig.style !== null) {
+          img.setAttribute("style", orig.style);
+        } else {
+          img.removeAttribute("style");
+        }
+      }
+
+      function beginImgResize(event, corner) {
+        if (event.button !== 0 || !activeImg) {
+          return;
+        }
+        var img = activeImg;
+        var orig = {
+          width: img.getAttribute("width"),
+          height: img.getAttribute("height"),
+          style: img.getAttribute("style"),
+        };
+        var startW = img.getBoundingClientRect().width;
+        var maxW = imgMaxWidth(img);
+        var minW = Math.min(MIN_IMG_WIDTH, maxW);
+        stripInlineSize(img);
+        img.style.maxWidth = "100%";
+        img.style.height = "auto";
+        event.target.setPointerCapture(event.pointerId);
+        resizeState = {
+          img: img,
+          corner: corner,
+          startX: event.clientX,
+          startW: startW,
+          maxW: maxW,
+          minW: minW,
+          pointerId: event.pointerId,
+          captureEl: event.target,
+          orig: orig,
+        };
+      }
+
+      function moveImgResize(event) {
+        if (!resizeState) {
+          return;
+        }
+        var dx = event.clientX - resizeState.startX;
+        var raw;
+        if (resizeState.corner === "ne" || resizeState.corner === "se") {
+          raw = resizeState.startW + dx;
+        } else {
+          raw = resizeState.startW - dx;
+        }
+        var w = Math.round(
+          Math.max(resizeState.minW, Math.min(resizeState.maxW, raw))
+        );
+        applyImgSize(resizeState.img, w);
+        positionImgOverlay();
+      }
+
+      function endImgResize(commit) {
+        if (!resizeState) {
+          return;
+        }
+        var state = resizeState;
+        resizeState = null;
+        try {
+          state.captureEl.releasePointerCapture(state.pointerId);
+        } catch (e) {}
+        var img = state.img;
+        var finalW = img.getAttribute("width");
+        var origW = state.orig.width;
+        var widthChanged = false;
+        if (commit) {
+          if (finalW === null || origW === null) {
+            widthChanged = finalW !== origW;
+          } else {
+            var finalNum = parseInt(finalW, 10);
+            var origNum = parseInt(origW, 10);
+            widthChanged =
+              isNaN(finalNum) || isNaN(origNum) || finalNum !== origNum;
+          }
+        }
+        if (widthChanged) {
+          postHtml();
+        } else {
+          restoreImgOrig(img, state.orig);
+        }
+        activeImg = img;
+        positionImgOverlay();
+      }
+
+      function resetImgSize(img) {
+        var had =
+          img.hasAttribute("width") ||
+          img.hasAttribute("height") ||
+          img.style.width !== "" ||
+          img.style.height !== "" ||
+          img.style.maxWidth !== "";
+        if (!had) {
+          return;
+        }
+        img.removeAttribute("width");
+        img.removeAttribute("height");
+        img.style.removeProperty("width");
+        img.style.removeProperty("height");
+        img.style.removeProperty("max-width");
+        if (img.style.length === 0) {
+          img.removeAttribute("style");
+        }
+        selectImgNode(img);
+        updateImgOverlay();
+        postHtml();
+      }
+
+      window.alcedoCompose = {
+        exec: function (cmd, value) {
+          document.execCommand(cmd, false, value || null);
+          editor.focus();
+          postHtml();
+        },
+        insertHTML: function (html) {
+          document.execCommand("insertHTML", false, html);
+          editor.focus();
+          postHtml();
+        },
+        wrapTag: function (tag) {
+          var sel = window.getSelection();
+          document.execCommand(
+            "insertHTML",
+            false,
+            "<" + tag + ">" + sel + "</" + tag + ">"
+          );
+          editor.focus();
+          postHtml();
+        },
+        applyLineSpacing: function (mult) {
+          if (mult !== "1" && mult !== "1.15" && mult !== "1.5" && mult !== "2") {
+            return;
+          }
+          var range = rangeForSpacing();
+          editor.focus();
+          if (range) {
+            restoreRange(range);
+          }
+          var blocks = blocksForRange(range);
+          if (blocks.length === 0) {
+            document.execCommand("formatBlock", false, "div");
+            var sel = window.getSelection();
+            if (sel && sel.rangeCount > 0) {
+              blocks = blocksForRange(sel.getRangeAt(0));
+            }
+          }
+          blocks.forEach(function (block) {
+            if (isMarker(block)) {
+              return;
+            }
+            block.style.margin = "0";
+            block.style.lineHeight = mult;
+          });
+          editorSelecting = true;
+          rememberSelection();
+          editorSelecting = false;
+          postHtml();
+        },
+        getHtml: function () {
+          return editor.innerHTML;
+        },
+        setHtml: function (html, focusStart) {
+          savedRange = null;
+          hideImgOverlay();
+          editor.innerHTML = html || "";
+          postHtml();
+          scrollEditorToTop();
+          if (focusStart) {
+            focusAtStart();
+          }
+        },
+        focus: function () {
+          editor.focus();
+        },
+        focusStart: function () {
+          focusAtStart();
+        },
+        scrollToStart: function () {
+          scrollEditorToTop();
+        },
+      };
+
+      editor.addEventListener("mousedown", function () {
+        editorSelecting = true;
+      });
+      editor.addEventListener("mouseup", function () {
+        rememberSelection();
+        editorSelecting = false;
+      });
+      editor.addEventListener("keydown", function () {
+        editorSelecting = true;
+      });
+      editor.addEventListener("keyup", function () {
+        rememberSelection();
+        editorSelecting = false;
+      });
+      editor.addEventListener("blur", function () {
+        rememberSelection();
+      });
+      document.addEventListener("selectionchange", function () {
+        if (document.activeElement === editor || editorSelecting) {
+          rememberSelection();
+        }
+      });
+
+      editor.addEventListener("input", function () {
+        var sel = window.getSelection();
+        if (sel && sel.rangeCount > 0) {
+          stampDefaultLineHeight(blockForNode(sel.getRangeAt(0).startContainer));
+        }
+        postHtml();
+      });
+      editor.addEventListener("paste", function (event) {
+        if (event.clipboardData && event.clipboardData.files.length > 0) {
+          event.preventDefault();
+        }
+      });
+
+      var imgHandles = imgOverlay.querySelectorAll(".alcedo-img-handle");
+      imgHandles.forEach(function (handle) {
+        handle.addEventListener("pointerdown", function (event) {
+          event.preventDefault();
+          beginImgResize(event, handle.getAttribute("data-corner"));
+        });
+        handle.addEventListener("pointermove", function (event) {
+          if (resizeState) {
+            moveImgResize(event);
+          }
+        });
+        handle.addEventListener("pointerup", function () {
+          endImgResize(true);
+        });
+        handle.addEventListener("pointercancel", function () {
+          endImgResize(false);
+        });
+        handle.addEventListener("mousedown", function (event) {
+          event.preventDefault();
+        });
+      });
+
+      document.addEventListener(
+        "keydown",
+        function (event) {
+          if (resizeState && event.key === "Escape") {
+            event.preventDefault();
+            endImgResize(false);
+          }
+        },
+        true
+      );
+
+      editor.addEventListener("click", function (event) {
+        if (isResizableImg(event.target)) {
+          selectImgNode(event.target);
+          updateImgOverlay();
+        }
+      });
+
+      editor.addEventListener("dblclick", function (event) {
+        if (isResizableImg(event.target)) {
+          event.preventDefault();
+          resetImgSize(event.target);
+        }
+      });
+
+      editor.addEventListener("dragstart", function (event) {
+        if (event.target && event.target.tagName === "IMG") {
+          event.preventDefault();
+        }
+      });
+
+      document.addEventListener("selectionchange", function () {
+        updateImgOverlay();
+      });
+
+      editor.addEventListener("input", function () {
+        updateImgOverlay();
+      });
+
+      editor.addEventListener("focus", function () {
+        updateImgOverlay();
+      });
+
+      editor.addEventListener("blur", function () {
+        if (!resizeState) {
+          hideImgOverlay();
+        }
+      });
+
+      window.addEventListener(
+        "scroll",
+        function () {
+          positionImgOverlay();
+        },
+        { passive: true }
+      );
+      window.addEventListener("resize", function () {
+        positionImgOverlay();
+      });
+
+      document.execCommand("defaultParagraphSeparator", false, "div");
+    </script>
+  </body>
+</html>
