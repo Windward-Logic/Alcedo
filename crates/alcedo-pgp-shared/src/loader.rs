@@ -131,7 +131,10 @@ fn load_and_log() -> Result<Loaded, String> {
 }
 
 fn load() -> Result<Loaded, String> {
-    let path = find_library()?;
+    load_from(find_library()?)
+}
+
+fn load_from(path: PathBuf) -> Result<Loaded, String> {
     // SAFETY: loading runs the library's initialisers. The file is the one the
     // user named in `ALCEDO_PGP_LIB` or one installed next to the app; running
     // its code is the point of a replaceable library, and no Rust invariant
@@ -145,11 +148,7 @@ fn load() -> Result<Loaded, String> {
     let abi_version_fn: AbiVersionFn = unsafe { resolve(&library, SYM_ABI_VERSION) }?;
     // SAFETY: as above; the library is still loaded.
     let found = unsafe { abi_version_fn() };
-    if found != ABI_VERSION {
-        return Err(format!(
-            "OpenPGP library ABI {found}, expected {ABI_VERSION}"
-        ));
-    }
+    check_abi(found)?;
 
     // SAFETY: the library reports `ABI_VERSION`, whose symbol types are the
     // ones named here.
@@ -167,6 +166,15 @@ fn load() -> Result<Loaded, String> {
         call_fn,
         free_fn,
     })
+}
+
+fn check_abi(found: u32) -> Result<(), String> {
+    if found == ABI_VERSION {
+        return Ok(());
+    }
+    Err(format!(
+        "OpenPGP library ABI {found}, expected {ABI_VERSION}"
+    ))
 }
 
 /// Copies a function pointer out of `library`.
@@ -188,14 +196,7 @@ unsafe fn resolve<T: Copy>(library: &Library, name: &[u8]) -> Result<T, String> 
 /// that exists among the locations a package or `cargo` puts it.
 fn find_library() -> Result<PathBuf, String> {
     if let Some(explicit) = std::env::var_os(LIBRARY_PATH_ENV) {
-        let path = PathBuf::from(explicit);
-        if path.is_file() {
-            return Ok(path);
-        }
-        return Err(format!(
-            "{LIBRARY_PATH_ENV} is set to {}, which is not an existing file",
-            path.display()
-        ));
+        return explicit_library(PathBuf::from(explicit));
     }
     let exe = std::env::current_exe()
         .map_err(|err| format!("cannot locate the running executable: {err}"))?;
@@ -216,17 +217,33 @@ fn find_library() -> Result<PathBuf, String> {
     ))
 }
 
+/// Resolves `ALCEDO_PGP_LIB` to an absolute path. `dlopen` searches the system
+/// library path for a name without a slash, so a relative value would load a
+/// different file from the one checked here.
+fn explicit_library(path: PathBuf) -> Result<PathBuf, String> {
+    match std::fs::canonicalize(&path) {
+        Ok(resolved) if resolved.is_file() => Ok(resolved),
+        _ => Err(format!(
+            "{LIBRARY_PATH_ENV} is set to {}, which is not an existing file",
+            path.display()
+        )),
+    }
+}
+
 /// Search order after `ALCEDO_PGP_LIB`: the installed package layout, then
-/// next to the executable, then one level up (cargo test binaries live in
-/// `target/<profile>/deps/`).
-fn bundled_candidates(exe_dir: &Path) -> [PathBuf; 3] {
-    [
+/// next to the executable, then (only for cargo test binaries) one level up.
+fn bundled_candidates(exe_dir: &Path) -> Vec<PathBuf> {
+    let mut candidates = vec![
         exe_dir
             .join("../lib/alcedo")
             .join(INSTALLED_LIBRARY_FILE_NAME),
         exe_dir.join(LIBRARY_FILE_NAME),
-        exe_dir.join("..").join(LIBRARY_FILE_NAME),
-    ]
+    ];
+    // cargo test binaries live in target/<profile>/deps/.
+    if exe_dir.file_name() == Some(std::ffi::OsStr::new("deps")) {
+        candidates.push(exe_dir.join("..").join(LIBRARY_FILE_NAME));
+    }
+    candidates
 }
 
 #[cfg(test)]
@@ -235,14 +252,74 @@ mod tests {
 
     #[test]
     fn bundled_candidates_follow_the_documented_order() {
-        let candidates = bundled_candidates(Path::new("/opt/alcedo/bin"));
         assert_eq!(
-            candidates,
+            bundled_candidates(Path::new("/opt/alcedo/bin")),
             [
                 PathBuf::from("/opt/alcedo/bin/../lib/alcedo/libalcedo_pgp_ffi.so.1"),
                 PathBuf::from("/opt/alcedo/bin/libalcedo_pgp_ffi.so"),
-                PathBuf::from("/opt/alcedo/bin/../libalcedo_pgp_ffi.so"),
             ]
         );
+        assert_eq!(
+            bundled_candidates(Path::new("/x/target/debug/deps")),
+            [
+                PathBuf::from("/x/target/debug/deps/../lib/alcedo/libalcedo_pgp_ffi.so.1"),
+                PathBuf::from("/x/target/debug/deps/libalcedo_pgp_ffi.so"),
+                PathBuf::from("/x/target/debug/deps/../libalcedo_pgp_ffi.so"),
+            ]
+        );
+    }
+
+    #[test]
+    fn installed_name_carries_the_abi_version() {
+        assert_eq!(
+            INSTALLED_LIBRARY_FILE_NAME,
+            format!("{LIBRARY_FILE_NAME}.{ABI_VERSION}")
+        );
+    }
+
+    #[test]
+    fn explicit_relative_path_resolves_to_an_absolute_file() {
+        let resolved = explicit_library(PathBuf::from("Cargo.toml")).expect("exists");
+        assert!(resolved.is_absolute(), "{}", resolved.display());
+        assert!(resolved.ends_with("alcedo-pgp-shared/Cargo.toml"));
+    }
+
+    #[test]
+    fn explicit_path_that_is_missing_or_a_directory_is_an_error() {
+        for bad in ["does-not-exist.so", "src"] {
+            let err = explicit_library(PathBuf::from(bad)).expect_err(bad);
+            assert!(err.contains(bad), "{err}");
+        }
+    }
+
+    #[test]
+    fn abi_mismatch_is_rejected() {
+        assert_eq!(check_abi(ABI_VERSION), Ok(()));
+        assert_eq!(
+            check_abi(ABI_VERSION + 1),
+            Err(format!(
+                "OpenPGP library ABI {}, expected {ABI_VERSION}",
+                ABI_VERSION + 1
+            ))
+        );
+    }
+
+    #[test]
+    fn rejects_a_library_without_the_abi_symbol() {
+        // Rust's std already loads libgcc_s; it exports no alcedo symbols.
+        let err = load_from(PathBuf::from("libgcc_s.so.1"))
+            .err()
+            .expect("rejected");
+        assert!(
+            err.contains("lacks symbol alcedo_pgp_ffi_abi_version"),
+            "{err}"
+        );
+    }
+
+    #[test]
+    fn rejects_a_file_that_is_not_a_library() {
+        let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Cargo.toml");
+        let err = load_from(path).err().expect("rejected");
+        assert!(err.starts_with("cannot load "), "{err}");
     }
 }

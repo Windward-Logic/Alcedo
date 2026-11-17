@@ -23,4 +23,6 @@ fn main() {
         "{BUILD_ID_ENV} must be 1-{MAX_BUILD_ID_LEN} printable ASCII characters without spaces, got {id:?}"
     );
     println!("cargo:rustc-env=ALCEDO_PGP_FFI_BUILD_ID={id}");
+    // Must equal wire::INSTALLED_LIBRARY_FILE_NAME (the ABI version is the suffix).
+    println!("cargo:rustc-cdylib-link-arg=-Wl,-soname,libalcedo_pgp_ffi.so.1");
 }

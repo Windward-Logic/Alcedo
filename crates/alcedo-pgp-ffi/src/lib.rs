@@ -13,8 +13,15 @@ use alcedo_core::Error;
 use alcedo_pgp::SequoiaPgp;
 use alcedo_pgp_api::PgpBackend;
 use alcedo_pgp_api::wire::{
-    ABI_VERSION, CALL_BAD_REQUEST, CALL_OK, CALL_PANIC, FfiBuffer, Reply, Request, Response,
+    ABI_VERSION, AbiVersionFn, BuildIdFn, CALL_BAD_REQUEST, CALL_OK, CALL_PANIC, CallFn, FfiBuffer,
+    FreeFn, Reply, Request, Response,
 };
+
+// The loader casts each symbol to these types; keep the exports in step.
+const _: AbiVersionFn = alcedo_pgp_ffi_abi_version;
+const _: BuildIdFn = alcedo_pgp_ffi_build_id;
+const _: CallFn = alcedo_pgp_ffi_call;
+const _: FreeFn = alcedo_pgp_ffi_free;
 
 const NULL_REQUEST_MESSAGE: &str = "request pointer is null but request length is not zero";
 /// Deliberately generic: a panic message could quote message or key material.
@@ -69,8 +76,7 @@ pub unsafe extern "C" fn alcedo_pgp_ffi_call(
             // `request_len` initialised bytes that outlive this call.
             unsafe { std::slice::from_raw_parts(request, request_len) }
         };
-        panic::catch_unwind(|| handle_request(request_bytes))
-            .unwrap_or_else(|_| (CALL_PANIC, PANIC_MESSAGE.as_bytes().to_vec()))
+        run_guarded(|| handle_request(request_bytes))
     };
     // SAFETY: `out` is non-null (checked above) and the caller guarantees it
     // is valid for a write of one `FfiBuffer`. `write` does not read or drop
@@ -98,10 +104,27 @@ pub unsafe extern "C" fn alcedo_pgp_ffi_free(buffer: FfiBuffer) {
     drop(unsafe { Vec::from_raw_parts(buffer.ptr, buffer.len, buffer.cap) });
 }
 
+/// Runs `handler`, turning a panic into [`CALL_PANIC`] with a fixed message so
+/// no payload (which could quote key or message material) leaves the library.
+fn run_guarded(handler: impl FnOnce() -> (i32, Vec<u8>) + panic::UnwindSafe) -> (i32, Vec<u8>) {
+    panic::catch_unwind(handler).unwrap_or_else(|_| (CALL_PANIC, PANIC_MESSAGE.as_bytes().to_vec()))
+}
+
+fn bad_request_message(err: &serde_json::Error) -> String {
+    format!(
+        "cannot parse OpenPGP request: {:?} error at line {} column {}",
+        err.classify(),
+        err.line(),
+        err.column()
+    )
+}
+
 fn handle_request(request_bytes: &[u8]) -> (i32, Vec<u8>) {
     let request: Request = match serde_json::from_slice(request_bytes) {
         Ok(request) => request,
-        Err(err) => return (CALL_BAD_REQUEST, err.to_string().into_bytes()),
+        // Position and category only: serde_json's message can quote a field
+        // value, such as a passphrase or a secret key.
+        Err(err) => return (CALL_BAD_REQUEST, bad_request_message(&err).into_bytes()),
     };
     let response = dispatch(request);
     // Every wire type is plain data with string map keys, so encoding cannot
@@ -203,6 +226,23 @@ mod tests {
         assert_eq!(code, CALL_BAD_REQUEST);
         assert!(!message.is_empty());
         assert!(String::from_utf8(message).is_ok());
+    }
+
+    #[test]
+    fn bad_request_message_does_not_quote_field_values() {
+        let (code, message) = call(
+            br#"{"op":"autocrypt_header_value","addr":"a","public_armored":"x","prefer_encrypt_mutual":"hunter2"}"#,
+        );
+        assert_eq!(code, CALL_BAD_REQUEST);
+        let message = String::from_utf8(message).unwrap();
+        assert!(!message.contains("hunter2"), "{message}");
+    }
+
+    #[test]
+    fn panics_become_call_panic_without_the_payload() {
+        let (code, message) = run_guarded(|| panic!("secret-key-material"));
+        assert_eq!(code, CALL_PANIC);
+        assert_eq!(message, PANIC_MESSAGE.as_bytes());
     }
 
     #[test]
