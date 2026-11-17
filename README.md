@@ -51,17 +51,29 @@ If `nettle-sys` fails with `stddef.h` not found during a manual `cargo build`, s
 export C_INCLUDE_PATH="$(gcc -print-file-name=include)"
 ```
 
+Release builds read the installed GSettings schema; install it with `./scripts/install-ubuntu-26.sh` or set `GSETTINGS_SCHEMA_DIR`.
+
 Validate the desktop entry (optional):
 
 ```bash
 desktop-file-validate data/dev.alcedo.Mail.desktop
 ```
 
+## Debian package
+
+Build the free app's `.deb` from a clean clone of this repository:
+
+```bash
+./scripts/build-deb.sh
+```
+
+The package and its `.sha256` file are written to `dist/`.
+
 ## OpenPGP library
 
 By default Alcedo links its OpenPGP code (Sequoia with Nettle) into the binary.
 
-A build made with `--no-default-features --features pgp-shared` instead loads `libalcedo_pgp_ffi.so` at run time. The library is searched for in this order:
+A build made with `cargo build -p alcedo --no-default-features --features pgp-shared` instead loads `libalcedo_pgp_ffi.so` at run time. The library is searched for in this order:
 
 1. The file named by the `ALCEDO_PGP_LIB` environment variable. If it is set, nothing else is tried.
 2. `../lib/alcedo/libalcedo_pgp_ffi.so.1`, relative to the executable.

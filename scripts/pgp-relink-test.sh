@@ -12,7 +12,7 @@ Check that a rebuilt OpenPGP library works under an unchanged client.
 
 Usage: ./scripts/pgp-relink-test.sh [-h|--help]
 
-Steps: build the alcedo-pgp-shared test binary once, run it against the normal
+Steps: check the pgp-shared app build, then build the alcedo-pgp-shared test binary once, run it against the normal
 library, build a second library with a different build id, run the same binary
 again with ALCEDO_PGP_LIB pointing at the new library, and fail if the test
 binary changed in between.
@@ -55,7 +55,14 @@ else
   trap 'rm -rf "$TARGET_DIR"' EXIT
 fi
 
-echo "==> 1/5 build the client test binary"
+echo "==> 1/6 check the pgp-shared app build links no Sequoia or Nettle"
+cargo check -p alcedo --no-default-features --features pgp-shared
+shared_deps="$(cargo tree -p alcedo --no-default-features --features pgp-shared -e normal --prefix none --format '{p}' | awk '{print $1}')"
+if grep -qxE 'sequoia-openpgp|sequoia-autocrypt|buffered-reader|nettle|nettle-sys' <<<"$shared_deps"; then
+  die "the pgp-shared build of alcedo still depends on Sequoia or Nettle"
+fi
+
+echo "==> 2/6 build the client test binary"
 build_log="$(mktemp)"
 cargo test -p alcedo-pgp-shared --no-run 2>&1 | tee "$build_log"
 client_bin="$(sed -n 's/^ *Executable tests\/parity\.rs (\(.*\))$/\1/p' "$build_log" | tail -n 1)"
@@ -64,10 +71,10 @@ rm -f "$build_log"
 client_bin="$(readlink -f "$client_bin")"
 stamp_before="$(stat -c '%n %Y.%y %s' "$client_bin")"
 
-echo "==> 2/5 run parity tests against the normal library"
+echo "==> 3/6 run parity tests against the normal library"
 cargo test -p alcedo-pgp-shared
 
-echo "==> 3/5 build a modified library from the same source"
+echo "==> 4/6 build a modified library from the same source"
 build_id="relink-$(date -u +%Y%m%dT%H%M%SZ)"
 build_cmd=(cargo build -p alcedo-pgp-ffi --release --target-dir "$TARGET_DIR")
 if [[ -n "${SEQUOIA_OPENPGP_SRC:-}" ]]; then
@@ -78,11 +85,11 @@ ALCEDO_PGP_BUILD_ID="$build_id" "${build_cmd[@]}"
 new_lib="$TARGET_DIR/release/libalcedo_pgp_ffi.so"
 [[ -f "$new_lib" ]] || die "rebuilt library not found: $new_lib"
 
-echo "==> 4/5 run the same client tests with the rebuilt library"
+echo "==> 5/6 run the same client tests with the rebuilt library"
 ALCEDO_PGP_LIB="$new_lib" ALCEDO_PGP_EXPECT_BUILD_ID="$build_id" \
   cargo test -p alcedo-pgp-shared
 
-echo "==> 5/5 check the client was not relinked"
+echo "==> 6/6 check the client was not relinked"
 stamp_after="$(stat -c '%n %Y.%y %s' "$client_bin")"
 if [[ "$stamp_before" != "$stamp_after" ]]; then
   die "client test binary changed: before '$stamp_before', after '$stamp_after'"
