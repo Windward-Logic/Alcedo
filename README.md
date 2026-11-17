@@ -57,6 +57,31 @@ Validate the desktop entry (optional):
 desktop-file-validate data/dev.alcedo.Mail.desktop
 ```
 
+## OpenPGP library
+
+By default Alcedo links its OpenPGP code (Sequoia with Nettle) into the binary.
+
+A build made with `--no-default-features --features pgp-shared` instead loads `libalcedo_pgp_ffi.so` at run time. The library is searched for in this order:
+
+1. The file named by the `ALCEDO_PGP_LIB` environment variable. If it is set, nothing else is tried.
+2. `../lib/alcedo/libalcedo_pgp_ffi.so.1`, relative to the executable.
+3. `libalcedo_pgp_ffi.so` next to the executable.
+4. For `cargo test` binaries only, `libalcedo_pgp_ffi.so` one directory above the binary.
+
+To rebuild the library from this source:
+
+```bash
+cargo build -p alcedo-pgp-ffi --release
+```
+
+To use the rebuilt library with an installed copy of Alcedo, set `ALCEDO_PGP_LIB=/path/to/target/release/libalcedo_pgp_ffi.so`, or replace the installed `libalcedo_pgp_ffi.so.1` with it.
+
+To compile a modified Sequoia into it, add `--config 'patch.crates-io.sequoia-openpgp.path="/path/to/sequoia-openpgp"'`. Set `ALCEDO_PGP_BUILD_ID` while building to bake in an identifier that the client can report.
+
+The interface between the client and the library is versioned. The library exports `alcedo_pgp_ffi_abi_version`, and the client refuses to use a library that reports a different version.
+
+`scripts/pgp-relink-test.sh` rebuilds the library and runs the same, unmodified client test binary against it.
+
 ## Mock UI
 
 Run the full 3-pane shell with fake mail and no network:
