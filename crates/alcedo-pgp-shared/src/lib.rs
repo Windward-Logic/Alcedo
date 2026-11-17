@@ -40,6 +40,10 @@ pub fn library_info() -> Result<LibraryInfo> {
 pub struct SharedPgp;
 
 impl PgpBackend for SharedPgp {
+    fn ensure_available() -> Result<()> {
+        loader::loaded().map(|_| ()).map_err(unavailable)
+    }
+
     fn generate(display_name: &str, email: &str, passphrase: &str) -> Result<GeneratedCert> {
         let request = Request::Generate {
             display_name: display_name.to_owned(),
@@ -226,6 +230,11 @@ mod tests {
     fn library_error_without_message_names_the_code() {
         let err = library_error(wire::CALL_BAD_REQUEST, b"");
         assert_eq!(pgp_message(err), "OpenPGP library error: code 1");
+    }
+
+    #[test]
+    fn ensure_available_succeeds_when_the_library_loads() {
+        assert!(SharedPgp::ensure_available().is_ok());
     }
 
     #[test]

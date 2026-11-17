@@ -2,7 +2,7 @@
 
 use super::drafts::open_imap_draft;
 use super::mailbox_sync::{ensure_selected, folder_is_syncable};
-use super::pgp::process_incoming_pgp;
+use super::pgp::{IncomingPgp, process_incoming_pgp};
 use super::reactions::maybe_persist_reaction_from_full;
 use super::*;
 
@@ -353,8 +353,13 @@ pub(super) async fn open_message(
         return open_followup(deferred, id);
     }
 
-    if let Some((pgp_text, pgp_html, pgp_status, snippet_override)) =
-        process_incoming_pgp(account.id, &full.raw, store).await?
+    if let Some(IncomingPgp {
+        text: pgp_text,
+        html: pgp_html,
+        status: pgp_status,
+        snippet_override,
+        persist,
+    }) = process_incoming_pgp(account.id, &full.raw, store).await?
     {
         let text = if pgp_text.is_empty() && pgp_html.is_empty() && pgp_status.encrypted {
             String::new()
@@ -400,11 +405,16 @@ pub(super) async fn open_message(
             envelope.snippet = "Encrypted message".to_string();
         }
         refresh_subject_from_full(&mut envelope, &full);
+        // A verdict made while the OpenPGP library was unavailable is shown but
+        // not stored, so the next open fetches and verifies again. The envelope
+        // upsert gets no body text then, which leaves the stored body untouched.
+        if persist {
+            store
+                .save_message_body(id, Some(&text), Some(&html), Some(&pgp_status))
+                .await?;
+        }
         store
-            .save_message_body(id, Some(&text), Some(&html), Some(&pgp_status))
-            .await?;
-        store
-            .upsert_envelopes(&[envelope.clone()], Some(&text))
+            .upsert_envelopes(&[envelope.clone()], persist.then_some(text.as_str()))
             .await?;
         let _ = events.send(SyncEvent::EnvelopeUpdated(envelope));
         let list = list_unsubscribe_for_persist(full.list_unsubscribe.clone());
