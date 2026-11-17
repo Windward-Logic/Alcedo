@@ -48,6 +48,14 @@ pub(crate) fn needs_attachment_rescan(stored: &alcedo_store::StoredMessage) -> b
     stored_has_local_body(stored) && file_attachments_for(stored).is_empty()
 }
 
+/// A remainder fetch extends a saved body. When nothing is saved (a PGP verdict
+/// made without the OpenPGP library is shown but not stored), it must redo the
+/// full open instead: extending would emit the empty stored body and blank the
+/// message in the reader.
+pub(crate) fn remainder_needs_full_open(stored: &alcedo_store::StoredMessage) -> bool {
+    !stored_has_local_body(stored)
+}
+
 pub(crate) fn needs_attachment_bytes(stored: &alcedo_store::StoredMessage) -> bool {
     stored.has_attachments && file_attachments_for(stored).is_empty()
 }
@@ -178,6 +186,30 @@ pub(super) enum OpenMode {
     Remainder,
     /// Background offline cache. Like `Prefetch`, but never sends `BodyReady`.
     Background,
+}
+
+/// Stores a processed PGP message. With `persist == false` (the verdict was
+/// made without the OpenPGP library) only the envelope is updated: the upsert
+/// gets no body text, which leaves the stored body untouched, and no body or
+/// verdict is saved. The message then still counts as unfetched, so after a
+/// restart the next open fetches and verifies it again.
+async fn store_pgp_result(
+    store: &StoreHandle,
+    id: MessageId,
+    envelope: &alcedo_core::Envelope,
+    text: &str,
+    html: &str,
+    status: &PgpStatus,
+    persist: bool,
+) -> Result<()> {
+    if persist {
+        store
+            .save_message_body(id, Some(text), Some(html), Some(status))
+            .await?;
+    }
+    store
+        .upsert_envelopes(std::slice::from_ref(envelope), persist.then_some(text))
+        .await
 }
 
 pub(super) async fn open_message(
@@ -405,17 +437,7 @@ pub(super) async fn open_message(
             envelope.snippet = "Encrypted message".to_string();
         }
         refresh_subject_from_full(&mut envelope, &full);
-        // A verdict made while the OpenPGP library was unavailable is shown but
-        // not stored, so the next open fetches and verifies again. The envelope
-        // upsert gets no body text then, which leaves the stored body untouched.
-        if persist {
-            store
-                .save_message_body(id, Some(&text), Some(&html), Some(&pgp_status))
-                .await?;
-        }
-        store
-            .upsert_envelopes(&[envelope.clone()], persist.then_some(text.as_str()))
-            .await?;
+        store_pgp_result(store, id, &envelope, &text, &html, &pgp_status, persist).await?;
         let _ = events.send(SyncEvent::EnvelopeUpdated(envelope));
         let list = list_unsubscribe_for_persist(full.list_unsubscribe.clone());
         store.save_list_unsubscribe(id, Some(&list)).await?;
@@ -579,6 +601,16 @@ pub(super) async fn fetch_message_remainder(
         return Ok(());
     }
 
+    if remainder_needs_full_open(&stored) {
+        let plan = alcedo_imap::DisplayPlan::Parts {
+            sections: Vec::new(),
+            has_extra: true,
+            extras: Vec::new(),
+        };
+        return full_open_remainder(state, account, store, events, &stored, &plan, bytes_allowed)
+            .await;
+    }
+
     ensure_selected(state, &folder.imap_name).await?;
     let plan = with_fetch_timeout(alcedo_imap::uid_fetch_display_plan(
         state.client_mut(),
@@ -683,8 +715,31 @@ pub(super) async fn fetch_message_remainder(
         return Ok(());
     }
 
-    if let Err(err) = open_message(state, account, id, store, events, OpenMode::Remainder).await {
-        fail_attachment_remainder(store, events, id, &stored, &plan, bytes_allowed).await;
+    full_open_remainder(state, account, store, events, &stored, &plan, bytes_allowed).await
+}
+
+/// Runs the full open in `Remainder` mode, which emits the complete body with
+/// its attachments and queues no further follow-up.
+async fn full_open_remainder(
+    state: &mut WorkerImapState,
+    account: &Account,
+    store: &StoreHandle,
+    events: &flume::Sender<SyncEvent>,
+    stored: &alcedo_store::StoredMessage,
+    plan: &alcedo_imap::DisplayPlan,
+    bytes_allowed: bool,
+) -> Result<()> {
+    if let Err(err) = open_message(
+        state,
+        account,
+        stored.id,
+        store,
+        events,
+        OpenMode::Remainder,
+    )
+    .await
+    {
+        fail_attachment_remainder(store, events, stored.id, stored, plan, bytes_allowed).await;
         return Err(err);
     }
     Ok(())
@@ -1141,6 +1196,17 @@ mod tests {
     }
 
     #[test]
+    fn remainder_without_saved_body_needs_full_open() {
+        assert!(remainder_needs_full_open(&minimal_stored_message(
+            None, None
+        )));
+        assert!(!remainder_needs_full_open(&minimal_stored_message(
+            Some(""),
+            None
+        )));
+    }
+
+    #[test]
     fn needs_attachment_bytes_when_flag_set_and_no_files() {
         let mut stored = minimal_stored_message(Some("hi"), None);
         stored.has_attachments = true;
@@ -1334,7 +1400,12 @@ mod tests {
             (store, dir)
         }
 
-        async fn setup_message(store: &StoreHandle) -> MessageId {
+        /// Adds one listed message; `list_body` is what list sync stored as its
+        /// body text (`None` for a real list sync).
+        async fn setup_listed_message(
+            store: &StoreHandle,
+            list_body: Option<&str>,
+        ) -> (Account, MessageId) {
             let account = sample_account(Uuid::new_v4(), "body@example.com");
             store
                 .upsert_account(&account)
@@ -1347,7 +1418,7 @@ mod tests {
             store
                 .upsert_envelopes(
                     &[sample_envelope(&account, folders[0].id, 1, "msg")],
-                    Some("snippet"),
+                    list_body,
                 )
                 .await
                 .expect("envelope");
@@ -1355,7 +1426,58 @@ mod tests {
                 .folder_messages(folders[0].id, 10, 0)
                 .await
                 .expect("list");
-            messages[0].id
+            (account, messages[0].id)
+        }
+
+        async fn setup_message(store: &StoreHandle) -> MessageId {
+            setup_listed_message(store, Some("snippet")).await.1
+        }
+
+        fn invalid_signature_status() -> PgpStatus {
+            PgpStatus {
+                encrypted: false,
+                decrypted: false,
+                signature: alcedo_core::PgpSignatureState::Invalid {
+                    reason: "OpenPGP library unavailable: x".to_string(),
+                },
+            }
+        }
+
+        #[tokio::test]
+        async fn unpersisted_pgp_result_leaves_no_local_body() {
+            let (store, _dir) = open_test_store().await;
+            let (account, id) = setup_listed_message(&store, None).await;
+            let stored = store.get_message(id).await.expect("get").expect("exists");
+            let envelope = fetched_to_envelope_from_stored(&stored, &account);
+            store_pgp_result(
+                &store,
+                id,
+                &envelope,
+                "hi",
+                "<p>hi</p>",
+                &invalid_signature_status(),
+                false,
+            )
+            .await
+            .expect("store result");
+            let after = store.get_message(id).await.expect("get").expect("exists");
+            assert!(!stored_has_local_body(&after));
+            assert!(after.pgp_status.is_none());
+        }
+
+        #[tokio::test]
+        async fn persisted_pgp_result_saves_body_and_verdict() {
+            let (store, _dir) = open_test_store().await;
+            let (account, id) = setup_listed_message(&store, None).await;
+            let stored = store.get_message(id).await.expect("get").expect("exists");
+            let envelope = fetched_to_envelope_from_stored(&stored, &account);
+            let status = invalid_signature_status();
+            store_pgp_result(&store, id, &envelope, "hi", "<p>hi</p>", &status, true)
+                .await
+                .expect("store result");
+            let after = store.get_message(id).await.expect("get").expect("exists");
+            assert_eq!(after.body_text.as_deref(), Some("hi"));
+            assert_eq!(after.pgp_status, Some(status));
         }
 
         fn full_message_with_parsed_attachments(raw: &str) -> alcedo_imap::FullMessage {
