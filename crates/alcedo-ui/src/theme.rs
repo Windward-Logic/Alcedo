@@ -256,6 +256,8 @@ fn register_app_icon() {
         if let Some(icons) = xdg_data_home() {
             theme.add_search_path(icons.join("icons"));
         }
+        // Dev convenience: load icons from the source tree. Release binaries must not embed or search the build path.
+        #[cfg(debug_assertions)]
         if let Ok(source_icons) = Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../../data/icons")
             .canonicalize()

@@ -13,3 +13,6 @@ flatpak_app
 /plans
 # Compiled GSettings schema (built by crates/alcedo/build.rs and at install)
 data/gschemas.compiled
+
+# Debian package output (scripts/build-deb.sh)
+/dist

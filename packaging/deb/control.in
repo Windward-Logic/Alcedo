@@ -1,0 +1,16 @@
+Package: alcedo
+Version: @VERSION@
+Architecture: @ARCH@
+Maintainer: Windward Logic LLC <alcedo@windwardlogic.com>
+Installed-Size: @INSTALLED_SIZE@
+Depends: @DEPENDS@
+Recommends: gnome-keyring
+Suggests: hunspell-en-us
+Section: mail
+Priority: optional
+Homepage: https://alcedo.email
+Description: Native IMAP/SMTP mail client for GNOME
+ Alcedo is a native mail client for GNOME with a unified inbox,
+ multi-account support, and privacy-first defaults: remote images and
+ tracking pixels are blocked until you opt in.
+ This is the free GPL build.

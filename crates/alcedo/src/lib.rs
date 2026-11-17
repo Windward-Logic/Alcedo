@@ -145,11 +145,23 @@ fn show_startup_error(details: &str) {
     app.run_with_args::<&str>(&[]);
 }
 
+/// Dev-only: the compiled schema dir baked in at build time exists only on the
+/// build machine, and a release build's copy may sit in a world-writable
+/// directory, so it is used only in debug builds and only when it still holds
+/// `gschemas.compiled`. Release builds use the system schema dir.
+fn build_schema_dir_usable(dir: &std::path::Path) -> bool {
+    dir.join("gschemas.compiled").is_file()
+}
+
 fn init_gsettings_schema_dir() {
-    if std::env::var_os("GSETTINGS_SCHEMA_DIR").is_none() {
+    let build_dir = std::path::Path::new(env!("ALCEDO_SCHEMA_DIR"));
+    if cfg!(debug_assertions)
+        && std::env::var_os("GSETTINGS_SCHEMA_DIR").is_none()
+        && build_schema_dir_usable(build_dir)
+    {
         // SAFETY: called before any threads are spawned, at the very start of main.
         unsafe {
-            std::env::set_var("GSETTINGS_SCHEMA_DIR", env!("ALCEDO_SCHEMA_DIR"));
+            std::env::set_var("GSETTINGS_SCHEMA_DIR", build_dir);
         }
     }
 }
@@ -217,5 +229,32 @@ fn activate_compose_action() -> bool {
             true
         }
         None => false,
+    }
+}
+
+#[cfg(test)]
+mod schema_dir_tests {
+    use super::build_schema_dir_usable;
+
+    fn scratch_dir(name: &str) -> std::path::PathBuf {
+        let dir = std::env::temp_dir().join(format!("alcedo-{name}-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        dir
+    }
+
+    #[test]
+    fn accepts_dir_with_compiled_schemas() {
+        let dir = scratch_dir("schema-with");
+        std::fs::write(dir.join("gschemas.compiled"), b"").unwrap();
+        assert!(build_schema_dir_usable(&dir));
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn rejects_dir_without_compiled_schemas() {
+        let dir = scratch_dir("schema-without");
+        assert!(!build_schema_dir_usable(&dir));
+        std::fs::remove_dir_all(&dir).unwrap();
     }
 }
