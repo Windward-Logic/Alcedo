@@ -149,16 +149,18 @@ fn show_startup_error(details: &str) {
 /// build machine, and a release build's copy may sit in a world-writable
 /// directory, so it is used only in debug builds and only when it still holds
 /// `gschemas.compiled`. Release builds use the system schema dir.
+#[cfg(debug_assertions)]
 fn build_schema_dir_usable(dir: &std::path::Path) -> bool {
     dir.join("gschemas.compiled").is_file()
 }
 
+#[cfg(not(debug_assertions))]
+fn init_gsettings_schema_dir() {}
+
+#[cfg(debug_assertions)]
 fn init_gsettings_schema_dir() {
     let build_dir = std::path::Path::new(env!("ALCEDO_SCHEMA_DIR"));
-    if cfg!(debug_assertions)
-        && std::env::var_os("GSETTINGS_SCHEMA_DIR").is_none()
-        && build_schema_dir_usable(build_dir)
-    {
+    if std::env::var_os("GSETTINGS_SCHEMA_DIR").is_none() && build_schema_dir_usable(build_dir) {
         // SAFETY: called before any threads are spawned, at the very start of main.
         unsafe {
             std::env::set_var("GSETTINGS_SCHEMA_DIR", build_dir);
@@ -232,7 +234,7 @@ fn activate_compose_action() -> bool {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, debug_assertions))]
 mod schema_dir_tests {
     use super::build_schema_dir_usable;
 

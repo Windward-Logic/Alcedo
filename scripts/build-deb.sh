@@ -21,7 +21,7 @@ Options:
   -h, --help       Show this help
 
 Environment:
-  ALCEDO_DEB_TARGET_DIR   Cargo target dir (default: /var/tmp/alcedo-deb-build)
+  ALCEDO_DEB_TARGET_DIR   Cargo target dir (default: target/deb in this checkout)
 EOF2
 }
 
@@ -59,7 +59,7 @@ shlibs_depends() {
   tmp="$(mktemp -d)"
   mkdir "$tmp/debian"
   : >"$tmp/debian/control"
-  (cd "$tmp" && dpkg-shlibdeps -O "$binary" 2>/dev/null) |
+  (cd "$tmp" && dpkg-shlibdeps -O "$binary") |
     sed -n 's/^shlibs:Depends=//p'
   rm -rf "$tmp"
 }
@@ -105,8 +105,12 @@ NAME="alcedo_${VERSION}-${REVISION}_${ARCH}"
 
 SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)"
 export SOURCE_DATE_EPOCH
-export CARGO_TARGET_DIR="${ALCEDO_DEB_TARGET_DIR:-/var/tmp/alcedo-deb-build}"
-export RUSTFLAGS="--remap-path-prefix=$ROOT=/usr/src/alcedo-$VERSION --remap-path-prefix=${CARGO_HOME:-$HOME/.cargo}=/cargo"
+export CARGO_TARGET_DIR="${ALCEDO_DEB_TARGET_DIR:-$ROOT/target/deb}"
+mkdir -p "$CARGO_TARGET_DIR"
+[[ -O "$CARGO_TARGET_DIR" ]] || die "$CARGO_TARGET_DIR is not owned by $(id -un)"
+CARGO_TARGET_DIR="$(cd "$CARGO_TARGET_DIR" && pwd -P)"
+# rustc applies the last matching prefix; the target dir sits inside $ROOT by default.
+export RUSTFLAGS="--remap-path-prefix=$ROOT=/usr/src/alcedo-$VERSION --remap-path-prefix=${CARGO_HOME:-$HOME/.cargo}=/cargo --remap-path-prefix=$CARGO_TARGET_DIR=/target"
 ensure_c_include_path
 
 echo "Building alcedo $VERSION (release, locked)…"
