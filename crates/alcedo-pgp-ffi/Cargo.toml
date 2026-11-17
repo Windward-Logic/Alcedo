@@ -1,0 +1,18 @@
+[package]
+name = "alcedo-pgp-ffi"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "Replaceable shared library exposing Alcedo's Sequoia OpenPGP backend over a small C ABI"
+
+[lib]
+name = "alcedo_pgp_ffi"
+# rlib only so this crate's own unit tests can call the exported functions.
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+alcedo-core = { workspace = true }
+alcedo-pgp = { workspace = true }
+alcedo-pgp-api = { workspace = true }
+serde_json = { workspace = true }

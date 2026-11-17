@@ -1,0 +1,25 @@
+[package]
+name = "alcedo-pgp-shared"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "OpenPGP backend for Alcedo that loads the replaceable alcedo-pgp-ffi shared library at run time"
+
+# No normal dependency on alcedo-pgp, alcedo-pgp-ffi, Sequoia or Nettle: the
+# LGPL crypto stack must only ever reach the app through the loaded library.
+[dependencies]
+alcedo-core = { workspace = true }
+alcedo-pgp-api = { workspace = true }
+libloading = "0.8"
+serde_json = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+# The static backend, to check that both backends answer identically.
+alcedo-pgp = { workspace = true }
+# Listed only so `cargo test` builds libalcedo_pgp_ffi.so into the same target
+# directory, where the loader finds it. Tests must never `use` this crate, so
+# its symbols are not linked into the test binary and every call goes through
+# the loaded library.
+alcedo-pgp-ffi = { workspace = true }

@@ -152,6 +152,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "alcedo-pgp-ffi"
+version = "1.0.1"
+dependencies = [
+ "alcedo-core",
+ "alcedo-pgp",
+ "alcedo-pgp-api",
+ "serde_json",
+]
+
+[[package]]
+name = "alcedo-pgp-shared"
+version = "1.0.1"
+dependencies = [
+ "alcedo-core",
+ "alcedo-pgp",
+ "alcedo-pgp-api",
+ "alcedo-pgp-ffi",
+ "libloading",
+ "serde_json",
+ "tracing",
+]
+
+[[package]]
 name = "alcedo-smtp"
 version = "1.0.1"
 dependencies = [
