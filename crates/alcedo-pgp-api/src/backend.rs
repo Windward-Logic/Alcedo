@@ -13,6 +13,14 @@ use crate::types::{
 /// produce the same message for the same failure so callers cannot tell which
 /// backend is linked.
 pub trait PgpBackend {
+    /// `Err` when the backend cannot run OpenPGP operations right now, for
+    /// example because a run-time library is missing or has the wrong ABI.
+    /// Results produced while this is `Err` describe the installation, not the
+    /// message, so callers must show them but never persist them.
+    fn ensure_available() -> Result<()> {
+        Ok(())
+    }
+
     fn generate(display_name: &str, email: &str, passphrase: &str) -> Result<GeneratedCert>;
     fn parse_public(armored: &str) -> Result<CertSummary>;
     fn parse_secret(armored: &str, passphrase: Option<&str>) -> Result<GeneratedCert>;
