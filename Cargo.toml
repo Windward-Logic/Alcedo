@@ -68,4 +68,7 @@ alcedo-html = { path = "crates/alcedo-html" }
 alcedo-widgets = { path = "crates/alcedo-widgets" }
 alcedo-ui = { path = "crates/alcedo-ui" }
 alcedo-pgp = { path = "crates/alcedo-pgp" }
+alcedo-pgp-api = { path = "crates/alcedo-pgp-api" }
+alcedo-pgp-shared = { path = "crates/alcedo-pgp-shared" }
+alcedo-pgp-ffi = { path = "crates/alcedo-pgp-ffi" }
 alcedo-tls = { path = "crates/alcedo-tls" }

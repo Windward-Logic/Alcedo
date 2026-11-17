@@ -140,6 +140,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "alcedo-pgp-api"
+version = "1.0.1"
+dependencies = [
+ "alcedo-core",
+ "base64 0.22.1",
+ "mail-parser",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "alcedo-smtp"
 version = "1.0.1"
 dependencies = [
