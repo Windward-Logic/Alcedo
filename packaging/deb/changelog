@@ -1,3 +1,12 @@
+alcedo (1.0.2-1) resolute; urgency=medium
+
+  * Add account keeps a Provider you picked by hand when the address changes,
+    so Gmail with an app password works under Other email.
+  * Documentation: Gmail app-password sign-in is the main route; own OAuth
+    clients are advanced.
+
+ -- Windward Logic LLC <alcedo@windwardlogic.com>  Tue, 17 Nov 2026 19:00:00 +0000
+
 alcedo (1.0.1-1) resolute; urgency=medium
 
   * First packaged release.
