@@ -898,7 +898,7 @@ fn show_about_dialog(window: &adw::ApplicationWindow) {
         .application_icon("dev.alcedo.Mail")
         .license_type(gtk::License::Gpl30)
         .license("GPL-3.0-or-later")
-        .version("0.1.0")
+        .version(env!("CARGO_PKG_VERSION"))
         .build();
     about.present(Some(window));
 }

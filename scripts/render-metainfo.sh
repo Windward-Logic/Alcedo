@@ -15,9 +15,9 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEMPLATE="$ROOT/data/dev.alcedo.Mail.metainfo.xml.in"
 CARGO_TOML="$ROOT/Cargo.toml"
-# Flathub prefers a tag or commit, but the default branch is what we have until
-# a public release tag exists. Override for a tag: ALCEDO_SCREENSHOT_REF=v0.1.0
-SCREENSHOT_REF="${ALCEDO_SCREENSHOT_REF:-master}"
+# Flathub prefers a tag or commit. The default branch is main; releases pass
+# ALCEDO_SCREENSHOT_REF=v<version> to pin screenshots to the release tag.
+SCREENSHOT_REF="${ALCEDO_SCREENSHOT_REF:-main}"
 
 die() {
   echo "render-metainfo: $*" >&2
