@@ -17,6 +17,11 @@ pub trait PgpBackend {
     /// example because a run-time library is missing or has the wrong ABI.
     /// Results produced while this is `Err` describe the installation, not the
     /// message, so callers must show them but never persist them.
+    ///
+    /// This covers only a backend that cannot start. A run-time library that
+    /// loads but fails inside one call (a caught panic, an unreadable reply)
+    /// still reports that failure as an ordinary verdict, which callers may
+    /// persist.
     fn ensure_available() -> Result<()> {
         Ok(())
     }
