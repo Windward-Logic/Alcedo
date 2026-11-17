@@ -64,7 +64,9 @@ pub const CALL_BAD_REQUEST: i32 = 1;
 pub const CALL_PANIC: i32 = 2;
 
 /// One variant per [`crate::PgpBackend`] function, with the same argument names.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+/// `Debug` prints only the operation name, because several variants carry
+/// passphrases, secret keys or message bytes.
+#[derive(Clone, Serialize, Deserialize)]
 #[serde(tag = "op", rename_all = "snake_case")]
 pub enum Request {
     Generate {
@@ -107,6 +109,31 @@ pub enum Request {
         #[serde(with = "crate::b64")]
         raw: Vec<u8>,
     },
+}
+
+impl Request {
+    /// The wire `op` tag, for logs and `Debug`.
+    pub fn op_name(&self) -> &'static str {
+        match self {
+            Request::Generate { .. } => "generate",
+            Request::ParsePublic { .. } => "parse_public",
+            Request::ParseSecret { .. } => "parse_secret",
+            Request::Verify { .. } => "verify",
+            Request::Decrypt { .. } => "decrypt",
+            Request::ProtectOutbound { .. } => "protect_outbound",
+            Request::AutocryptHeaderValue { .. } => "autocrypt_header_value",
+            Request::ParseAutocryptFromRfc822 { .. } => "parse_autocrypt_from_rfc822",
+            Request::AutocryptPeerFromRfc822 { .. } => "autocrypt_peer_from_rfc822",
+        }
+    }
+}
+
+impl std::fmt::Debug for Request {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Request")
+            .field("op", &self.op_name())
+            .finish_non_exhaustive()
+    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -228,6 +255,42 @@ mod tests {
             "autocrypt_peer_from_rfc822",
         ] {
             assert!(ops.iter().any(|op| op == expected), "missing op {expected}");
+        }
+    }
+
+    #[test]
+    fn op_name_matches_the_serde_tag() {
+        for request in all_requests() {
+            let json = serde_json::to_value(&request).unwrap();
+            assert_eq!(json["op"], request.op_name());
+        }
+    }
+
+    #[test]
+    fn request_debug_hides_secrets_and_message_bytes() {
+        let requests = [
+            Request::Generate {
+                display_name: "Ada".into(),
+                email: "ada@example.com".into(),
+                passphrase: "hunter2".into(),
+            },
+            Request::ParseSecret {
+                armored: "SECRET-KEY-BLOCK".into(),
+                passphrase: Some("hunter2".into()),
+            },
+            Request::Decrypt {
+                raw: b"PLAINTEXT-BYTES".to_vec(),
+                secret_armored: "SECRET-KEY-BLOCK".into(),
+                passphrase: "hunter2".into(),
+                extra_publics: vec![],
+            },
+        ];
+        for request in requests {
+            let printed = format!("{request:?}");
+            assert!(printed.contains(request.op_name()), "{printed}");
+            for secret in ["hunter2", "SECRET-KEY-BLOCK", "PLAINTEXT", "80, 76"] {
+                assert!(!printed.contains(secret), "{printed}");
+            }
         }
     }
 
