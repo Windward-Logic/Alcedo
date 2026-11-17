@@ -2,7 +2,7 @@
 # Build the free `alcedo` .deb from a clone of the public repository.
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 cd "$ROOT"
 
 PUBLIC_REMOTE="https://github.com/Windward-Logic/Alcedo"
