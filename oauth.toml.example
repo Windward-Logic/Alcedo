@@ -1,3 +1,5 @@
+# Optional, advanced. Gmail works with an app password and needs no config here.
+# Use your own OAuth client only if you have a Google Cloud project with a desktop OAuth client.
 # Copy to $XDG_CONFIG_HOME/alcedo/oauth.toml (e.g. ~/.config/alcedo/oauth.toml).
 # Google Desktop clients need both client_id and client_secret (the secret is
 # not confidential for installed apps). Microsoft public clients use client_id only.

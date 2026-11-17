@@ -13,8 +13,8 @@
       tracking pixels require explicit disclosure before sending.
     </p>
     <p>
-      Supports Gmail and Microsoft OAuth, Yahoo app passwords, and generic
-      IMAP/SMTP accounts over TLS.
+      Supports Gmail and Yahoo app passwords, generic IMAP/SMTP accounts over
+      TLS, and optional Google and Microsoft OAuth.
     </p>
   </description>
   <launchable type="desktop-id">dev.alcedo.Mail.desktop</launchable>

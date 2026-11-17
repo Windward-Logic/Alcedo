@@ -227,7 +227,8 @@ Make sure $PREFIX/bin is on your PATH, then launch from GNOME or:
 
   alcedo
 
-Google/Microsoft OAuth (optional): copy oauth.toml.example to
+Gmail needs no config: use an app password with Provider set to Other email.
+Google/Microsoft OAuth (advanced, optional): copy oauth.toml.example to
   $config_home/alcedo/oauth.toml
 EOF
 }

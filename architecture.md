@@ -19,7 +19,7 @@
 - **SMTP:** lettre with tokio1-rustls-tls on a per-account serial Tokio task (not on the IMAP command FIFO)
 - **Store:** rusqlite, one writer thread plus one read-only reader thread (WAL, query_only). Not a connection pool.
 - **Secrets:** oo7 (keyring / portal) — never SQLite
-- **OAuth:** PKCE + system browser loopback (Google, Microsoft); Yahoo app password only. Access tokens live in one in-memory cache per (account, purpose) in `alcedo-sync::oauth_token_cache`, refreshed 60 s before expiry under a per-account async mutex; the OAuth client config is re-read only when `oauth.toml` changes. Token endpoint errors are summarized, never logged raw.
+- **OAuth:** PKCE + system browser loopback for Google and Microsoft, only when `oauth.toml` has client IDs; Gmail, Yahoo and generic IMAP use app passwords. Access tokens live in one in-memory cache per (account, purpose) in `alcedo-sync::oauth_token_cache`, refreshed 60 s before expiry under a per-account async mutex; the OAuth client config is re-read only when `oauth.toml` changes. Token endpoint errors are summarized, never logged raw.
 
 ## Crate graph
 

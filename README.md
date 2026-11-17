@@ -108,9 +108,19 @@ Drag the list handle onto a folder to **move**. Hold **Ctrl** while dragging, or
 
 Some IMAP servers treat `COPY` as a move (the message leaves the source folder). Gmail copies as expected. Alcedo does not fake a copy with `APPEND`.
 
-## OAuth
+## Gmail and other mail accounts
 
-Copy `oauth.toml.example` to `$XDG_CONFIG_HOME/alcedo/oauth.toml` and add your Google and/or Microsoft client IDs. Google Desktop OAuth clients also need `client_secret` (it is not confidential for installed apps):
+Gmail works with an app password and needs no configuration file:
+
+1. Turn on 2-Step Verification for your Google account.
+2. Create an app password under Google Account > Security > App passwords.
+3. In Add account, enter your Gmail address, then set **Provider** to **Other email**. Alcedo fills in `imap.gmail.com` (port 993) and `smtp.gmail.com` (port 465, SSL/TLS). Enter the app password as the password.
+
+Google Workspace admins can turn app passwords off. Yahoo and generic IMAP accounts also use app passwords, stored in the system keyring via `oo7`.
+
+## OAuth (advanced, optional)
+
+Google and Microsoft sign-in can use your own OAuth client IDs instead. For Google this needs a Google Cloud project with a desktop OAuth client. Copy `oauth.toml.example` to `$XDG_CONFIG_HOME/alcedo/oauth.toml` and add your client IDs. Google Desktop OAuth clients also need `client_secret` (it is not confidential for installed apps):
 
 ```toml
 [google]
@@ -121,7 +131,6 @@ client_secret = "GOCSPX-xxxxx"
 client_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 ```
 
-Yahoo and generic IMAP accounts use an app password stored in the system keyring via `oo7`.
 
 ## Logging
 

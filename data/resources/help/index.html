@@ -170,8 +170,9 @@
         <h2>Accounts</h2>
         <p>Add accounts from <strong>File → Add Account</strong> or Preferences → Accounts.</p>
         <ul>
-          <li><strong>Google</strong> and <strong>Microsoft</strong> sign in with OAuth in your browser. Put client IDs in <code>~/.config/alcedo/oauth.toml</code> (see <code>oauth.toml.example</code>).</li>
+          <li><strong>Gmail</strong>: create an app password in your Google account (2-Step Verification must be on), then add the account with <strong>Provider</strong> set to <strong>Other email</strong>. Alcedo fills in the Gmail server settings. Google Workspace admins can turn app passwords off.</li>
           <li><strong>Yahoo</strong> and generic IMAP use an app password stored in the system keyring, not in Alcedo’s database.</li>
+          <li><strong>Google</strong> and <strong>Microsoft</strong> OAuth (advanced) sign in with your own client IDs in your browser. Put them in <code>~/.config/alcedo/oauth.toml</code> (see <code>oauth.toml.example</code>). Google needs a Google Cloud project with a desktop OAuth client.</li>
           <li>Each account has IMAP, SMTP, a display name, a chip (blank for automatic initials, with a background color or a photo cropped to a circle), optional extra From addresses, a signature, and OpenPGP keys.</li>
         </ul>
         <p>The folder pane account switcher picks which account’s folders you are browsing. Unified views still combine mail across accounts.</p>
