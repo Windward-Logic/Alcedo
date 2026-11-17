@@ -316,4 +316,16 @@ mod tests {
     fn reports_the_abi_version() {
         assert_eq!(alcedo_pgp_ffi_abi_version(), ABI_VERSION);
     }
+
+    #[test]
+    fn build_script_soname_is_the_installed_file_name() {
+        let expected = format!(
+            "-soname,{}\"",
+            alcedo_pgp_api::wire::INSTALLED_LIBRARY_FILE_NAME
+        );
+        assert!(
+            include_str!("../build.rs").contains(&expected),
+            "{expected}"
+        );
+    }
 }
