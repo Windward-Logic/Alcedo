@@ -63,7 +63,7 @@ alcedo-store = { path = "crates/alcedo-store" }
 alcedo-imap = { path = "crates/alcedo-imap" }
 alcedo-smtp = { path = "crates/alcedo-smtp" }
 alcedo-oauth = { path = "crates/alcedo-oauth" }
-alcedo-sync = { path = "crates/alcedo-sync" }
+alcedo-sync = { path = "crates/alcedo-sync", default-features = false }
 alcedo-html = { path = "crates/alcedo-html" }
 alcedo-widgets = { path = "crates/alcedo-widgets" }
 alcedo-ui = { path = "crates/alcedo-ui" }

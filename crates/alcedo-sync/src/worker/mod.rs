@@ -35,9 +35,8 @@ use alcedo_oauth::{
     SecretKind, get_secret, load_oauth_config_cached, refresh_google, refresh_microsoft,
     store_secret, with_quiet_keyring,
 };
-use alcedo_pgp::{
-    IncomingKind, PgpMimeKind, ProtectRequest, SignKey, decrypt, inspect_incoming,
-    protect_outbound, verify,
+use alcedo_pgp_api::{
+    IncomingKind, PgpBackend, PgpMimeKind, ProtectRequest, SignKey, inspect_incoming,
 };
 use alcedo_smtp::{
     PgpMimeBody, RenderedBodies, SmtpAuth, SmtpOptions, build_draft_message, message_to_rfc822,
@@ -56,6 +55,7 @@ use crate::aggregator::{
     emit_error, emit_unread_counts, list_mode, load_folder_envelopes, refresh_virtual_inboxes,
     select_folder,
 };
+use crate::pgp_backend::Pgp;
 use crate::server_rules::ServerRulesBackend;
 
 mod auth;

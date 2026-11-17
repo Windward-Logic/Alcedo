@@ -216,6 +216,8 @@ dependencies = [
  "alcedo-imap",
  "alcedo-oauth",
  "alcedo-pgp",
+ "alcedo-pgp-api",
+ "alcedo-pgp-shared",
  "alcedo-smtp",
  "alcedo-store",
  "chrono",

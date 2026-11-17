@@ -3,9 +3,11 @@
 use alcedo_core::{AccountId, Error, Result, SyncEvent};
 use alcedo_core::{PgpAccountState, PgpKeySource};
 use alcedo_oauth::{SecretKind, delete_secret, get_secret, store_secret};
-use alcedo_pgp::{generate, parse_public, parse_secret};
+use alcedo_pgp_api::PgpBackend;
 use alcedo_store::StoreHandle;
 use tracing::warn;
+
+use crate::pgp_backend::Pgp;
 
 pub async fn emit_pgp_state(
     store: &StoreHandle,
@@ -48,10 +50,11 @@ pub async fn pgp_generate(
     let email_owned = email.to_string();
     let name_owned = display_name.to_string();
     let pass_for_crypto = passphrase.clone();
-    let generated =
-        tokio::task::spawn_blocking(move || generate(&name_owned, &email_owned, &pass_for_crypto))
-            .await
-            .map_err(|e| Error::Pgp(e.to_string()))??;
+    let generated = tokio::task::spawn_blocking(move || {
+        Pgp::generate(&name_owned, &email_owned, &pass_for_crypto)
+    })
+    .await
+    .map_err(|e| Error::Pgp(e.to_string()))??;
 
     store_secret(
         account_id.0,
@@ -69,7 +72,7 @@ pub async fn pgp_generate(
     .await?;
 
     store.delete_own_pgp_key(account_id).await?;
-    let emails = parse_public(&generated.public_armored)
+    let emails = Pgp::parse_public(&generated.public_armored)
         .map(|s| s.emails)
         .unwrap_or_else(|_| vec![email.to_string()]);
     store
@@ -94,9 +97,10 @@ pub async fn pgp_import(
     events: &flume::Sender<SyncEvent>,
 ) -> Result<()> {
     let pass = passphrase.clone();
-    let generated = tokio::task::spawn_blocking(move || parse_secret(&armored, pass.as_deref()))
-        .await
-        .map_err(|e| Error::Pgp(e.to_string()))??;
+    let generated =
+        tokio::task::spawn_blocking(move || Pgp::parse_secret(&armored, pass.as_deref()))
+            .await
+            .map_err(|e| Error::Pgp(e.to_string()))??;
 
     store_secret(
         account_id.0,
@@ -112,7 +116,7 @@ pub async fn pgp_import(
     }
 
     store.delete_own_pgp_key(account_id).await?;
-    let emails = parse_public(&generated.public_armored)
+    let emails = Pgp::parse_public(&generated.public_armored)
         .map(|s| s.emails)
         .unwrap_or_else(|_| vec![email.to_string()]);
     store
@@ -182,7 +186,7 @@ pub async fn pgp_accept_peer(
     events: &flume::Sender<SyncEvent>,
 ) -> Result<()> {
     let armored_for_parse = armored.clone();
-    let summary = tokio::task::spawn_blocking(move || parse_public(&armored_for_parse))
+    let summary = tokio::task::spawn_blocking(move || Pgp::parse_public(&armored_for_parse))
         .await
         .map_err(|e| Error::Pgp(e.to_string()))??;
     if !summary
@@ -233,7 +237,7 @@ pub async fn attach_outbound_autocrypt(
     let addr = email.to_string();
     let armored = public_armored;
     let header = tokio::task::spawn_blocking(move || {
-        alcedo_pgp::autocrypt_header_value(&addr, &armored, prefer_mutual)
+        Pgp::autocrypt_header_value(&addr, &armored, prefer_mutual)
     })
     .await
     .map_err(|e| Error::Pgp(e.to_string()))??;
@@ -250,17 +254,16 @@ pub async fn maybe_emit_autocrypt_offer(
     events: &flume::Sender<SyncEvent>,
 ) {
     let raw_vec = raw.to_vec();
-    let peer =
-        match tokio::task::spawn_blocking(move || alcedo_pgp::autocrypt_peer_from_rfc822(&raw_vec))
-            .await
-        {
-            Ok(Some(peer)) => peer,
-            Ok(None) => return,
-            Err(err) => {
-                warn!(?account_id, error = %err, "autocrypt parse task failed");
-                return;
-            }
-        };
+    let peer = match tokio::task::spawn_blocking(move || Pgp::autocrypt_peer_from_rfc822(&raw_vec))
+        .await
+    {
+        Ok(Some(peer)) => peer,
+        Ok(None) => return,
+        Err(err) => {
+            warn!(?account_id, error = %err, "autocrypt parse task failed");
+            return;
+        }
+    };
 
     let keys = match store.list_pgp_keys(account_id).await {
         Ok(keys) => keys,

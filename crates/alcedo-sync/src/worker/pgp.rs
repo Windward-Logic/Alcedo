@@ -48,7 +48,7 @@ pub(super) async fn send_pgp_compose(
         None
     };
     let protected = tokio::task::spawn_blocking(move || {
-        protect_outbound(ProtectRequest {
+        Pgp::protect_outbound(ProtectRequest {
             inner_mime: inner,
             sign,
             encrypt_to,
@@ -103,7 +103,7 @@ pub(super) async fn process_incoming_pgp(
                 };
             let extra = public_armoreds.clone();
             match tokio::task::spawn_blocking(move || {
-                decrypt(&raw_vec, &secret, &passphrase, &extra)
+                Pgp::decrypt(&raw_vec, &secret, &passphrase, &extra)
             })
             .await
             {
@@ -132,7 +132,7 @@ pub(super) async fn process_incoming_pgp(
         IncomingKind::SignedMime | IncomingKind::SignedCleartext => {
             let pubs = public_armoreds;
             let raw_for_verify = raw_vec.clone();
-            let status = tokio::task::spawn_blocking(move || verify(&raw_for_verify, &pubs))
+            let status = tokio::task::spawn_blocking(move || Pgp::verify(&raw_for_verify, &pubs))
                 .await
                 .map_err(|e| Error::Pgp(e.to_string()))?;
             let parsed = MessageParser::default().parse(&raw_vec);

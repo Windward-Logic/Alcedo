@@ -20,8 +20,17 @@ uuid = { workspace = true }
 chrono = { workspace = true }
 serde_json = { workspace = true }
 mail-parser = { workspace = true }
-alcedo-pgp = { workspace = true }
+alcedo-pgp = { workspace = true, optional = true }
+alcedo-pgp-shared = { workspace = true, optional = true }
+alcedo-pgp-api = { workspace = true }
 flume = "0.11"
+
+[features]
+default = ["pgp-static"]
+# The free app: Sequoia linked in-process.
+pgp-static = ["dep:alcedo-pgp"]
+# Builds that must not link Sequoia/Nettle statically: load libalcedo_pgp_ffi at run time.
+pgp-shared = ["dep:alcedo-pgp-shared"]
 
 [dev-dependencies]
 tempfile = { workspace = true }
