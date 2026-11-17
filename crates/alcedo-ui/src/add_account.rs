@@ -37,6 +37,9 @@ struct AppliedPreset {
 
 struct DialogState {
     syncing_smtp: bool,
+    syncing_provider: bool,
+    /// Provider the user picked by hand. Once set, typed addresses no longer change it.
+    user_picked_provider: Option<u32>,
     submitting: bool,
     oauth_generation: u64,
     last_preset: Option<AppliedPreset>,
@@ -204,6 +207,8 @@ pub fn build_add_account_dialog(sender: Sender<MailMsg>, runtime: Handle) -> adw
 
     let state = Rc::new(RefCell::new(DialogState {
         syncing_smtp: false,
+        syncing_provider: false,
+        user_picked_provider: None,
         submitting: false,
         oauth_generation: 0,
         last_preset: None,
@@ -321,7 +326,12 @@ pub fn build_add_account_dialog(sender: Sender<MailMsg>, runtime: Handle) -> adw
                 smtp_host: preset.smtp_host,
                 provider,
             });
-            widgets.provider_row.set_selected(provider);
+            let user_picked = state.borrow().user_picked_provider;
+            set_provider_quietly(
+                &widgets,
+                &state,
+                provider_for_address(user_picked, provider),
+            );
             widgets.server_expander.set_expanded(false);
             apply_provider_visibility();
         }
@@ -358,8 +368,15 @@ pub fn build_add_account_dialog(sender: Sender<MailMsg>, runtime: Handle) -> adw
     });
 
     provider_row.connect_notify_local(Some("selected-item"), {
+        let state = state.clone();
         let apply_provider_visibility = apply_provider_visibility.clone();
-        move |_, _| apply_provider_visibility()
+        move |row, _| {
+            let syncing = state.borrow().syncing_provider;
+            if !syncing {
+                state.borrow_mut().user_picked_provider = Some(row.selected());
+            }
+            apply_provider_visibility()
+        }
     });
 
     smtp_security_row.connect_notify_local(Some("selected-item"), {
@@ -676,8 +693,9 @@ fn clear_autofilled_preset(widgets: &DialogWidgets, state: &RefCell<DialogState>
             smtp_sync_end(state);
         }
     }
-    if widgets.provider_row.selected() == last.provider {
-        widgets.provider_row.set_selected(PROVIDER_GENERIC);
+    let user_picked = state.borrow().user_picked_provider.is_some();
+    if !user_picked && widgets.provider_row.selected() == last.provider {
+        set_provider_quietly(widgets, state, PROVIDER_GENERIC);
     }
 }
 
@@ -698,6 +716,18 @@ fn apply_identity_from_widgets(widgets: &DialogWidgets, draft: &mut AccountDraft
     let (display_name, username) = identity_from_widgets(widgets, &draft.email);
     draft.display_name = display_name;
     draft.username = username;
+}
+
+/// Provider to show for an address: the user's own pick wins over the address preset.
+fn provider_for_address(user_picked: Option<u32>, preset_provider: u32) -> u32 {
+    user_picked.unwrap_or(preset_provider)
+}
+
+/// Set the Provider from code without counting it as a user pick.
+fn set_provider_quietly(widgets: &DialogWidgets, state: &RefCell<DialogState>, provider: u32) {
+    state.borrow_mut().syncing_provider = true;
+    widgets.provider_row.set_selected(provider);
+    state.borrow_mut().syncing_provider = false;
 }
 
 fn smtp_sync_begin(state: &RefCell<DialogState>) -> bool {
@@ -786,6 +816,7 @@ fn reset_dialog(widgets: &DialogWidgets, state: &RefCell<DialogState>) {
         st.submitting = false;
         st.oauth_generation = st.oauth_generation.wrapping_add(1);
         st.last_preset = None;
+        st.user_picked_provider = None;
     }
     clear_row_errors(widgets);
     widgets.email_row.set_text("");
@@ -795,7 +826,7 @@ fn reset_dialog(widgets: &DialogWidgets, state: &RefCell<DialogState>) {
     widgets.split_row.set_active(false);
     widgets.smtp_username_row.set_text("");
     widgets.smtp_password_row.set_text("");
-    widgets.provider_row.set_selected(PROVIDER_GENERIC);
+    set_provider_quietly(widgets, state, PROVIDER_GENERIC);
     widgets.imap_host_row.set_text("");
     widgets.imap_port_row.set_value(993.0);
     widgets.smtp_host_row.set_text("");
@@ -812,6 +843,20 @@ fn reset_dialog(widgets: &DialogWidgets, state: &RefCell<DialogState>) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn address_keeps_provider_the_user_picked() {
+        // Gmail's preset is Google (OAuth); a user who picked Other email keeps it.
+        assert_eq!(
+            provider_for_address(Some(PROVIDER_GENERIC), PROVIDER_GOOGLE),
+            PROVIDER_GENERIC
+        );
+    }
+
+    #[test]
+    fn address_picks_provider_until_the_user_chooses() {
+        assert_eq!(provider_for_address(None, PROVIDER_GOOGLE), PROVIDER_GOOGLE);
+    }
 
     #[test]
     fn google_email_uses_gmail_hosts() {
