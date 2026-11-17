@@ -48,11 +48,23 @@ fi
 # A user's own ALCEDO_PGP_LIB must not decide which library step 3 loads.
 unset ALCEDO_PGP_LIB ALCEDO_PGP_EXPECT_BUILD_ID
 
+# One EXIT trap covers every temp path; the target dir is removed only when
+# this script created it.
+build_log="$(mktemp)"
+created_target_dir=""
+cleanup() {
+  rm -f "$build_log"
+  if [[ -n "$created_target_dir" ]]; then
+    rm -rf "$created_target_dir"
+  fi
+}
+trap cleanup EXIT
+
 if [[ -n "${RELINK_TARGET_DIR:-}" ]]; then
   TARGET_DIR="$RELINK_TARGET_DIR"
 else
   TARGET_DIR="$(mktemp -d)"
-  trap 'rm -rf "$TARGET_DIR"' EXIT
+  created_target_dir="$TARGET_DIR"
 fi
 
 echo "==> 1/6 check the pgp-shared app build links no Sequoia or Nettle"
@@ -61,12 +73,11 @@ shared_deps="$(cargo tree -p alcedo --no-default-features --features pgp-shared 
 if grep -qxE 'sequoia-openpgp|sequoia-autocrypt|buffered-reader|nettle|nettle-sys' <<<"$shared_deps"; then
   die "the pgp-shared build of alcedo still depends on Sequoia or Nettle"
 fi
+grep -qx 'alcedo-pgp-shared' <<<"$shared_deps" || die "the pgp-shared build of alcedo does not depend on alcedo-pgp-shared"
 
 echo "==> 2/6 build the client test binary"
-build_log="$(mktemp)"
 cargo test -p alcedo-pgp-shared --no-run 2>&1 | tee "$build_log"
 client_bin="$(sed -n 's/^ *Executable tests\/parity\.rs (\(.*\))$/\1/p' "$build_log" | tail -n 1)"
-rm -f "$build_log"
 [[ -n "$client_bin" && -f "$client_bin" ]] || die "could not find the parity test binary"
 client_bin="$(readlink -f "$client_bin")"
 stamp_before="$(stat -c '%n %Y.%y %s' "$client_bin")"
