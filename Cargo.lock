@@ -130,6 +130,7 @@ name = "alcedo-pgp"
 version = "1.0.1"
 dependencies = [
  "alcedo-core",
+ "alcedo-pgp-api",
  "chrono",
  "mail-parser",
  "sequoia-autocrypt",

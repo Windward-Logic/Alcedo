@@ -9,18 +9,7 @@ use sequoia_openpgp::types::Features;
 
 use crate::util::{armored_secret_to_cert, cert_fingerprint_hex, emails_from_cert};
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct GeneratedCert {
-    pub fingerprint: String,
-    pub public_armored: String,
-    pub secret_armored: String,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct CertSummary {
-    pub fingerprint: String,
-    pub emails: Vec<String>,
-}
+pub use alcedo_pgp_api::{CertSummary, GeneratedCert};
 
 /// Generate a new Ed25519 + Cv25519 key with the given user ID and passphrase.
 pub fn generate(display_name: &str, email: &str, passphrase: &str) -> Result<GeneratedCert> {

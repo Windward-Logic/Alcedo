@@ -13,47 +13,7 @@ use crate::util::{
     armored_public_to_cert, armored_secret_to_cert, normalize_mime_crlf, signing_keypair,
 };
 
-#[derive(Clone)]
-pub struct SignKey {
-    pub secret_armored: String,
-    pub passphrase: String,
-}
-
-/// Never print the private key or its passphrase.
-impl std::fmt::Debug for SignKey {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("SignKey")
-            .field("secret_armored", &"***")
-            .field("passphrase", &"***")
-            .finish()
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct ProtectRequest {
-    pub inner_mime: Vec<u8>,
-    pub sign: Option<SignKey>,
-    pub encrypt_to: Vec<String>,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum PgpMimeKind {
-    Signed,
-    Encrypted,
-}
-
-#[derive(Clone, Debug)]
-pub struct PgpBodyParts {
-    pub inner_mime: Vec<u8>,
-    pub signature: Option<Vec<u8>>,
-    pub encrypted_payload: Option<Vec<u8>>,
-}
-
-#[derive(Clone, Debug)]
-pub struct ProtectResult {
-    pub mime_kind: PgpMimeKind,
-    pub body_parts: PgpBodyParts,
-}
+pub use alcedo_pgp_api::{PgpBodyParts, PgpMimeKind, ProtectRequest, ProtectResult, SignKey};
 
 pub fn protect_outbound(request: ProtectRequest) -> Result<ProtectResult> {
     let encrypt = !request.encrypt_to.is_empty();

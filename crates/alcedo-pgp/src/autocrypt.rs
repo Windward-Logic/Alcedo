@@ -8,15 +8,9 @@ use sequoia_openpgp::parse::Parse;
 use sequoia_openpgp::policy::StandardPolicy;
 use sequoia_openpgp::serialize::Serialize;
 
-use crate::util::cert_fingerprint_hex;
+pub use alcedo_pgp_api::AutocryptPeer;
 
-/// Parsed Autocrypt sender key from an incoming message.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct AutocryptPeer {
-    pub email: String,
-    pub fingerprint: String,
-    pub armored: String,
-}
+use crate::util::cert_fingerprint_hex;
 
 /// Build the Autocrypt header value (without the `Autocrypt:` name).
 pub fn autocrypt_header_value(

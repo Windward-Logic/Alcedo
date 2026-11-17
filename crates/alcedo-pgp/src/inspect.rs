@@ -23,20 +23,7 @@ use crate::util::{
     armored_public_to_cert, armored_secret_to_cert, cert_fingerprint_hex, normalize_mime_crlf,
 };
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum IncomingKind {
-    None,
-    SignedCleartext,
-    SignedMime,
-    EncryptedMime,
-    InlineEncrypted,
-}
-
-#[derive(Clone, Debug)]
-pub struct DecryptResult {
-    pub inner_rfc822: Vec<u8>,
-    pub status: PgpStatus,
-}
+pub use alcedo_pgp_api::{DecryptResult, IncomingKind, inspect_incoming};
 
 struct PublicKeyHelper {
     keys: Vec<Cert>,
@@ -170,25 +157,6 @@ impl VerificationHelper for DecryptHelper {
         }
         Ok(())
     }
-}
-
-pub fn inspect_incoming(raw_rfc822: &[u8]) -> IncomingKind {
-    if let Some(msg) = MessageParser::default().parse(raw_rfc822) {
-        if msg.is_content_type("multipart", "encrypted") {
-            return IncomingKind::EncryptedMime;
-        }
-        if msg.is_content_type("multipart", "signed") {
-            return IncomingKind::SignedMime;
-        }
-    }
-    let text = String::from_utf8_lossy(raw_rfc822);
-    if text.contains("-----BEGIN PGP SIGNED MESSAGE-----") {
-        return IncomingKind::SignedCleartext;
-    }
-    if text.contains("-----BEGIN PGP MESSAGE-----") {
-        return IncomingKind::InlineEncrypted;
-    }
-    IncomingKind::None
 }
 
 pub fn verify(raw: &[u8], public_armoreds: &[String]) -> PgpStatus {
