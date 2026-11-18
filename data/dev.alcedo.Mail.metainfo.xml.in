@@ -42,6 +42,11 @@
   </screenshots>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="1.0.7" date="2026-11-18">
+      <description>
+        <p>The mail window now keeps its content inside narrower windows: toolbars drop their labels first, and the side panes make room at widths where they fit. Closed search and selection bars no longer take up space in the message list.</p>
+      </description>
+    </release>
     <release version="1.0.6" date="2026-11-18">
       <description>
         <p>Personal Outlook.com accounts now sign in through your browser with no setup. Sending from Microsoft accounts works with aliases, and sent mail no longer appears twice in the Sent folder. The activity log and error messages now fully hide passwords that contain an @.</p>

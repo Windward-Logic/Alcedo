@@ -1,3 +1,13 @@
+alcedo (1.0.7-1) resolute; urgency=medium
+
+  * Layout: the mail window keeps its content inside narrower windows.
+    Toolbars drop their labels first, and the rail, folder column and second
+    pane give way at widths measured to fit.
+  * Closed search and selection bars no longer reserve width in the message
+    list.
+
+ -- Windward Logic LLC <alcedo@windwardlogic.com>  Wed, 18 Nov 2026 21:30:00 +0000
+
 alcedo (1.0.6-1) resolute; urgency=medium
 
   * Microsoft: personal Outlook.com accounts sign in through the browser with
