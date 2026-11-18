@@ -106,6 +106,73 @@ pub fn apply_participation(
     });
 }
 
+/// Address for the `ATTENDEE` on an iTIP `REPLY`.
+///
+/// The organizer matches this to an `ATTENDEE` on the request. A mailbox
+/// address (`carter@…`) is the wrong choice when the invitation named an
+/// alias (`carterstclair@…`): the reply is ignored.
+///
+/// Prefer an attendee who is also a recipient of this message (`Delivered-To`,
+/// then `To`, then `Cc`). When none of those are attendees, use the only
+/// attendee `is_self` accepts. Otherwise use `fallback`, the address the
+/// reply is sent From.
+pub fn rsvp_responder_email(
+    drafts: &[CalendarEventDraft],
+    message_addresses: &[&str],
+    fallback: &str,
+    is_self: impl Fn(&str) -> bool,
+) -> String {
+    let attendees = attendee_emails(drafts);
+    for address in message_addresses {
+        let address = address.trim();
+        if address.is_empty() {
+            continue;
+        }
+        if let Some(email) = attendees
+            .iter()
+            .find(|email| email.eq_ignore_ascii_case(address))
+        {
+            return (*email).to_string();
+        }
+    }
+    let own: Vec<&str> = attendees
+        .iter()
+        .copied()
+        .filter(|email| is_self(email))
+        .collect();
+    if own.len() == 1 {
+        return own[0].to_string();
+    }
+    let fallback = fallback.trim();
+    if let Some(email) = attendees
+        .iter()
+        .find(|email| email.eq_ignore_ascii_case(fallback))
+    {
+        return (*email).to_string();
+    }
+    fallback.to_string()
+}
+
+fn attendee_emails(drafts: &[CalendarEventDraft]) -> Vec<&str> {
+    let mut emails = Vec::new();
+    for draft in drafts {
+        for attendee in &draft.details.attendees {
+            let email = attendee.person.email.trim();
+            if email.is_empty() {
+                continue;
+            }
+            if emails
+                .iter()
+                .any(|existing: &&str| existing.eq_ignore_ascii_case(email))
+            {
+                continue;
+            }
+            emails.push(email);
+        }
+    }
+    emails
+}
+
 /// Email subject for an RSVP reply.
 pub fn reply_subject(status: ParticipationStatus, summary: &str) -> String {
     let prefix = match status {
@@ -193,5 +260,76 @@ mod tests {
                 .iter()
                 .any(|a| a.person.email == "new@x.test")
         );
+    }
+
+    fn draft_with_attendees(emails: &[&str]) -> CalendarEventDraft {
+        let mut draft = CalendarEventDraft {
+            uid: "u".into(),
+            summary: "S".into(),
+            location: None,
+            description: None,
+            start: Utc::now(),
+            end: Utc::now(),
+            all_day: false,
+            recurrence_id: None,
+            rrule: None,
+            source_message_id: None,
+            cancelled: false,
+            details: EventDetails::default(),
+        };
+        for email in emails {
+            draft.details.attendees.push(Attendee {
+                person: EventPerson {
+                    email: (*email).to_string(),
+                    name: None,
+                },
+                status: ParticipationStatus::NeedsAction,
+            });
+        }
+        draft
+    }
+
+    #[test]
+    fn responder_is_the_invited_alias_not_the_mailbox() {
+        let draft = draft_with_attendees(&["carterstclair@codeinfusion.com"]);
+        let recipients = ["carter@codeinfusion.com", "carterstclair@codeinfusion.com"];
+        let email = rsvp_responder_email(
+            &[draft],
+            &recipients,
+            "carter@codeinfusion.com",
+            |address| address.ends_with("@codeinfusion.com"),
+        );
+        assert_eq!(email, "carterstclair@codeinfusion.com");
+    }
+
+    #[test]
+    fn responder_prefers_the_recipient_who_is_an_attendee() {
+        let draft = draft_with_attendees(&["ada@x.com", "me@x.com"]);
+        let email = rsvp_responder_email(&[draft], &["me@x.com"], "other@x.com", |_| true);
+        assert_eq!(email, "me@x.com");
+    }
+
+    #[test]
+    fn responder_uses_the_only_own_attendee_when_headers_do_not_match() {
+        let draft = draft_with_attendees(&["alias@codeinfusion.com", "org@cer.bo"]);
+        let email = rsvp_responder_email(
+            &[draft],
+            &["list@example.com"],
+            "carter@codeinfusion.com",
+            |address| address.ends_with("@codeinfusion.com"),
+        );
+        assert_eq!(email, "alias@codeinfusion.com");
+    }
+
+    #[test]
+    fn responder_does_not_guess_among_several_own_attendees() {
+        let draft = draft_with_attendees(&["a@codeinfusion.com", "b@codeinfusion.com"]);
+        let email = rsvp_responder_email(
+            &[draft],
+            &["list@example.com"],
+            "carter@codeinfusion.com",
+            |address| address.ends_with("@codeinfusion.com"),
+        );
+        assert_eq!(email, "carter@codeinfusion.com");
     }
 }

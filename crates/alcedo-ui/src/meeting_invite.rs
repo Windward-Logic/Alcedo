@@ -194,8 +194,24 @@ pub fn build_meeting_banner() -> MeetingBanner {
 }
 
 impl MeetingBanner {
-    pub fn calendar_destination_anchor(&self) -> gtk::Button {
-        self.add_btn.clone()
+    /// Widget the calendar chooser should point at.
+    ///
+    /// Accept hides "Add to Calendar". A popover parented to that hidden
+    /// button never appears, so the chooser uses the RSVP row instead.
+    pub fn calendar_destination_anchor(&self) -> gtk::Widget {
+        if self.rsvp_box.is_visible() {
+            self.rsvp_box.clone().upcast()
+        } else {
+            self.add_btn.clone().upcast()
+        }
+    }
+
+    pub(crate) fn mark_rsvp_in_progress(&self) {
+        self.rsvp_box.set_sensitive(false);
+    }
+
+    pub(crate) fn mark_rsvp_idle(&self) {
+        self.rsvp_box.set_sensitive(true);
     }
 
     pub(crate) fn handles(&self) -> MeetingBannerHandles {
@@ -297,13 +313,12 @@ pub fn update_meeting_banner(
             if show_rsvp {
                 banner.add_btn.set_visible(false);
                 banner.rsvp_box.set_visible(true);
+                banner.rsvp_box.set_sensitive(true);
                 let mid = message_id;
                 let ics_for_send = ics.clone();
                 let on_choice: Rc<dyn Fn(alcedo_core::ParticipationStatus)> = Rc::new({
                     let sender = sender.clone();
-                    let rsvp_box = banner.rsvp_box.clone();
                     move |status| {
-                        rsvp_box.set_sensitive(false);
                         sender
                             .send(AppMsg::RespondToInvite {
                                 message_id: mid,

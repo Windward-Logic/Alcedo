@@ -5,9 +5,9 @@ use super::reply::apply_reply_from;
 use crate::extension::CalendarInvite;
 use crate::meeting_rsvp::add_to_calendar_with_extension;
 use alcedo_core::{
-    ComposeAttachment, ComposeDraft, ComposeFormat, Envelope, ParticipationStatus, ReplyPlan,
-    apply_participation, build_ics, build_reply_ics, calendar_invite_reply_subject,
-    parse_ics_with_method,
+    AccountIdentity, ComposeAttachment, ComposeDraft, ComposeFormat, Envelope, ParticipationStatus,
+    ReplyFrom, ReplyPlan, apply_participation, build_ics, build_reply_ics,
+    calendar_invite_reply_subject, parse_ics_with_method, rsvp_responder_email,
 };
 
 #[derive(Clone, Debug)]
@@ -30,7 +30,10 @@ impl MailModel {
             status,
             ics,
         } = payload;
-        let Some(envelope) = self.envelopes.iter().find(|e| e.id == message_id).cloned() else {
+        let Some(envelope) = self.envelope_for(message_id).cloned() else {
+            self.toasts.add_toast(crate::toast::plain(
+                "Couldn't send a response to this invitation",
+            ));
             return;
         };
         let Some(account) = self
@@ -39,6 +42,9 @@ impl MailModel {
             .find(|a| a.id == envelope.account_id)
             .cloned()
         else {
+            self.toasts.add_toast(crate::toast::plain(
+                "Couldn't send a response to this invitation",
+            ));
             return;
         };
         let parsed = match parse_ics_with_method(ics.as_bytes()) {
@@ -58,18 +64,29 @@ impl MailModel {
             return;
         }
 
-        let plan = self
-            .reply_planner_for(&envelope)
-            .plan(alcedo_core::ReplyMode::Sender);
         let (in_reply_to, references) = self.threading_for_reply(message_id);
-        let account_email = account.email.as_str();
+        let (plan, fallback, responder_email) = {
+            let planner = self.reply_planner_for(&envelope);
+            let plan = planner.plan(alcedo_core::ReplyMode::Sender);
+            let identities = self
+                .identities
+                .get(&envelope.account_id)
+                .map(Vec::as_slice)
+                .unwrap_or(&[]);
+            let fallback = reply_from_address(&plan.from, account.email.as_str(), identities);
+            let recipients = invitation_recipient_addresses(&envelope);
+            let responder_email = rsvp_responder_email(&drafts, &recipients, &fallback, |email| {
+                planner.address_is_self(email)
+            });
+            (plan, fallback, responder_email)
+        };
         let responder_name =
             (!account.display_name.trim().is_empty()).then_some(account.display_name.as_str());
         let organizer_label = organizer_display_for_toast(&mut drafts);
 
         let mut applied_drafts = drafts.clone();
         for d in &mut applied_drafts {
-            apply_participation(d, account_email, responder_name, status);
+            apply_participation(d, &responder_email, responder_name, status);
         }
 
         if matches!(
@@ -86,17 +103,12 @@ impl MailModel {
                 sha256: String::new(),
                 filename: String::new(),
             };
-            let anchor = if self.selected == Some(message_id) {
-                self.reader.meeting_banner.calendar_destination_anchor()
-            } else if let Some(w) = self.message_windows.get(&message_id) {
-                w.reader.meeting_banner.calendar_destination_anchor()
-            } else {
-                self.reader.meeting_banner.calendar_destination_anchor()
-            };
+            let anchor = self.invite_banner(message_id).calendar_destination_anchor();
             add_to_calendar_with_extension(&anchor, &invite);
         }
+        self.invite_banner(message_id).mark_rsvp_in_progress();
 
-        let reply_ics = build_reply_ics(&applied_drafts, account_email, responder_name, status);
+        let reply_ics = build_reply_ics(&applied_drafts, &responder_email, responder_name, status);
         let responder_display = if account.display_name.trim().is_empty() {
             account.email.as_str()
         } else {
@@ -114,11 +126,56 @@ impl MailModel {
             responder_display,
         );
         apply_reply_from(&mut draft, &plan.from, &account);
+        if !responder_email.eq_ignore_ascii_case(&fallback) {
+            apply_reply_from(&mut draft, &ReplyFrom::Alias(responder_email), &account);
+        }
 
         self.pending_invite_response_organizer = Some(organizer_label);
         if !self.queue_outgoing_send(draft, None) {
             self.pending_invite_response_organizer = None;
+            self.invite_banner(message_id).mark_rsvp_idle();
         }
+    }
+
+    fn invite_banner(
+        &self,
+        message_id: alcedo_core::MessageId,
+    ) -> &crate::meeting_invite::MeetingBanner {
+        if self.selected == Some(message_id) {
+            &self.reader.meeting_banner
+        } else if let Some(window) = self.message_windows.get(&message_id) {
+            &window.reader.meeting_banner
+        } else {
+            &self.reader.meeting_banner
+        }
+    }
+}
+
+fn invitation_recipient_addresses(envelope: &Envelope) -> Vec<&str> {
+    let routing = envelope.routing_headers();
+    routing
+        .delivered_to
+        .iter()
+        .map(String::as_str)
+        .chain(envelope.to.iter().map(|address| address.email.as_str()))
+        .chain(envelope.cc.iter().map(|address| address.email.as_str()))
+        .filter(|email| !email.trim().is_empty())
+        .collect()
+}
+
+fn reply_from_address(
+    from: &ReplyFrom,
+    account_email: &str,
+    identities: &[AccountIdentity],
+) -> String {
+    match from {
+        ReplyFrom::AccountDefault => account_email.to_string(),
+        ReplyFrom::Alias(email) => email.clone(),
+        ReplyFrom::Identity(id) => identities
+            .iter()
+            .find(|identity| identity.id == *id)
+            .map(|identity| identity.email.clone())
+            .unwrap_or_else(|| account_email.to_string()),
     }
 }
 

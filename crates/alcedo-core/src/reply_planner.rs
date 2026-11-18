@@ -143,6 +143,11 @@ impl<'a> ReplyPlanner<'a> {
         }
     }
 
+    /// True when `email` is the account address, a saved identity, or a catch-all alias.
+    pub fn address_is_self(&self, email: &str) -> bool {
+        self.me.is_self(email)
+    }
+
     /// True when the user wrote this message.
     pub fn is_outbound(&self) -> bool {
         self.outbound_folder

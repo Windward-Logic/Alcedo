@@ -72,6 +72,7 @@ pub use calendar_details::{
 pub use calendar_invite_link::{draft_from_google_template_url, is_calendar_invite_uri};
 pub use calendar_rsvp::{
     apply_participation, build_reply_ics, reply_subject as calendar_invite_reply_subject,
+    rsvp_responder_email,
 };
 pub use calendar_windows_zones::windows_zone_to_iana;
 pub use calendar_zone::{
