@@ -8,5 +8,7 @@
 client_id = "xxxxx.apps.googleusercontent.com"
 client_secret = "GOCSPX-xxxxx"
 
-[microsoft]
-client_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+# Uncomment only to replace the Microsoft client built into this build. Accounts
+# signed in with a different client must sign in again.
+# [microsoft]
+# client_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"

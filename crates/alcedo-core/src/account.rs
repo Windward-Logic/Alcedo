@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::commands::AccountDraft;
 use crate::ids::{AccountId, FolderId};
+use crate::mail_provider::{GoogleMail, MailProvider, MicrosoftMail};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum AuthMethod {
@@ -16,18 +17,20 @@ pub enum OAuthProvider {
 }
 
 impl OAuthProvider {
-    pub fn imap_host(self) -> &'static str {
+    /// Server settings and behaviour of this provider.
+    pub fn profile(self) -> &'static dyn MailProvider {
         match self {
-            Self::Google => "imap.gmail.com",
-            Self::Microsoft => "outlook.office365.com",
+            Self::Google => &GoogleMail,
+            Self::Microsoft => &MicrosoftMail,
         }
     }
 
+    pub fn imap_host(self) -> &'static str {
+        self.profile().imap_host()
+    }
+
     pub fn smtp_host(self) -> &'static str {
-        match self {
-            Self::Google => "smtp.gmail.com",
-            Self::Microsoft => "smtp.office365.com",
-        }
+        self.profile().smtp_host()
     }
 
     pub fn validate_imap_host(self, host: &str) -> Result<(), &'static str> {
@@ -39,7 +42,13 @@ impl OAuthProvider {
     }
 
     pub fn validate_smtp_host(self, host: &str) -> Result<(), &'static str> {
-        if host_eq(host, self.smtp_host()) {
+        let profile = self.profile();
+        let is_allowed = host_eq(host, profile.smtp_host())
+            || profile
+                .alternate_smtp_hosts()
+                .iter()
+                .any(|allowed| host_eq(host, allowed));
+        if is_allowed {
             Ok(())
         } else {
             Err("SMTP host must match the OAuth provider")
@@ -63,6 +72,9 @@ pub struct OAuthTokens {
     pub access_token: String,
     pub refresh_token: Option<String>,
     pub expires_in: Option<u64>,
+    /// The account name the provider reported at sign-in, when it reported one.
+    #[serde(default)]
+    pub sign_in_name: Option<String>,
 }
 
 impl std::fmt::Debug for OAuthTokens {
@@ -71,6 +83,7 @@ impl std::fmt::Debug for OAuthTokens {
             .field("access_token", &"***")
             .field("refresh_token", &self.refresh_token.as_ref().map(|_| "***"))
             .field("expires_in", &self.expires_in)
+            .field("sign_in_name", &self.sign_in_name.as_ref().map(|_| "***"))
             .finish()
     }
 }
@@ -98,7 +111,8 @@ pub struct Account {
     /// Password accounts only. When true, SMTP uses `smtp_username` and the `smtp_password` keyring item.
     #[serde(default)]
     pub split_credentials: bool,
-    /// SMTP login when split. Empty means use the mailbox email. Ignored unless `uses_split_credentials`.
+    /// SMTP login for split password accounts, or the sign-in name for Microsoft OAuth accounts.
+    /// Empty means use the normal login. Ignored for password accounts that are not split.
     #[serde(default)]
     pub smtp_username: String,
     pub display_name: String,
@@ -156,6 +170,23 @@ impl Account {
         matches!(self.auth, AuthMethod::Password) && self.split_credentials
     }
 
+    /// The OAuth provider behind this account, if it signs in with OAuth.
+    pub fn mail_provider(&self) -> Option<&'static dyn MailProvider> {
+        match self.auth {
+            AuthMethod::OAuth2 { provider } => Some(provider.profile()),
+            AuthMethod::Password => None,
+        }
+    }
+
+    /// True when the provider needs the sign-in name for SMTP and reported one.
+    fn sends_with_sign_in_name(&self) -> bool {
+        !self.split_credentials
+            && !self.smtp_username.is_empty()
+            && self
+                .mail_provider()
+                .is_some_and(|provider| provider.smtp_login_is_sign_in_name())
+    }
+
     pub fn smtp_login_name(&self) -> &str {
         if self.uses_split_credentials() {
             if self.smtp_username.is_empty() {
@@ -163,8 +194,18 @@ impl Account {
             } else {
                 &self.smtp_username
             }
+        } else if self.sends_with_sign_in_name() {
+            &self.smtp_username
         } else {
             self.login_name()
+        }
+    }
+
+    /// Name sent to the SMTP server when authenticating.
+    pub fn smtp_auth_username(&self) -> &str {
+        match self.auth {
+            AuthMethod::OAuth2 { .. } if !self.sends_with_sign_in_name() => &self.email,
+            _ => self.smtp_login_name(),
         }
     }
 
@@ -188,42 +229,18 @@ impl Account {
         let domain = domain.to_ascii_lowercase();
 
         match domain.as_str() {
-            "gmail.com" | "googlemail.com" => Some(AccountDraft {
-                email: email.to_string(),
-                username: email.to_string(),
+            "gmail.com" | "googlemail.com" => Some(oauth_preset(
+                OAuthProvider::Google,
+                email,
+                &domain,
                 display_name,
-                imap_host: OAuthProvider::Google.imap_host().to_string(),
-                imap_port: 993,
-                smtp_host: OAuthProvider::Google.smtp_host().to_string(),
-                smtp_port: 465,
-                smtp_starttls: false,
-                auth: AuthMethod::OAuth2 {
-                    provider: OAuthProvider::Google,
-                },
-                password: None,
-                oauth_tokens: None,
-                split_credentials: false,
-                smtp_username: String::new(),
-                smtp_password: None,
-            }),
-            "outlook.com" | "hotmail.com" | "live.com" | "office365.com" => Some(AccountDraft {
-                email: email.to_string(),
-                username: email.to_string(),
+            )),
+            "outlook.com" | "hotmail.com" | "live.com" | "office365.com" => Some(oauth_preset(
+                OAuthProvider::Microsoft,
+                email,
+                &domain,
                 display_name,
-                imap_host: OAuthProvider::Microsoft.imap_host().to_string(),
-                imap_port: 993,
-                smtp_host: OAuthProvider::Microsoft.smtp_host().to_string(),
-                smtp_port: 587,
-                smtp_starttls: true,
-                auth: AuthMethod::OAuth2 {
-                    provider: OAuthProvider::Microsoft,
-                },
-                password: None,
-                oauth_tokens: None,
-                split_credentials: false,
-                smtp_username: String::new(),
-                smtp_password: None,
-            }),
+            )),
             "yahoo.com" | "ymail.com" => Some(AccountDraft {
                 email: email.to_string(),
                 username: email.to_string(),
@@ -242,6 +259,31 @@ impl Account {
             }),
             _ => None,
         }
+    }
+}
+
+fn oauth_preset(
+    provider: OAuthProvider,
+    email: &str,
+    domain: &str,
+    display_name: String,
+) -> AccountDraft {
+    let profile = provider.profile();
+    AccountDraft {
+        email: email.to_string(),
+        username: email.to_string(),
+        display_name,
+        imap_host: profile.imap_host().to_string(),
+        imap_port: 993,
+        smtp_host: profile.smtp_host_for_domain(domain).to_string(),
+        smtp_port: profile.smtp_port(),
+        smtp_starttls: profile.smtp_starttls(),
+        auth: AuthMethod::OAuth2 { provider },
+        password: None,
+        oauth_tokens: None,
+        split_credentials: false,
+        smtp_username: String::new(),
+        smtp_password: None,
     }
 }
 
@@ -345,6 +387,19 @@ pub fn avatar_chip_words(chip: &str) -> String {
 }
 
 /// IMAP/SMTP login. Empty username means use the email address.
+/// SMTP login an OAuth account keeps after `tokens` arrive.
+///
+/// Microsoft's SMTP server accepts only the account's primary sign-in name, even
+/// when IMAP accepts an alias. Without a reported name, the current login stays.
+pub fn oauth_smtp_login(current: &str, tokens: Option<&OAuthTokens>) -> String {
+    tokens
+        .and_then(|tokens| tokens.sign_in_name.as_deref())
+        .map(str::trim)
+        .filter(|name| !name.is_empty())
+        .unwrap_or(current)
+        .to_string()
+}
+
 pub fn login_name_from(username: &str, email: &str) -> String {
     let username = username.trim();
     if username.is_empty() {

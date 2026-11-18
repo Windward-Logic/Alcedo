@@ -1,12 +1,16 @@
 //! Google OAuth (P5).
 
+use oauth2::basic::BasicTokenResponse;
 use oauth2::{CsrfToken, Scope};
 
 use alcedo_core::{Error, OAuthTokens, Result};
 
+use crate::flow::{BoxFuture, OAuthFlow, OpenAuthUrl, missing_client_message};
 use crate::loopback::LoopbackRedirect;
 use crate::pkce::new_pkce_pair;
-use crate::{ProviderOAuthConfig, build_oauth_client, http_client, tokens_from_response};
+use crate::{
+    OAuthConfig, ProviderOAuthConfig, build_oauth_client, http_client, tokens_from_response,
+};
 
 const GOOGLE_AUTH_URL: &str = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_TOKEN_URL: &str = "https://oauth2.googleapis.com/token";
@@ -25,7 +29,12 @@ where
     require_google_client_secret(config)?;
     let loopback = LoopbackRedirect::bind().await?;
     let redirect_url = loopback.redirect_url().clone();
-    let oauth_client = build_oauth_client(config, GOOGLE_AUTH_URL, GOOGLE_TOKEN_URL, redirect_url)?;
+    let oauth_client = build_oauth_client::<BasicTokenResponse>(
+        config,
+        GOOGLE_AUTH_URL,
+        GOOGLE_TOKEN_URL,
+        redirect_url,
+    )?;
     let http = http_client()?;
 
     let (pkce_challenge, pkce_verifier) = new_pkce_pair();
@@ -60,7 +69,12 @@ pub async fn refresh_google(
     require_google_client_secret(config)?;
     let redirect_url = oauth2::RedirectUrl::new("http://127.0.0.1".to_string())
         .map_err(|e| Error::Auth(format!("google redirect URL invalid: {e}")))?;
-    let oauth_client = build_oauth_client(config, GOOGLE_AUTH_URL, GOOGLE_TOKEN_URL, redirect_url)?;
+    let oauth_client = build_oauth_client::<BasicTokenResponse>(
+        config,
+        GOOGLE_AUTH_URL,
+        GOOGLE_TOKEN_URL,
+        redirect_url,
+    )?;
     let http = http_client()?;
 
     let token = oauth_client
@@ -70,6 +84,46 @@ pub async fn refresh_google(
         .map_err(|e| crate::map_token_error("google token refresh", e))?;
 
     Ok(tokens_from_response(token))
+}
+
+/// Google sign-in for mail accounts.
+pub(crate) struct GoogleFlow;
+
+impl OAuthFlow for GoogleFlow {
+    fn client_config(
+        &self,
+        config: &OAuthConfig,
+    ) -> std::result::Result<ProviderOAuthConfig, String> {
+        let client = config
+            .google
+            .clone()
+            .ok_or_else(|| missing_client_message("Google"))?;
+        if client.has_client_secret() {
+            Ok(client)
+        } else {
+            Err(crate::google_client_secret_missing_message())
+        }
+    }
+
+    fn sign_in<'a>(
+        &'a self,
+        config: &'a ProviderOAuthConfig,
+        open_auth_url: OpenAuthUrl,
+    ) -> BoxFuture<'a, Result<OAuthTokens>> {
+        Box::pin(google_auth_flow(
+            config,
+            &[GOOGLE_MAIL_SCOPE],
+            open_auth_url,
+        ))
+    }
+
+    fn refresh<'a>(
+        &'a self,
+        config: &'a ProviderOAuthConfig,
+        refresh_token: &'a str,
+    ) -> BoxFuture<'a, Result<OAuthTokens>> {
+        Box::pin(refresh_google(config, refresh_token))
+    }
 }
 
 fn require_google_client_secret(config: &ProviderOAuthConfig) -> Result<()> {

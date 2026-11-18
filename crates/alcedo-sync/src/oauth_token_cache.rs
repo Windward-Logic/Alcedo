@@ -108,6 +108,7 @@ mod tests {
             access_token: secret.into(),
             refresh_token: None,
             expires_in,
+            sign_in_name: None,
         }
     }
 

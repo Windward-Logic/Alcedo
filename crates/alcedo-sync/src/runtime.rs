@@ -1347,7 +1347,8 @@ async fn update_account(
     match &account.auth {
         AuthMethod::OAuth2 { .. } => {
             account.split_credentials = false;
-            account.smtp_username.clear();
+            account.smtp_username =
+                alcedo_core::oauth_smtp_login(&account.smtp_username, update.oauth_tokens.as_ref());
         }
         AuthMethod::Password if update.split_credentials => {
             account.split_credentials = true;
@@ -1446,6 +1447,8 @@ fn account_from_draft(draft: AccountDraft, id: AccountId) -> Account {
     let split_credentials = matches!(draft.auth, AuthMethod::Password) && draft.split_credentials;
     let smtp_username = if split_credentials {
         alcedo_core::login_name_from(&draft.smtp_username, &draft.email)
+    } else if matches!(draft.auth, AuthMethod::OAuth2 { .. }) {
+        alcedo_core::oauth_smtp_login("", draft.oauth_tokens.as_ref())
     } else {
         String::new()
     };
@@ -1665,6 +1668,46 @@ mod tests {
     use alcedo_store::StoredMessage;
     use chrono::Utc;
     use uuid::Uuid;
+
+    fn microsoft_draft(sign_in_name: Option<&str>) -> AccountDraft {
+        AccountDraft {
+            email: "alias@outlook.com".to_string(),
+            username: "alias@outlook.com".to_string(),
+            display_name: String::new(),
+            imap_host: "outlook.office365.com".to_string(),
+            imap_port: 993,
+            smtp_host: "smtp-mail.outlook.com".to_string(),
+            smtp_port: 587,
+            smtp_starttls: true,
+            auth: AuthMethod::OAuth2 {
+                provider: alcedo_core::OAuthProvider::Microsoft,
+            },
+            password: None,
+            oauth_tokens: Some(alcedo_core::OAuthTokens {
+                access_token: "access".to_string(),
+                refresh_token: Some("refresh".to_string()),
+                expires_in: None,
+                sign_in_name: sign_in_name.map(str::to_string),
+            }),
+            split_credentials: false,
+            smtp_username: String::new(),
+            smtp_password: None,
+        }
+    }
+
+    #[test]
+    fn new_oauth_account_sends_with_the_reported_sign_in_name() {
+        let draft = microsoft_draft(Some("primary@example.com"));
+        let account = account_from_draft(draft, AccountId(Uuid::nil()));
+        assert_eq!(account.smtp_login_name(), "primary@example.com");
+        assert_eq!(account.login_name(), "alias@outlook.com");
+    }
+
+    #[test]
+    fn new_oauth_account_without_a_sign_in_name_sends_with_its_login() {
+        let account = account_from_draft(microsoft_draft(None), AccountId(Uuid::nil()));
+        assert_eq!(account.smtp_login_name(), "alias@outlook.com");
+    }
 
     fn minimal_stored_message(body_text: Option<&str>, body_html: Option<&str>) -> StoredMessage {
         StoredMessage {

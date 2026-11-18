@@ -19,12 +19,12 @@
 - **SMTP:** lettre with tokio1-rustls-tls on a per-account serial Tokio task (not on the IMAP command FIFO)
 - **Store:** rusqlite, one writer thread plus one read-only reader thread (WAL, query_only). Not a connection pool.
 - **Secrets:** oo7 (keyring / portal) — never SQLite
-- **OAuth:** PKCE + system browser loopback for Google and Microsoft, only when `oauth.toml` has client IDs; Gmail, Yahoo and generic IMAP use app passwords. Access tokens live in one in-memory cache per (account, purpose) in `alcedo-sync::oauth_token_cache`, refreshed 60 s before expiry under a per-account async mutex; the OAuth client config is re-read only when `oauth.toml` changes. Token endpoint errors are summarized, never logged raw.
+- **OAuth:** PKCE + system browser loopback for Google and Microsoft. Google needs a client in `oauth.toml`; Microsoft uses `oauth.toml` first, then the public client compiled in from `ALCEDO_MICROSOFT_CLIENT_ID`. Microsoft SMTP logs in with the account's primary sign-in name from the ID token, because SMTP rejects aliases that IMAP accepts. Gmail, Yahoo and generic IMAP use app passwords. Access tokens live in one in-memory cache per (account, purpose) in `alcedo-sync::oauth_token_cache`, refreshed 60 s before expiry under a per-account async mutex; the OAuth client config is re-read only when `oauth.toml` changes. Token endpoint errors are summarized, never logged raw.
 
 ## Crate graph
 
 ```
-alcedo-core   → (serde, uuid, chrono, thiserror)     # domain types, reply planning, routing, private_fs, byte_lru
+alcedo-core   → (serde, uuid, chrono, thiserror)     # domain types, MailProvider profiles, reply planning, routing, private_fs, byte_lru
 alcedo-tls    → rustls + rustls-native-certs + webpki-roots
 alcedo-store  → core (rusqlite, bundled SQLite)
 alcedo-html   → core (ammonia sanitizer, tracker detection)
@@ -109,6 +109,10 @@ Remaining debt:
 1. `mail/mod.rs` still carries the ~700-line `init` (it must stay inside the `#[relm4::component]` impl); child components would shrink it further.
 2. `handle/requests.rs` and `handle/dispatch.rs` (≈1k lines each) are still one flat enum and one match per lane. Nesting a per-table enum (`WriteRequest::Messages(MessagesWrite)`) would let each table own its variants and dispatch, but it changes every call site, so only do it if the flat layout becomes a problem.
 3. `message_list/mod.rs` (≈2.5k lines, about 1.1k of which are tests) and `message_list/cells.rs` (≈1.4k lines) are the largest UI files left.
+
+## Mail providers
+
+Provider differences live behind two interfaces. `alcedo_core::MailProvider` (`mail_provider/`) holds pure server settings and protocol rules, and `alcedo_oauth::OAuthFlow` holds browser sign-in and token refresh. `OAuthProvider::profile` and `oauth_flow` are the only places that choose an implementation, so shared code asks about behaviour and does not check the vendor.
 
 ## Extension points
 

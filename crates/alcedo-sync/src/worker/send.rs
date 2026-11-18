@@ -201,10 +201,7 @@ pub(super) async fn smtp_options_for_compose(
         port: account.smtp_port,
         starttls: account.smtp_starttls,
         email: account.email.clone(),
-        username: match &account.auth {
-            AuthMethod::Password => account.smtp_login_name().to_string(),
-            AuthMethod::OAuth2 { .. } => account.email.clone(),
-        },
+        username: account.smtp_auth_username().to_string(),
         display_name: account.display_name.clone(),
         from_email: Some(from_email),
         from_display_name: Some(from_display_name),

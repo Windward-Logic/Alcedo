@@ -11,7 +11,7 @@ use alcedo_core::{
     sanitize_sender_name,
 };
 use alcedo_html::html_to_plain_email;
-use alcedo_oauth::{GOOGLE_MAIL_SCOPE, MICROSOFT_SCOPES, google_auth_flow, microsoft_auth_flow};
+use alcedo_oauth::oauth_flow;
 use relm4::Sender;
 use relm4::adw;
 use relm4::adw::prelude::*;
@@ -369,14 +369,9 @@ pub(crate) async fn mail_oauth_pkce(account: &Account) -> Result<OAuthTokens, Er
         }
     };
     let provider_cfg = oauth_provider_config(&oauth_provider).map_err(Error::Auth)?;
-    match oauth_provider {
-        OAuthProvider::Google => {
-            google_auth_flow(&provider_cfg, &[GOOGLE_MAIL_SCOPE], launch_auth_url).await
-        }
-        OAuthProvider::Microsoft => {
-            microsoft_auth_flow(&provider_cfg, &MICROSOFT_SCOPES, launch_auth_url).await
-        }
-    }
+    oauth_flow(oauth_provider)
+        .sign_in(&provider_cfg, Box::new(launch_auth_url))
+        .await
 }
 
 fn push_account_subpage(
@@ -1305,12 +1300,7 @@ fn push_account_subpage(
                 oauth_spinner.set_visible(true);
 
                 let oauth_provider = match &account.auth {
-                    AuthMethod::OAuth2 {
-                        provider: OAuthProvider::Google,
-                    } => OAuthProvider::Google,
-                    AuthMethod::OAuth2 {
-                        provider: OAuthProvider::Microsoft,
-                    } => OAuthProvider::Microsoft,
+                    AuthMethod::OAuth2 { provider } => *provider,
                     AuthMethod::Password => unreachable!(),
                 };
 

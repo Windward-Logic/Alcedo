@@ -32,8 +32,7 @@ use alcedo_imap::{
     uid_fetch_routing_headers,
 };
 use alcedo_oauth::{
-    SecretKind, get_secret, load_oauth_config_cached, refresh_google, refresh_microsoft,
-    store_secret, with_quiet_keyring,
+    SecretKind, get_secret, load_oauth_config_cached, oauth_flow, store_secret, with_quiet_keyring,
 };
 use alcedo_pgp_api::{
     IncomingKind, PgpBackend, PgpMimeKind, ProtectRequest, SignKey, inspect_incoming,

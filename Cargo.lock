@@ -111,6 +111,7 @@ name = "alcedo-oauth"
 version = "1.0.5"
 dependencies = [
  "alcedo-core",
+ "base64 0.22.1",
  "directories",
  "oauth2",
  "oo7",

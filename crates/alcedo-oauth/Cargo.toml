@@ -8,6 +8,7 @@ description = "OAuth PKCE and secrets for Alcedo"
 
 [dependencies]
 alcedo-core = { workspace = true }
+base64 = { workspace = true }
 oo7 = { workspace = true }
 oauth2 = { workspace = true }
 reqwest = { workspace = true }

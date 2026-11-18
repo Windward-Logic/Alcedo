@@ -82,21 +82,9 @@ pub(super) async fn refresh_mail_oauth_tokens(
         .await?
         .ok_or_else(|| Error::Auth("no refresh token stored for account".to_string()))?;
 
-    let tokens =
-        match provider {
-            OAuthProvider::Google => {
-                let provider_cfg = config.google.as_ref().ok_or_else(|| {
-                    Error::Auth("google oauth.toml client_id missing".to_string())
-                })?;
-                refresh_google(provider_cfg, &refresh_token).await?
-            }
-            OAuthProvider::Microsoft => {
-                let provider_cfg = config.microsoft.as_ref().ok_or_else(|| {
-                    Error::Auth("microsoft oauth.toml client_id missing".to_string())
-                })?;
-                refresh_microsoft(provider_cfg, &refresh_token).await?
-            }
-        };
+    let flow = oauth_flow(*provider);
+    let client = flow.client_config(&config).map_err(Error::Auth)?;
+    let tokens = flow.refresh(&client, &refresh_token).await?;
 
     if let Some(new_refresh) = tokens.refresh_token.as_deref() {
         store_secret(

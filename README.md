@@ -118,9 +118,19 @@ Gmail works with an app password and needs no configuration file:
 
 Google Workspace admins can turn app passwords off. Yahoo and generic IMAP accounts also use app passwords, stored in the system keyring via `oo7`.
 
+## Microsoft sign-in
+
+Builds made with `ALCEDO_MICROSOFT_CLIENT_ID` set include that Microsoft public client, so Outlook.com and Microsoft 365 accounts sign in through the browser with no configuration file:
+
+```bash
+ALCEDO_MICROSOFT_CLIENT_ID="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" cargo build --release -p alcedo
+```
+
+Register the client for personal and organizational accounts, as a public client with the redirect URI `http://127.0.0.1/`. Add that URI in the app manifest, because the Azure portal's redirect form rejects `http` loopback addresses. Builds without the variable need a `[microsoft]` entry in `oauth.toml`.
+
 ## OAuth (advanced, optional)
 
-Google and Microsoft sign-in can use your own OAuth client IDs instead. For Google this needs a Google Cloud project with a desktop OAuth client. Copy `oauth.toml.example` to `$XDG_CONFIG_HOME/alcedo/oauth.toml` and add your client IDs. Google Desktop OAuth clients also need `client_secret` (it is not confidential for installed apps):
+Google and Microsoft sign-in can use your own OAuth client IDs instead. For Google this needs a Google Cloud project with a desktop OAuth client. Copy `oauth.toml.example` to `$XDG_CONFIG_HOME/alcedo/oauth.toml` and add your client IDs. A `[microsoft]` entry replaces the built-in client, and accounts signed in with a different client must sign in again. Google Desktop OAuth clients also need `client_secret` (it is not confidential for installed apps):
 
 ```toml
 [google]

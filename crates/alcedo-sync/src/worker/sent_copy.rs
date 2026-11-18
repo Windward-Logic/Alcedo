@@ -7,7 +7,9 @@ use super::bodies::{
     emit_body_ready_from_stored, recover_html_body, save_attachments, stored_has_local_body,
 };
 use super::drafts::{draft_message_id_eq, normalize_draft_message_id};
-use super::mailbox_sync::{emit_folder_envelopes, ensure_selected, fetched_to_envelope};
+use super::mailbox_sync::{
+    emit_folder_envelopes, ensure_selected, envelope_fetch_start_seq, fetched_to_envelope,
+};
 use super::moves::sync_destination_folder;
 use super::send::resolve_compose_from;
 use super::session::is_recoverable_disconnect;
@@ -55,6 +57,157 @@ pub(super) fn sent_folder(folders: &[Folder]) -> Option<&Folder> {
 /// still files a copy.
 pub(crate) fn should_append_sent_copy(header_hits: &[u32]) -> bool {
     header_hits.is_empty()
+}
+
+/// Pauses between looks for a provider's own Sent copy. There is no event to
+/// wait on, and past this limit Alcedo files the copy itself.
+const PROVIDER_COPY_RETRY_DELAYS: [Duration; 3] = [
+    Duration::from_secs(1),
+    Duration::from_secs(2),
+    Duration::from_secs(3),
+];
+
+/// Newest Sent messages checked for the provider's copy.
+const PROVIDER_COPY_SCAN_LIMIT: u32 = 10;
+
+/// True when the account's provider files its own Sent copy of submitted mail.
+fn provider_saves_sent_copy(account: &Account) -> bool {
+    account
+        .mail_provider()
+        .is_some_and(|provider| provider.files_sent_copy_on_submit())
+}
+
+/// What still identifies a sent message after the provider changes its Message-ID.
+#[derive(Debug, PartialEq, Eq)]
+struct SentFingerprint {
+    date: i64,
+    subject: String,
+    recipients: Vec<String>,
+    in_reply_to: String,
+}
+
+impl SentFingerprint {
+    fn new<'a>(
+        date: i64,
+        subject: &str,
+        recipients: impl Iterator<Item = &'a str>,
+        in_reply_to: Option<&str>,
+    ) -> Self {
+        let mut recipients: Vec<String> = recipients
+            .map(|address| address.trim().to_ascii_lowercase())
+            .collect();
+        recipients.sort_unstable();
+        let in_reply_to = in_reply_to
+            .and_then(|ids| ids.split_whitespace().last())
+            .map(normalize_draft_message_id)
+            .unwrap_or_default();
+        Self {
+            date,
+            subject: subject.trim().to_string(),
+            recipients,
+            in_reply_to,
+        }
+    }
+
+    fn from_rfc822(rfc822: &[u8]) -> Option<Self> {
+        let message = MessageParser::default().parse_headers(rfc822)?;
+        let recipients = message
+            .to()
+            .into_iter()
+            .chain(message.cc())
+            .flat_map(|addresses| addresses.iter())
+            .filter_map(|address| address.address());
+        Some(Self::new(
+            message.date()?.to_timestamp(),
+            message.subject().unwrap_or_default(),
+            recipients,
+            message.in_reply_to().as_text(),
+        ))
+    }
+
+    fn from_envelope(envelope: &alcedo_imap::FetchedEnvelope) -> Self {
+        let recipients = envelope
+            .to
+            .iter()
+            .chain(&envelope.cc)
+            .map(|address| address.email.as_str());
+        Self::new(
+            envelope.date.timestamp(),
+            &envelope.subject,
+            recipients,
+            envelope.in_reply_to.as_deref(),
+        )
+    }
+}
+
+/// The newest candidate that is the same sent message.
+fn provider_copy_uid(sent: &SentFingerprint, candidates: &[(u32, SentFingerprint)]) -> Option<u32> {
+    candidates
+        .iter()
+        .filter(|(_, candidate)| candidate == sent)
+        .map(|(uid, _)| *uid)
+        .max()
+}
+
+/// Look for the copy the provider filed in Sent, giving it a moment to arrive.
+async fn find_provider_sent_copy(
+    state: &mut WorkerImapState,
+    sent: &Folder,
+    rfc822: &[u8],
+) -> Result<Option<u32>> {
+    let Some(fingerprint) = SentFingerprint::from_rfc822(rfc822) else {
+        return Ok(None);
+    };
+    for delay in std::iter::once(Duration::ZERO).chain(PROVIDER_COPY_RETRY_DELAYS) {
+        tokio::time::sleep(delay).await;
+        let selected = with_imap_timeout(
+            IMAP_COMMAND_TIMEOUT,
+            state.client_mut().select_mailbox(&sent.imap_name),
+        )
+        .await?;
+        if selected.exists == 0 {
+            continue;
+        }
+        let start = envelope_fetch_start_seq(selected.exists, PROVIDER_COPY_SCAN_LIMIT);
+        let recent = with_imap_timeout(
+            IMAP_COMMAND_TIMEOUT,
+            alcedo_imap::fetch_envelope_meta_by_seq(
+                state.client_mut(),
+                sent.id,
+                &format!("{start}:{}", selected.exists),
+            ),
+        )
+        .await?;
+        let candidates: Vec<(u32, SentFingerprint)> = recent
+            .iter()
+            .filter(|envelope| !envelope.imap_deleted)
+            .map(|envelope| (envelope.uid, SentFingerprint::from_envelope(envelope)))
+            .collect();
+        if let Some(uid) = provider_copy_uid(&fingerprint, &candidates) {
+            return Ok(Some(uid));
+        }
+    }
+    Ok(None)
+}
+
+/// The provider's own Sent copy, when this account's provider files one.
+async fn provider_sent_copy(
+    state: &mut WorkerImapState,
+    account: &Account,
+    sent: &Folder,
+    rfc822: &[u8],
+) -> Result<Option<u32>> {
+    if !provider_saves_sent_copy(account) {
+        return Ok(None);
+    }
+    match find_provider_sent_copy(state, sent, rfc822).await {
+        Ok(uid) => Ok(uid),
+        Err(err) if is_recoverable_disconnect(&err) || is_auth_failure(&err) => Err(err),
+        Err(err) => {
+            warn!(error = %err, folder = %sent.imap_name, "failed to look for the provider's Sent copy");
+            Ok(None)
+        }
+    }
 }
 
 /// Which copy of a duplicated Message-ID is the one worth keeping.
@@ -668,17 +821,23 @@ pub(super) async fn file_sent_copy(
     };
 
     emit_status(events, account, "Saving to Sent…".to_string());
-    let resolved = match ensure_sent_copy(state, &sent, rfc822, message_id_hdr).await {
-        Ok(uid) => uid,
-        Err(err) if is_recoverable_disconnect(&err) || is_auth_failure(&err) => return Err(err),
-        Err(err) => {
-            warn!(
-                error = %err,
-                folder = %sent.imap_name,
-                "failed to ensure sent copy"
-            );
-            None
-        }
+    let provider_copy = provider_sent_copy(state, account, &sent, rfc822).await?;
+    let resolved = match provider_copy {
+        Some(uid) => Some(uid),
+        None => match ensure_sent_copy(state, &sent, rfc822, message_id_hdr).await {
+            Ok(uid) => uid,
+            Err(err) if is_recoverable_disconnect(&err) || is_auth_failure(&err) => {
+                return Err(err);
+            }
+            Err(err) => {
+                warn!(
+                    error = %err,
+                    folder = %sent.imap_name,
+                    "failed to ensure sent copy"
+                );
+                None
+            }
+        },
     };
     let mut rehomed = false;
     if let (Some(placeholder), Some(uid)) = (placeholder.as_ref(), resolved) {
@@ -705,6 +864,10 @@ pub(super) async fn file_sent_copy(
 
     if should_sync_sent_after_file(placeholder.as_ref(), resolved, rehomed) {
         sync_destination_folder(state, account, sent.id, store, events).await;
+    }
+    if provider_copy.is_some() {
+        // The attachments are on the provider's copy, which has a different Message-ID.
+        return Ok(());
     }
     apply_sent_copy_attachments(state, account, &sent, rfc822, message_id_hdr, store).await
 }
@@ -951,5 +1114,77 @@ mod tests {
             true
         ));
         assert!(should_sync_sent_after_file(None, None, false));
+    }
+
+    const SENT_RFC822: &[u8] = b"From: Me <alias@outlook.com>\r\n\
+        To: Friend <Friend@Example.com>\r\n\
+        Cc: other@example.com\r\n\
+        Subject: Re: test\r\n\
+        Date: Wed, 18 Nov 2026 20:07:30 +0000\r\n\
+        Message-ID: <local@outlook.com>\r\n\
+        In-Reply-To: <Original@example.com>\r\n\
+        \r\n\
+        Hello\r\n";
+
+    /// 2026-11-18T20:07:30Z, the Date header of [`SENT_RFC822`].
+    const SENT_TIMESTAMP: i64 = 1_795_032_450;
+
+    fn provider_copy() -> SentFingerprint {
+        SentFingerprint::new(
+            SENT_TIMESTAMP,
+            "Re: test",
+            ["other@example.com", "friend@example.com"].into_iter(),
+            Some("<original@example.com>"),
+        )
+    }
+
+    #[test]
+    fn provider_copy_with_a_new_message_id_matches_the_sent_message() {
+        let sent = SentFingerprint::from_rfc822(SENT_RFC822).expect("fingerprint");
+        assert_eq!(provider_copy_uid(&sent, &[(1, provider_copy())]), Some(1));
+    }
+
+    #[test]
+    fn newest_matching_provider_copy_wins() {
+        let sent = provider_copy();
+        assert_eq!(
+            provider_copy_uid(&sent, &[(4, provider_copy()), (9, provider_copy())]),
+            Some(9)
+        );
+    }
+
+    #[test]
+    fn different_messages_are_not_the_provider_copy() {
+        let sent = provider_copy();
+        let recipients = || ["other@example.com", "friend@example.com"].into_iter();
+        let reply = Some("<original@example.com>");
+        let others = [
+            SentFingerprint::new(SENT_TIMESTAMP + 1, "Re: test", recipients(), reply),
+            SentFingerprint::new(SENT_TIMESTAMP, "Re: other", recipients(), reply),
+            SentFingerprint::new(
+                SENT_TIMESTAMP,
+                "Re: test",
+                ["friend@example.com"].into_iter(),
+                reply,
+            ),
+            SentFingerprint::new(SENT_TIMESTAMP, "Re: test", recipients(), None),
+        ];
+        for other in others {
+            assert_eq!(provider_copy_uid(&sent, &[(2, other)]), None);
+        }
+    }
+
+    #[test]
+    fn only_microsoft_oauth_accounts_rely_on_the_provider_copy() {
+        let mut account = crate::worker::test_support::account_with_imap_host("imap.example.com");
+        assert!(!provider_saves_sent_copy(&account));
+        account.auth = AuthMethod::OAuth2 {
+            provider: OAuthProvider::Google,
+        };
+        assert!(!provider_saves_sent_copy(&account));
+        account.auth = AuthMethod::OAuth2 {
+            provider: OAuthProvider::Microsoft,
+        };
+        assert!(provider_saves_sent_copy(&account));
     }
 }

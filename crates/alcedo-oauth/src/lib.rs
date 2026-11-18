@@ -1,5 +1,6 @@
 //! OAuth PKCE and keyring secrets (P5).
 
+pub mod flow;
 pub mod google;
 pub mod loopback;
 pub mod microsoft;
@@ -9,12 +10,16 @@ pub mod secrets;
 use std::path::{Path, PathBuf};
 
 use oauth2::TokenResponse;
-use oauth2::{AuthType, EndpointNotSet, EndpointSet, basic::BasicClient};
+use oauth2::basic::{
+    BasicErrorResponse, BasicRevocationErrorResponse, BasicTokenIntrospectionResponse,
+};
+use oauth2::{AuthType, Client, EndpointNotSet, EndpointSet, StandardRevocableToken};
 use serde::Deserialize;
 
 use alcedo_core::{Error, Result, looks_like_network_failure};
 
 pub use alcedo_core::OAuthTokens;
+pub use flow::{OAuthFlow, OpenAuthUrl, oauth_flow};
 pub use google::{GOOGLE_MAIL_SCOPE, google_auth_flow, refresh_google};
 pub use microsoft::{MICROSOFT_SCOPES, microsoft_auth_flow, refresh_microsoft};
 pub use secrets::{
@@ -24,17 +29,27 @@ pub use secrets::{
 };
 
 /// OAuth2 client with authorization and token endpoints configured.
-pub(crate) type ConfiguredOAuthClient =
-    BasicClient<EndpointSet, EndpointNotSet, EndpointNotSet, EndpointNotSet, EndpointSet>;
+pub(crate) type ConfiguredOAuthClient<TokenResponseType> = Client<
+    BasicErrorResponse,
+    TokenResponseType,
+    BasicTokenIntrospectionResponse,
+    StandardRevocableToken,
+    BasicRevocationErrorResponse,
+    EndpointSet,
+    EndpointNotSet,
+    EndpointNotSet,
+    EndpointNotSet,
+    EndpointSet,
+>;
 
 /// Build an OAuth2 client with auth + token URIs and redirect URL set.
-pub(crate) fn build_oauth_client(
+pub(crate) fn build_oauth_client<TokenResponseType: TokenResponse>(
     config: &ProviderOAuthConfig,
     auth_url: &str,
     token_url: &str,
     redirect_url: oauth2::RedirectUrl,
-) -> Result<ConfiguredOAuthClient> {
-    let mut client = BasicClient::new(oauth2::ClientId::new(config.client_id.clone()))
+) -> Result<ConfiguredOAuthClient<TokenResponseType>> {
+    let mut client = Client::new(oauth2::ClientId::new(config.client_id.clone()))
         .set_auth_uri(
             oauth2::AuthUrl::new(auth_url.to_string())
                 .map_err(|e| Error::Auth(format!("auth URL invalid: {e}")))?,
@@ -157,11 +172,35 @@ impl ProviderOAuthConfig {
     }
 }
 
-/// OAuth client IDs loaded from `oauth.toml`.
+/// Microsoft public client compiled into this build, if the build set
+/// `ALCEDO_MICROSOFT_CLIENT_ID`. Public clients have no secret, so the ID is
+/// safe to ship; it is a build setting so forks do not inherit the official app.
+const BUILT_IN_MICROSOFT_CLIENT_ID: Option<&str> = option_env!("ALCEDO_MICROSOFT_CLIENT_ID");
+
+/// OAuth client IDs from `oauth.toml` and this build's built-in clients.
 #[derive(Clone, Debug, Default, Deserialize)]
 pub struct OAuthConfig {
     pub google: Option<ProviderOAuthConfig>,
     pub microsoft: Option<ProviderOAuthConfig>,
+}
+
+impl OAuthConfig {
+    /// Use `built_in_client_id` when `oauth.toml` names no Microsoft client.
+    ///
+    /// A client from `oauth.toml` always wins: refresh tokens only work with
+    /// the client that issued them, so replacing it would sign accounts out.
+    fn with_microsoft_fallback(mut self, built_in_client_id: Option<&str>) -> Self {
+        if self.microsoft.is_none() {
+            self.microsoft = built_in_client_id
+                .map(str::trim)
+                .filter(|id| !id.is_empty())
+                .map(|id| ProviderOAuthConfig {
+                    client_id: id.to_string(),
+                    client_secret: None,
+                });
+        }
+        self
+    }
 }
 
 /// Convert an oauth2 token response into [`OAuthTokens`].
@@ -170,6 +209,7 @@ pub(crate) fn tokens_from_response<T: TokenResponse>(response: T) -> OAuthTokens
         access_token: response.access_token().secret().clone(),
         refresh_token: response.refresh_token().map(|token| token.secret().clone()),
         expires_in: response.expires_in().map(|duration| duration.as_secs()),
+        sign_in_name: None,
     }
 }
 
@@ -218,12 +258,13 @@ pub fn google_client_secret_missing_message() -> String {
     )
 }
 
-/// Load OAuth client configuration from `$XDG_CONFIG_HOME/alcedo/oauth.toml`.
+/// Load OAuth clients from `$XDG_CONFIG_HOME/alcedo/oauth.toml`, which is
+/// optional, and add this build's built-in clients.
 pub fn load_oauth_config() -> Result<OAuthConfig> {
     let path = oauth_config_path().ok_or_else(|| {
         Error::Auth("could not resolve XDG config directory for oauth.toml".to_string())
     })?;
-    load_oauth_config_from_path(&path)
+    Ok(read_oauth_config_or_default(&path)?.with_microsoft_fallback(BUILT_IN_MICROSOFT_CLIENT_ID))
 }
 
 /// Like [`load_oauth_config`], but re-parses `oauth.toml` only when its
@@ -232,7 +273,21 @@ pub fn load_oauth_config_cached() -> Result<OAuthConfig> {
     let path = oauth_config_path().ok_or_else(|| {
         Error::Auth("could not resolve XDG config directory for oauth.toml".to_string())
     })?;
-    load_oauth_config_cached_from(&path)
+    Ok(load_oauth_config_cached_from(&path)?.with_microsoft_fallback(BUILT_IN_MICROSOFT_CLIENT_ID))
+}
+
+/// Read `oauth.toml`, treating only a file that is really absent as empty. An
+/// unreadable or invalid file stays an error, so a built-in client never
+/// silently replaces the client the user configured.
+fn read_oauth_config_or_default(path: &Path) -> Result<OAuthConfig> {
+    match path.try_exists() {
+        Ok(true) => load_oauth_config_from_path(path),
+        Ok(false) => Ok(OAuthConfig::default()),
+        Err(e) => Err(Error::Auth(format!(
+            "read oauth config {}: {e}",
+            path.display()
+        ))),
+    }
 }
 
 type ConfigCacheEntry = (PathBuf, Option<std::time::SystemTime>, OAuthConfig);
@@ -250,7 +305,7 @@ fn load_oauth_config_cached_from(path: &Path) -> Result<OAuthConfig> {
     {
         return Ok(config.clone());
     }
-    let config = load_oauth_config_from_path(path)?;
+    let config = read_oauth_config_or_default(path)?;
     *cache = Some((path.to_path_buf(), modified, config.clone()));
     Ok(config)
 }
@@ -451,6 +506,67 @@ redirect_uri = "http://127.0.0.1"
             .unwrap();
         let second = load_oauth_config_cached_from(&path).unwrap();
         assert_eq!(second.google.unwrap().client_id, "two");
+    }
+
+    #[test]
+    fn cached_config_treats_a_missing_file_as_empty() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let config = load_oauth_config_cached_from(&dir.path().join("oauth.toml"))
+            .expect("a missing oauth.toml is not an error");
+        assert!(config.google.is_none());
+        assert!(config.microsoft.is_none());
+    }
+
+    #[test]
+    fn missing_oauth_toml_uses_the_built_in_microsoft_client() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let config = read_oauth_config_or_default(&dir.path().join("oauth.toml"))
+            .expect("a missing oauth.toml is not an error")
+            .with_microsoft_fallback(Some("built-in-id"));
+        let microsoft = config.microsoft.expect("built-in client");
+        assert_eq!(microsoft.client_id, "built-in-id");
+        assert!(!microsoft.has_client_secret());
+        assert!(config.google.is_none());
+    }
+
+    #[test]
+    fn own_microsoft_client_wins_over_the_built_in_one() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let path = dir.path().join("oauth.toml");
+        std::fs::write(&path, "[microsoft]\nclient_id = \"own-id\"\n").unwrap();
+        let config = read_oauth_config_or_default(&path)
+            .unwrap()
+            .with_microsoft_fallback(Some("built-in-id"));
+        assert_eq!(config.microsoft.unwrap().client_id, "own-id");
+    }
+
+    #[test]
+    fn google_only_oauth_toml_still_gets_the_built_in_microsoft_client() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let path = dir.path().join("oauth.toml");
+        std::fs::write(&path, "[google]\nclient_id = \"google-id\"\n").unwrap();
+        let config = read_oauth_config_or_default(&path)
+            .unwrap()
+            .with_microsoft_fallback(Some("built-in-id"));
+        assert_eq!(config.google.unwrap().client_id, "google-id");
+        assert_eq!(config.microsoft.unwrap().client_id, "built-in-id");
+    }
+
+    #[test]
+    fn build_without_a_client_id_leaves_microsoft_unconfigured() {
+        for built_in in [None, Some(""), Some("   ")] {
+            let config = OAuthConfig::default().with_microsoft_fallback(built_in);
+            assert!(config.microsoft.is_none(), "{built_in:?}");
+        }
+    }
+
+    #[test]
+    fn invalid_oauth_toml_stays_an_error() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let path = dir.path().join("oauth.toml");
+        std::fs::write(&path, "[microsoft\n").unwrap();
+        let err = read_oauth_config_or_default(&path).expect_err("invalid file should error");
+        assert!(err.to_string().contains("parse oauth config"), "{err}");
     }
 
     #[test]

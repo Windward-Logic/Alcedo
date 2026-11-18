@@ -27,6 +27,7 @@ pub mod layout_policy;
 mod line_endings;
 mod list_unsubscribe;
 pub mod mail_feedback;
+mod mail_provider;
 mod mailbox_utf7;
 mod message_id;
 mod mime;
@@ -50,7 +51,7 @@ pub mod welcome;
 pub use account::{
     Account, AuthMethod, DEFAULT_ACCENT_COLOR, Folder, OAuthProvider, OAuthTokens, SpecialUse,
     avatar_chip_words, avatar_from_label, display_name_from_email, login_name_from,
-    sanitize_accent_color, sanitize_avatar_text, username_for_email_change,
+    oauth_smtp_login, sanitize_accent_color, sanitize_avatar_text, username_for_email_change,
 };
 pub use attachment::{
     AttachmentLists, DEFAULT_COMPOSE_SIZE_LIMIT, DEFAULT_RISKY_ATTACHMENT_EXTENSIONS,
@@ -119,6 +120,7 @@ pub use list_unsubscribe::{
     ListUnsubscribe, MailtoUnsubscribe, https_host_is_blocked, https_uri_host, ip_addr_is_blocked,
     parse_list_unsubscribe,
 };
+pub use mail_provider::MailProvider;
 pub use mailbox_utf7::{decode_mailbox_name, encode_mailbox_name};
 pub use message_id::{msg_id_list, reply_in_reply_to, reply_references};
 pub use mime::decode_mime_header;
@@ -238,6 +240,45 @@ mod tests {
         assert_eq!(draft.imap_host, "imap.mail.yahoo.com");
         assert_eq!(draft.smtp_host, "smtp.mail.yahoo.com");
         assert!(matches!(draft.auth, AuthMethod::Password));
+    }
+
+    #[test]
+    fn personal_microsoft_presets_use_the_outlook_com_smtp_host() {
+        for email in ["user@outlook.com", "user@hotmail.com", "user@Live.com"] {
+            let draft = Account::preset_for_email(email).expect("preset");
+            assert_eq!(draft.smtp_host, "smtp-mail.outlook.com", "{email}");
+            assert_eq!(draft.smtp_port, 587, "{email}");
+            assert!(draft.smtp_starttls, "{email}");
+            assert!(
+                OAuthProvider::Microsoft
+                    .validate_mail_hosts(&draft.imap_host, &draft.smtp_host)
+                    .is_ok(),
+                "{email}"
+            );
+        }
+    }
+
+    #[test]
+    fn microsoft_365_preset_keeps_the_office365_smtp_host() {
+        let draft = Account::preset_for_email("user@office365.com").expect("preset");
+        assert_eq!(draft.smtp_host, "smtp.office365.com");
+    }
+
+    #[test]
+    fn microsoft_oauth_tokens_only_go_to_microsoft_smtp_hosts() {
+        let microsoft = OAuthProvider::Microsoft;
+        assert!(microsoft.validate_smtp_host("smtp.office365.com").is_ok());
+        assert!(
+            microsoft
+                .validate_smtp_host("SMTP-MAIL.outlook.com.")
+                .is_ok()
+        );
+        assert!(microsoft.validate_smtp_host("smtp.example.com").is_err());
+        assert!(
+            OAuthProvider::Google
+                .validate_smtp_host("smtp-mail.outlook.com")
+                .is_err()
+        );
     }
 
     #[test]
@@ -509,6 +550,7 @@ mod tests {
                 access_token: "ya29.access".to_string(),
                 refresh_token: Some("1//refresh".to_string()),
                 expires_in: Some(3600),
+                sign_in_name: None,
             }),
             split_credentials: false,
             smtp_username: String::new(),
@@ -537,6 +579,92 @@ mod tests {
             avatar_image: Vec::new(),
         };
         assert_eq!(account.smtp_login_name(), account.login_name());
+    }
+
+    #[test]
+    fn oauth_account_sends_with_its_sign_in_name_and_reads_with_its_address() {
+        let account = crate::Account {
+            id: crate::AccountId(uuid::Uuid::nil()),
+            email: "alias@outlook.com".to_string(),
+            username: "alias@outlook.com".to_string(),
+            split_credentials: false,
+            smtp_username: "primary@example.com".to_string(),
+            display_name: String::new(),
+            sender_name: String::new(),
+            imap_host: String::new(),
+            imap_port: 993,
+            smtp_host: String::new(),
+            smtp_port: 587,
+            smtp_starttls: true,
+            auth: crate::AuthMethod::OAuth2 {
+                provider: OAuthProvider::Microsoft,
+            },
+            accent_color: String::new(),
+            avatar_text: String::new(),
+            avatar_image: Vec::new(),
+        };
+        assert_eq!(account.smtp_login_name(), "primary@example.com");
+        assert_eq!(account.login_name(), "alias@outlook.com");
+    }
+
+    fn account_for_smtp_auth(auth: crate::AuthMethod, smtp_username: &str) -> crate::Account {
+        crate::Account {
+            id: crate::AccountId(uuid::Uuid::nil()),
+            email: "alias@outlook.com".to_string(),
+            username: "custom-login".to_string(),
+            split_credentials: false,
+            smtp_username: smtp_username.to_string(),
+            display_name: String::new(),
+            sender_name: String::new(),
+            imap_host: String::new(),
+            imap_port: 993,
+            smtp_host: String::new(),
+            smtp_port: 587,
+            smtp_starttls: true,
+            auth,
+            accent_color: String::new(),
+            avatar_text: String::new(),
+            avatar_image: Vec::new(),
+        }
+    }
+
+    #[test]
+    fn microsoft_oauth_authenticates_smtp_with_the_sign_in_name() {
+        let account = account_for_smtp_auth(
+            crate::AuthMethod::OAuth2 {
+                provider: OAuthProvider::Microsoft,
+            },
+            "primary@example.com",
+        );
+        assert_eq!(account.smtp_auth_username(), "primary@example.com");
+    }
+
+    #[test]
+    fn microsoft_oauth_without_a_sign_in_name_authenticates_smtp_with_the_address() {
+        let account = account_for_smtp_auth(
+            crate::AuthMethod::OAuth2 {
+                provider: OAuthProvider::Microsoft,
+            },
+            "",
+        );
+        assert_eq!(account.smtp_auth_username(), "alias@outlook.com");
+    }
+
+    #[test]
+    fn google_oauth_authenticates_smtp_with_the_address() {
+        let account = account_for_smtp_auth(
+            crate::AuthMethod::OAuth2 {
+                provider: OAuthProvider::Google,
+            },
+            "stale-smtp-user",
+        );
+        assert_eq!(account.smtp_auth_username(), "alias@outlook.com");
+    }
+
+    #[test]
+    fn password_account_authenticates_smtp_with_its_login() {
+        let account = account_for_smtp_auth(crate::AuthMethod::Password, "");
+        assert_eq!(account.smtp_auth_username(), "custom-login");
     }
 
     #[test]
@@ -848,11 +976,53 @@ mod tests {
             access_token: "ya29.secret-access".to_string(),
             refresh_token: Some("1//secret-refresh".to_string()),
             expires_in: Some(3600),
+            sign_in_name: Some("private@example.com".to_string()),
         };
         let debug = format!("{tokens:?}");
         assert!(debug.contains("***"));
         assert!(!debug.contains("secret-access"));
         assert!(!debug.contains("secret-refresh"));
+        assert!(!debug.contains("private@example.com"));
         assert!(debug.contains("3600"));
+    }
+
+    fn tokens_signed_in_as(name: Option<&str>) -> OAuthTokens {
+        OAuthTokens {
+            access_token: "access".to_string(),
+            refresh_token: None,
+            expires_in: None,
+            sign_in_name: name.map(str::to_string),
+        }
+    }
+
+    #[test]
+    fn oauth_smtp_login_uses_the_reported_sign_in_name() {
+        let tokens = tokens_signed_in_as(Some(" primary@example.com "));
+        assert_eq!(
+            crate::oauth_smtp_login("old@example.com", Some(&tokens)),
+            "primary@example.com"
+        );
+    }
+
+    #[test]
+    fn oauth_smtp_login_keeps_the_current_login_without_a_reported_name() {
+        for tokens in [tokens_signed_in_as(None), tokens_signed_in_as(Some("  "))] {
+            assert_eq!(
+                crate::oauth_smtp_login("old@example.com", Some(&tokens)),
+                "old@example.com"
+            );
+        }
+        assert_eq!(
+            crate::oauth_smtp_login("old@example.com", None),
+            "old@example.com"
+        );
+    }
+
+    #[test]
+    fn oauth_tokens_saved_before_sign_in_names_still_load() {
+        let tokens: OAuthTokens =
+            serde_json::from_str(r#"{"access_token":"a","refresh_token":null,"expires_in":null}"#)
+                .expect("older token JSON");
+        assert_eq!(tokens.sign_in_name, None);
     }
 }

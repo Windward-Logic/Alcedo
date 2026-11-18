@@ -7,10 +7,7 @@ use alcedo_core::{
     Account, AccountDraft, AuthMethod, Error, OAuthProvider, display_name_from_email,
     login_name_from, mail_provider_labels, smtp_security_labels,
 };
-use alcedo_oauth::{
-    GOOGLE_MAIL_SCOPE, MICROSOFT_SCOPES, ProviderOAuthConfig, google_auth_flow, load_oauth_config,
-    microsoft_auth_flow,
-};
+use alcedo_oauth::{ProviderOAuthConfig, load_oauth_config, oauth_flow};
 use relm4::Sender;
 use relm4::adw;
 use relm4::adw::prelude::*;
@@ -473,16 +470,9 @@ pub fn build_add_account_dialog(sender: Sender<MailMsg>, runtime: Handle) -> adw
                 };
                 let (tx, rx) = oneshot::channel();
                 runtime.spawn(async move {
-                    let auth_result = match oauth_provider {
-                        OAuthProvider::Google => {
-                            google_auth_flow(&provider_cfg, &[GOOGLE_MAIL_SCOPE], launch_auth_url)
-                                .await
-                        }
-                        OAuthProvider::Microsoft => {
-                            microsoft_auth_flow(&provider_cfg, &MICROSOFT_SCOPES, launch_auth_url)
-                                .await
-                        }
-                    };
+                    let auth_result = oauth_flow(oauth_provider)
+                        .sign_in(&provider_cfg, Box::new(launch_auth_url))
+                        .await;
                     let _ = tx.send(auth_result);
                 });
                 glib::spawn_future_local(async move {
@@ -573,7 +563,7 @@ pub fn build_add_account_dialog(sender: Sender<MailMsg>, runtime: Handle) -> adw
 
 /// Open an OAuth authorization URL in the browser; safe to call from any thread.
 pub fn launch_auth_url(url: String) {
-    // google_auth_flow / microsoft_auth_flow invoke this from a Tokio worker.
+    // OAuth sign-in flows invoke this from a Tokio worker.
     // hop to the GTK main context; idle_add_local_once is main-thread-only.
     glib::MainContext::default().invoke(move || {
         let launcher = gtk::UriLauncher::new(&url);
@@ -589,29 +579,10 @@ pub fn launch_auth_url(url: String) {
     });
 }
 
-/// OAuth client settings for `provider`, read from `oauth.toml`.
+/// OAuth client settings for `provider`, from `oauth.toml` or this build's built-in client.
 pub fn oauth_provider_config(provider: &OAuthProvider) -> Result<ProviderOAuthConfig, String> {
     let config = load_oauth_config().map_err(|err| err.to_string())?;
-    match provider {
-        OAuthProvider::Google => {
-            let google = config.google.ok_or_else(|| {
-                format!(
-                    "Add Google client_id to {}",
-                    alcedo_oauth::oauth_config_path_display()
-                )
-            })?;
-            if !google.has_client_secret() {
-                return Err(alcedo_oauth::google_client_secret_missing_message());
-            }
-            Ok(google)
-        }
-        OAuthProvider::Microsoft => config.microsoft.ok_or_else(|| {
-            format!(
-                "Add Microsoft client_id to {}",
-                alcedo_oauth::oauth_config_path_display()
-            )
-        }),
-    }
+    oauth_flow(*provider).client_config(&config)
 }
 
 fn build_oauth_draft(provider: u32, email: &str) -> Result<AccountDraft, &'static str> {
@@ -639,19 +610,17 @@ fn build_oauth_draft(provider: u32, email: &str) -> Result<AccountDraft, &'stati
         }
     }
 
+    let profile = oauth_provider.profile();
     let display_name = display_name_from_email(email);
     Ok(AccountDraft {
         email: email.to_string(),
         username: email.to_string(),
         display_name,
-        imap_host: oauth_provider.imap_host().to_string(),
+        imap_host: profile.imap_host().to_string(),
         imap_port: 993,
-        smtp_host: oauth_provider.smtp_host().to_string(),
-        smtp_port: match oauth_provider {
-            OAuthProvider::Google => 465,
-            OAuthProvider::Microsoft => 587,
-        },
-        smtp_starttls: matches!(oauth_provider, OAuthProvider::Microsoft),
+        smtp_host: profile.smtp_host().to_string(),
+        smtp_port: profile.smtp_port(),
+        smtp_starttls: profile.smtp_starttls(),
         auth: AuthMethod::OAuth2 {
             provider: oauth_provider,
         },
