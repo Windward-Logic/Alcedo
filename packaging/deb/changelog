@@ -1,3 +1,10 @@
+alcedo (1.0.4-1) resolute; urgency=medium
+
+  * Gmail: read and starred state stays in step across a message's labels.
+    Reading a message in one label marks its copies in the others read.
+
+ -- Windward Logic LLC <alcedo@windwardlogic.com>  Wed, 18 Nov 2026 12:40:00 +0000
+
 alcedo (1.0.3-1) resolute; urgency=medium
 
   * RSVP replies name the attendee address the invitation used, so an

@@ -42,6 +42,11 @@
   </screenshots>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="1.0.4" date="2026-11-18">
+      <description>
+        <p>Gmail keeps read and starred state in step across a message's labels, so reading a message in one label marks it read in the others.</p>
+      </description>
+    </release>
     <release version="1.0.3" date="2026-11-18">
       <description>
         <p>Calendar RSVP replies use the attendee address from the invitation, so invitations sent to an alias are answered. The calendar chooser after Accept appears beside the RSVP buttons.</p>
