@@ -1023,7 +1023,7 @@ pub fn sync_reader_star(widgets: &ReaderWidgets, flagged: bool) {
     widgets.star_syncing.set(false);
 }
 
-/// Drop Reply / Forward text on the single-pane layout. Accessible names stay.
+/// Drop Reply / Forward text on compact layouts. Accessible names stay.
 pub fn set_reader_reply_icon_only(widgets: &ReaderWidgets, icon_only: bool) {
     if icon_only {
         widgets.reply_btn.set_label("");

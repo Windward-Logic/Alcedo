@@ -1,13 +1,22 @@
 //! Breakpoint and window-control placement for the mail shell.
 //!
-//! Wide windows keep the resizable panes. At 860sp the rail hides and folders
-//! become an overlay. At 560sp the window is a single pane.
+//! Wide windows keep the resizable panes. As the window narrows, toolbars drop
+//! their labels, then the rail hides and folders become an overlay, and finally
+//! the window shows a single pane. Each limit is the narrowest width at which
+//! the wider layout still fits its minimum content.
+
+/// Main window is at most this wide (sp): toolbars drop their text labels.
+pub const COMPACT_MAX_WIDTH_SP: f64 = 1040.0;
 
 /// Main window is at most this wide (sp): hide the rail, overlay the folders.
-pub const MEDIUM_MAX_WIDTH_SP: f64 = 860.0;
+pub const MEDIUM_MAX_WIDTH_SP: f64 = 975.0;
 
 /// Main window is at most this wide (sp): one pane at a time.
-pub const NARROW_MAX_WIDTH_SP: f64 = 560.0;
+pub const NARROW_MAX_WIDTH_SP: f64 = 750.0;
+
+const _: () = assert!(
+    NARROW_MAX_WIDTH_SP < MEDIUM_MAX_WIDTH_SP && MEDIUM_MAX_WIDTH_SP < COMPACT_MAX_WIDTH_SP
+);
 
 /// Smallest useful main-window size, in pixels.
 pub const MIN_WINDOW_WIDTH: i32 = 360;
@@ -18,6 +27,14 @@ pub const MIN_WINDOW_HEIGHT: i32 = 480;
 pub enum ReadingPanePlacement {
     Right,
     Bottom,
+}
+
+/// The window-width breakpoints currently applied.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct WidthBreakpoints {
+    pub compact: bool,
+    pub medium: bool,
+    pub narrow: bool,
 }
 
 /// What a width breakpoint does to the shell.
@@ -34,19 +51,19 @@ pub struct AdaptiveMailLayout {
     pub compact_composer: bool,
 }
 
-/// `max_width_860` / `max_width_560` are the applied breakpoint flags.
-/// The narrow flag implies the medium layout even if the wider breakpoint
-/// has not been reported yet.
-pub fn adaptive_mail_layout(max_width_860: bool, max_width_560: bool) -> AdaptiveMailLayout {
-    let single_pane = max_width_560;
-    let medium = max_width_860 || single_pane;
+/// Only the narrowest matching window breakpoint is applied, so each breakpoint
+/// implies the layouts wider than it.
+pub fn adaptive_mail_layout(applied: WidthBreakpoints) -> AdaptiveMailLayout {
+    let single_pane = applied.narrow;
+    let medium = applied.medium || single_pane;
+    let compact = applied.compact || medium;
     AdaptiveMailLayout {
         hide_rail: medium,
         folders_overlay: medium,
         single_pane,
         list_compose: medium,
-        reply_icon_only: single_pane,
-        compact_composer: single_pane,
+        reply_icon_only: compact,
+        compact_composer: compact,
     }
 }
 
@@ -183,21 +200,44 @@ mod tests {
     }
 
     #[test]
-    fn breakpoints_collapse_the_rail_then_the_panes() {
-        let wide = adaptive_mail_layout(false, false);
+    fn wide_window_keeps_every_pane_and_label() {
+        let wide = adaptive_mail_layout(WidthBreakpoints::default());
         assert!(!wide.hide_rail);
         assert!(!wide.folders_overlay);
         assert!(!wide.single_pane);
         assert!(!wide.list_compose);
         assert!(!wide.reply_icon_only);
         assert!(!wide.compact_composer);
+    }
 
-        let medium = adaptive_mail_layout(true, false);
+    #[test]
+    fn compact_window_drops_toolbar_labels_but_keeps_the_panes() {
+        let compact = adaptive_mail_layout(WidthBreakpoints {
+            compact: true,
+            ..WidthBreakpoints::default()
+        });
+        assert!(compact.reply_icon_only && compact.compact_composer);
+        assert!(!compact.hide_rail && !compact.folders_overlay && !compact.single_pane);
+        assert!(!compact.list_compose);
+    }
+
+    #[test]
+    fn medium_window_hides_the_rail_and_stays_compact() {
+        let medium = adaptive_mail_layout(WidthBreakpoints {
+            medium: true,
+            ..WidthBreakpoints::default()
+        });
         assert!(medium.hide_rail && medium.folders_overlay && medium.list_compose);
-        assert!(!medium.single_pane && !medium.reply_icon_only);
-        assert!(!medium.compact_composer);
+        assert!(medium.reply_icon_only && medium.compact_composer);
+        assert!(!medium.single_pane);
+    }
 
-        let narrow = adaptive_mail_layout(false, true);
+    #[test]
+    fn narrow_window_shows_one_pane_and_every_wider_change() {
+        let narrow = adaptive_mail_layout(WidthBreakpoints {
+            narrow: true,
+            ..WidthBreakpoints::default()
+        });
         assert!(narrow.hide_rail && narrow.folders_overlay && narrow.single_pane);
         assert!(narrow.list_compose && narrow.reply_icon_only);
         assert!(narrow.compact_composer);

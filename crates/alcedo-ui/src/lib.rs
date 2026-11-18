@@ -67,6 +67,7 @@ pub mod toast;
 pub mod tray;
 pub mod verification_code;
 
+mod collapsing_revealer;
 #[cfg(test)]
 mod test_helpers;
 #[cfg(any(test, feature = "test-support"))]

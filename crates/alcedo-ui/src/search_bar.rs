@@ -59,9 +59,8 @@ impl SearchFilterBar {
         flags_box.append(&star_btn);
         flags_box.append(&attachment_btn);
 
-        // The revealer reports this bar's width even while hidden, so a
-        // single row would set the list column's minimum width and the
-        // window would clip its title buttons. Wrap the groups instead.
+        // While open, a single row would set the list column's minimum width
+        // and the window would clip its title buttons. Wrap the groups instead.
         let filters = adw::WrapBox::builder()
             .child_spacing(8)
             .line_spacing(4)
@@ -93,6 +92,7 @@ impl SearchFilterBar {
             .reveal_child(false)
             .child(&action_bar)
             .build();
+        crate::collapsing_revealer::collapse_while_closed(&revealer);
 
         {
             let on_scope_here = on_scope.clone();

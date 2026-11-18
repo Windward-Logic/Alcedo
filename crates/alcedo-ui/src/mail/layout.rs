@@ -4,7 +4,8 @@ use std::cell::Cell;
 use std::rc::Rc;
 
 use alcedo_core::layout_policy::{
-    HeaderTitleButtons, ReadingPanePlacement, adaptive_mail_layout, title_button_placement,
+    HeaderTitleButtons, ReadingPanePlacement, WidthBreakpoints, adaptive_mail_layout,
+    title_button_placement,
 };
 use relm4::adw;
 use relm4::adw::prelude::*;
@@ -72,8 +73,8 @@ pub(super) fn build_folder_chrome() -> (adw::HeaderBar, gtk::Box, gtk::Button, g
 }
 
 impl MailModel {
-    pub(super) fn apply_adaptive_layout(&mut self, max_width_860: bool, max_width_560: bool) {
-        let spec = adaptive_mail_layout(max_width_860, max_width_560);
+    pub(super) fn apply_adaptive_layout(&mut self, applied: WidthBreakpoints) {
+        let spec = adaptive_mail_layout(applied);
         self.layout.single_pane = spec.single_pane;
         self.layout.list_compose.set_visible(spec.list_compose);
         set_reader_reply_icon_only(&self.reader, spec.reply_icon_only);

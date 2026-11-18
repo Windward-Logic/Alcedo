@@ -165,6 +165,7 @@ impl SelectionBar {
             .reveal_child(false)
             .child(&action_bar)
             .build();
+        crate::collapsing_revealer::collapse_while_closed(&revealer);
 
         Self {
             revealer,

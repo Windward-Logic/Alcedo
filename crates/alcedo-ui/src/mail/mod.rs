@@ -434,11 +434,8 @@ pub enum MailMsg {
     OpenCommandPalette,
     /// Folder column, or the overlay sidebar when the window is narrow.
     SetFoldersVisible(bool),
-    /// Breakpoint flags from the main window (max-width 860sp, then 560sp).
-    SetAdaptiveLayout {
-        max_width_860: bool,
-        max_width_560: bool,
-    },
+    /// Width breakpoints applied to the main window.
+    SetAdaptiveLayout(alcedo_core::layout_policy::WidthBreakpoints),
     BackToMessages,
     ApplyTitleButtons,
     RefreshShortcutTooltips,
@@ -1804,7 +1801,7 @@ impl Component for MailModel {
             | MailMsg::Escape
             | MailMsg::OpenCommandPalette
             | MailMsg::SetFoldersVisible(_)
-            | MailMsg::SetAdaptiveLayout { .. }
+            | MailMsg::SetAdaptiveLayout(_)
             | MailMsg::BackToMessages
             | MailMsg::ApplyTitleButtons
             | MailMsg::RefreshShortcutTooltips) => self.update_chrome(msg, sender),

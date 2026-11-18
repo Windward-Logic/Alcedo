@@ -910,28 +910,35 @@ fn install_layout_breakpoints(
     app_sender: ComponentSender<AppModel>,
     mail_sender: relm4::Sender<MailMsg>,
 ) {
-    use alcedo_core::layout_policy::{MEDIUM_MAX_WIDTH_SP, NARROW_MAX_WIDTH_SP};
+    use alcedo_core::layout_policy::{
+        COMPACT_MAX_WIDTH_SP, MEDIUM_MAX_WIDTH_SP, NARROW_MAX_WIDTH_SP, WidthBreakpoints,
+        adaptive_mail_layout,
+    };
 
+    let compact = Rc::new(Cell::new(false));
     let medium = Rc::new(Cell::new(false));
     let narrow = Rc::new(Cell::new(false));
-    // Only one window breakpoint is active at a time, so crossing 560sp
-    // unapplies 860sp and then applies 560sp. Report once per idle so the
-    // mail panes are not reparented through the wide layout in between.
+    // Only one window breakpoint is active at a time, so crossing a limit
+    // unapplies the wider breakpoint and then applies the narrower one. Report
+    // once per idle so the mail panes are not reparented through the wide
+    // layout in between.
     let scheduled = Rc::new(Cell::new(false));
     let report = Rc::new({
+        let compact = compact.clone();
         let medium = medium.clone();
         let narrow = narrow.clone();
         let scheduled = scheduled.clone();
         move || {
             scheduled.set(false);
-            let hide_rail =
-                alcedo_core::layout_policy::adaptive_mail_layout(medium.get(), narrow.get())
-                    .hide_rail;
-            app_sender.input(AppMsg::SetAdaptiveRail(hide_rail));
-            mail_sender.emit(MailMsg::SetAdaptiveLayout {
-                max_width_860: medium.get(),
-                max_width_560: narrow.get(),
-            });
+            let applied = WidthBreakpoints {
+                compact: compact.get(),
+                medium: medium.get(),
+                narrow: narrow.get(),
+            };
+            app_sender.input(AppMsg::SetAdaptiveRail(
+                adaptive_mail_layout(applied).hide_rail,
+            ));
+            mail_sender.emit(MailMsg::SetAdaptiveLayout(applied));
         }
     });
     let emit = Rc::new(move || {
@@ -961,6 +968,7 @@ fn install_layout_breakpoints(
         });
         window.add_breakpoint(breakpoint);
     };
+    add(COMPACT_MAX_WIDTH_SP, compact);
     add(MEDIUM_MAX_WIDTH_SP, medium);
     add(NARROW_MAX_WIDTH_SP, narrow);
 }

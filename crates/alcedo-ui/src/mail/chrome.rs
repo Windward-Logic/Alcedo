@@ -110,10 +110,7 @@ impl MailModel {
                 }
             }
             MailMsg::SetFoldersVisible(visible) => self.set_folders_visible(visible),
-            MailMsg::SetAdaptiveLayout {
-                max_width_860,
-                max_width_560,
-            } => self.apply_adaptive_layout(max_width_860, max_width_560),
+            MailMsg::SetAdaptiveLayout(applied) => self.apply_adaptive_layout(applied),
             MailMsg::BackToMessages => self.back_to_messages(),
             MailMsg::ApplyTitleButtons => self.apply_title_buttons(),
             MailMsg::RefreshShortcutTooltips => self.refresh_shortcut_tooltips(),
