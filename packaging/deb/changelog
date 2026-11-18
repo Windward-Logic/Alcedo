@@ -1,3 +1,12 @@
+alcedo (1.0.3-1) resolute; urgency=medium
+
+  * RSVP replies name the attendee address the invitation used, so an
+    invitation sent to an alias is answered correctly.
+  * Accepting an invitation shows the calendar chooser beside the RSVP
+    buttons, which stay visible after Accept.
+
+ -- Windward Logic LLC <alcedo@windwardlogic.com>  Wed, 18 Nov 2026 12:00:00 +0000
+
 alcedo (1.0.2-1) resolute; urgency=medium
 
   * Add account keeps a Provider you picked by hand when the address changes,
