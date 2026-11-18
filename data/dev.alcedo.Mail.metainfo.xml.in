@@ -42,6 +42,11 @@
   </screenshots>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="1.0.6" date="2026-11-18">
+      <description>
+        <p>Personal Outlook.com accounts now sign in through your browser with no setup. Sending from Microsoft accounts works with aliases, and sent mail no longer appears twice in the Sent folder. The activity log and error messages now fully hide passwords that contain an @.</p>
+      </description>
+    </release>
     <release version="1.0.5" date="2026-11-18">
       <description>
         <p>Calendar no longer shows a blank column beside the page. The header has a button to show or hide the side rail, the back button is labelled Mail, and the event detail pane stays hidden until you select an event.</p>

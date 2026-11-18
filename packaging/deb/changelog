@@ -1,3 +1,14 @@
+alcedo (1.0.6-1) resolute; urgency=medium
+
+  * Microsoft: personal Outlook.com accounts sign in through the browser with
+    no setup. Work and school accounts still need their own client ID.
+  * Microsoft: sending works when the account signs in with an alias, and sent
+    mail is no longer filed twice in the Sent folder.
+  * The activity log and error messages fully hide passwords that contain an
+    @, and keep the host of a URL with an @ in its path or query.
+
+ -- Windward Logic LLC <alcedo@windwardlogic.com>  Wed, 18 Nov 2026 20:51:00 +0000
+
 alcedo (1.0.5-1) resolute; urgency=medium
 
   * Calendar: no blank column beside the page, a header button shows or hides
