@@ -1,0 +1,63 @@
+{
+  "id": "dev.alcedo.Mail",
+  "runtime": "org.gnome.Platform",
+  "runtime-version": "50",
+  "sdk": "org.gnome.Sdk",
+  "sdk-extensions": [
+    "org.freedesktop.Sdk.Extension.rust-stable",
+    "org.freedesktop.Sdk.Extension.llvm21"
+  ],
+  "command": "alcedo",
+  "finish-args": [
+    "--share=network",
+    "--share=ipc",
+    "--socket=wayland",
+    "--socket=fallback-x11",
+    "--device=dri",
+    "--talk-name=org.freedesktop.secrets",
+    "--talk-name=org.kde.StatusNotifierWatcher"
+  ],
+  "build-options": {
+    "append-path": "/usr/lib/sdk/rust-stable/bin:/usr/lib/sdk/llvm21/bin",
+    "prepend-ld-library-path": "/usr/lib/sdk/llvm21/lib",
+    "env": {
+      "CARGO_HOME": "/run/build/alcedo/cargo",
+      "CARGO_NET_OFFLINE": "true",
+      "LIBCLANG_PATH": "/usr/lib/sdk/llvm21/lib",
+      "RUSTFLAGS": "--remap-path-prefix=/run/build/alcedo=/usr/src/alcedo"
+    }
+  },
+  "modules": [
+    {
+      "name": "alcedo",
+      "buildsystem": "simple",
+      "build-commands": [
+        "cargo build --release --locked -p alcedo",
+        "install -Dm755 target/release/alcedo /app/bin/alcedo",
+        "install -Dm644 data/dev.alcedo.Mail.desktop /app/share/applications/dev.alcedo.Mail.desktop",
+        "ALCEDO_SCREENSHOT_REF=\"v$(. scripts/lib/deb-common.sh; cargo_section_version workspace.package Cargo.toml)\" bash scripts/render-metainfo.sh dev.alcedo.Mail.metainfo.xml",
+        "install -Dm644 dev.alcedo.Mail.metainfo.xml /app/share/metainfo/dev.alcedo.Mail.metainfo.xml",
+        "install -Dm644 data/dev.alcedo.Mail.gschema.xml /app/share/glib-2.0/schemas/dev.alcedo.Mail.gschema.xml",
+        "glib-compile-schemas --strict /app/share/glib-2.0/schemas",
+        "install -Dm644 data/icons/hicolor/scalable/apps/dev.alcedo.Mail.svg /app/share/icons/hicolor/scalable/apps/dev.alcedo.Mail.svg",
+        "python3 -I scripts/third-party-licenses.py --manifest-path Cargo.toml --package alcedo --output THIRD-PARTY-LICENSES",
+        "install -Dm644 THIRD-PARTY-LICENSES /app/share/doc/alcedo/THIRD-PARTY-LICENSES"
+      ],
+      "sources": [
+        {
+          "type": "dir",
+          "path": "..",
+          "skip": [
+            ".flatpak-builder",
+            ".git",
+            "dist",
+            "flatpak_app",
+            "flatpak_repo",
+            "target"
+          ]
+        },
+        "cargo-sources.json"
+      ]
+    }
+  ]
+}

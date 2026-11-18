@@ -4,6 +4,7 @@ client_secret*.json
 *.db
 .flatpak-builder
 flatpak_app
+flatpak_repo
 .cursor/*
 !.cursor/rules/
 !.cursor/rules/**
