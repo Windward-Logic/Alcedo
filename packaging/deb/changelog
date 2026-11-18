@@ -1,3 +1,11 @@
+alcedo (1.0.5-1) resolute; urgency=medium
+
+  * Calendar: no blank column beside the page, a header button shows or hides
+    the side rail, the back button is labelled Mail, and the event detail
+    pane stays hidden until an event is selected.
+
+ -- Windward Logic LLC <alcedo@windwardlogic.com>  Wed, 18 Nov 2026 13:30:00 +0000
+
 alcedo (1.0.4-1) resolute; urgency=medium
 
   * Gmail: read and starred state stays in step across a message's labels.
