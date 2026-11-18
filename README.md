@@ -120,7 +120,9 @@ Google Workspace admins can turn app passwords off. Yahoo and generic IMAP accou
 
 ## Microsoft sign-in
 
-Builds made with `ALCEDO_MICROSOFT_CLIENT_ID` set include that Microsoft public client, so Outlook.com and Microsoft 365 accounts sign in through the browser with no configuration file:
+Builds made with `ALCEDO_MICROSOFT_CLIENT_ID` set include that Microsoft public client, so personal Outlook.com accounts sign in through the browser with no configuration file. The official packages don't support work or school accounts through this client yet, because its publisher is not verified. Those accounts need a client registered for the organization, set as a `[microsoft]` entry in `oauth.toml`.
+
+To include a client in your own build:
 
 ```bash
 ALCEDO_MICROSOFT_CLIENT_ID="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" cargo build --release -p alcedo
