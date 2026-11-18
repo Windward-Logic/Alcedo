@@ -25,5 +25,5 @@ pub use fetch::{
     uid_fetch_reply_headers, uid_fetch_rfc822_sizes, uid_fetch_routing_headers,
 };
 pub use idle::{IDLE_RESTART_TIMEOUT, IdleNotification, IdleSession, IdleWaitResult};
-pub use tls::{ImapTransport, connect_tls};
+pub use tls::{ImapTransport, connect_tcp, connect_tls, upgrade_to_tls};
 pub use xoauth2::{Xoauth2Authenticator, encode_xoauth2, xoauth2_sasl_string};

@@ -5,6 +5,7 @@ use std::collections::VecDeque;
 use std::rc::Rc;
 
 use crate::settings::{activity_log_filter, set_activity_log_filter};
+pub use alcedo_core::redact_url_userinfo;
 use chrono::{DateTime, Local, Utc};
 use relm4::adw;
 use relm4::adw::prelude::*;
@@ -160,33 +161,6 @@ pub fn format_account_debug(
         lines.push(format!("status: {}", redact_url_userinfo(raw)));
     }
     lines.join("\n")
-}
-
-pub fn redact_url_userinfo(text: &str) -> String {
-    let mut out = String::with_capacity(text.len());
-    let mut rest = text;
-    loop {
-        let Some(pos) = rest.find("://") else {
-            out.push_str(rest);
-            break;
-        };
-        out.push_str(&rest[..pos + 3]);
-        let after = &rest[pos + 3..];
-        let end = after
-            .find(|c: char| c.is_whitespace())
-            .unwrap_or(after.len());
-        let segment = &after[..end];
-        if let Some(at) = segment.find('@') {
-            out.push_str(&segment[at + 1..]);
-        } else {
-            out.push_str(segment);
-        }
-        rest = &after[end..];
-        if rest.is_empty() {
-            break;
-        }
-    }
-    out
 }
 
 pub fn server_host(url: &str) -> Option<String> {
@@ -888,14 +862,6 @@ mod tests {
         assert!(!debug.contains("secret"));
         let sparse = format_account_debug("a@b.com", "", 0, "", 0, "", "Connecting…");
         assert_eq!(sparse, "status: Connecting…");
-    }
-
-    #[test]
-    fn redact_url_userinfo_strips_credentials() {
-        let raw = "error for url (https://user:token@cal.example/feed.ics): timeout";
-        let redacted = redact_url_userinfo(raw);
-        assert!(!redacted.contains("token"));
-        assert!(redacted.contains("cal.example/feed.ics"));
     }
 
     #[test]

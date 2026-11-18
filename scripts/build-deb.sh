@@ -5,6 +5,9 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 cd "$ROOT"
 
+# shellcheck source=scripts/lib/deb-common.sh
+source "$ROOT/scripts/lib/deb-common.sh"
+
 PUBLIC_REMOTE="https://github.com/Windward-Logic/Alcedo"
 REVISION=1
 ALLOW_DIRTY=0
@@ -23,45 +26,6 @@ Options:
 Environment:
   ALCEDO_DEB_TARGET_DIR   Cargo target dir (default: target/deb in this checkout)
 EOF2
-}
-
-die() {
-  echo "error: $*" >&2
-  exit 1
-}
-
-need_cmd() {
-  command -v "$1" >/dev/null 2>&1 || die "missing command: $1"
-}
-
-workspace_version() {
-  awk '
-    /^\[/ { in_pkg = ($0 == "[workspace.package]"); next }
-    in_pkg && /^[[:space:]]*version[[:space:]]*=/ {
-      sub(/^[^=]*=[[:space:]]*"/, ""); sub(/"[[:space:]]*(#.*)?$/, ""); print; exit
-    }
-  ' "$ROOT/Cargo.toml"
-}
-
-ensure_c_include_path() {
-  if [[ -f /usr/include/stddef.h ]] || ! command -v gcc >/dev/null 2>&1; then
-    return
-  fi
-  local gcc_include
-  gcc_include="$(gcc -print-file-name=include)"
-  if [[ -n "$gcc_include" && -f "$gcc_include/stddef.h" ]]; then
-    export C_INCLUDE_PATH="${gcc_include}${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}"
-  fi
-}
-
-shlibs_depends() {
-  local binary="$1" tmp
-  tmp="$(mktemp -d)"
-  mkdir "$tmp/debian"
-  : >"$tmp/debian/control"
-  (cd "$tmp" && dpkg-shlibdeps -O "$binary") |
-    sed -n 's/^shlibs:Depends=//p'
-  rm -rf "$tmp"
 }
 
 while [[ $# -gt 0 ]]; do
@@ -98,7 +62,7 @@ if [[ "$ALLOW_DIRTY" -eq 0 && -n "$(git status --porcelain)" ]]; then
   die "working tree is dirty (commit, or pass --allow-dirty)"
 fi
 
-VERSION="$(workspace_version)"
+VERSION="$(cargo_section_version workspace.package "$ROOT/Cargo.toml")"
 [[ -n "$VERSION" ]] || die "no version in [workspace.package] of Cargo.toml"
 ARCH="$(dpkg --print-architecture)"
 NAME="alcedo_${VERSION}-${REVISION}_${ARCH}"

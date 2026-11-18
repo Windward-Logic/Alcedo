@@ -129,6 +129,9 @@ has a do-nothing default, so the app runs unchanged with none.
 - **Sync** (`alcedo-sync::extension`): `SyncExtension` handles that extension's commands with a `SyncContext`
   (store, events, a cross-folder IMAP search import). `ServerRulesBackend` lets rules run on the server; without
   one, every rule runs client-side.
+- **Shared helpers:** extensions reuse `alcedo_core::redact_url_userinfo`, `alcedo_widgets::css_color`,
+  `alcedo_imap::{connect_tcp, upgrade_to_tls}`, `alcedo_ui::test_support` (behind the `test-support` feature) and
+  `scripts/lib/deb-common.sh` instead of keeping their own copies.
 
 ## v1 non-goals
 

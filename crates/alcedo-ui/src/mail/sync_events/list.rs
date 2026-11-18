@@ -370,7 +370,7 @@ impl MailModel {
                         activity_log::KIND_MAIL,
                         ActivityOutcome::Failure,
                         title.clone(),
-                        activity_log::redact_url_userinfo(&reason),
+                        alcedo_core::redact_url_userinfo(&reason),
                         email,
                         "",
                     );

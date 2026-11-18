@@ -69,6 +69,8 @@ pub mod verification_code;
 
 #[cfg(test)]
 mod test_helpers;
+#[cfg(any(test, feature = "test-support"))]
+pub mod test_support;
 mod widget_lifetime;
 
 pub use app::{AppInit, AppModel as App, present_main_window};

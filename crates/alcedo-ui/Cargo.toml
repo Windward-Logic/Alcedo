@@ -6,6 +6,10 @@ license.workspace = true
 rust-version.workspace = true
 description = "Relm4 UI for Alcedo"
 
+[features]
+# Test helpers for crates that extend the UI. Never enable in a release build.
+test-support = []
+
 [dependencies]
 alcedo-core = { workspace = true }
 alcedo-html = { workspace = true }

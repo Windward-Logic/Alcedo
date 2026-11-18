@@ -46,6 +46,7 @@ mod search_query;
 mod sender;
 mod snippet;
 mod subject;
+mod url_redaction;
 pub mod welcome;
 
 pub use account::{
@@ -157,6 +158,7 @@ pub use search_query::{
 pub use sender::{canonical_email, is_noreply_address, sender_is_blocked};
 pub use snippet::{AccountSignature, Snippet, expand_snippet_placeholders};
 pub use subject::{NO_SUBJECT, reply_subject};
+pub use url_redaction::redact_url_userinfo;
 
 #[cfg(test)]
 mod tests {

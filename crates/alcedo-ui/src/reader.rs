@@ -44,6 +44,7 @@ use alcedo_html::{
     html_has_remote_images, looks_like_generated_plaintext_html, looks_like_html,
     plaintext_to_fragment, sanitize_html,
 };
+use alcedo_widgets::css_color::{lookup_css_color, rgba_hex};
 use alcedo_widgets::sandbox::{
     CidCache, create_isolated_context, ephemeral_network_session, mail_settings,
     register_cid_scheme,
@@ -2629,22 +2630,6 @@ struct CanvasPaint {
     text: String,
     link: String,
     rgba: gdk::RGBA,
-}
-
-fn rgba_hex(color: &gdk::RGBA) -> String {
-    format!(
-        "#{:02x}{:02x}{:02x}",
-        (color.red().clamp(0.0, 1.0) * 255.0).round() as u8,
-        (color.green().clamp(0.0, 1.0) * 255.0).round() as u8,
-        (color.blue().clamp(0.0, 1.0) * 255.0).round() as u8
-    )
-}
-
-#[allow(deprecated)]
-fn lookup_css_color(widget: &gtk::Widget, names: &[&str]) -> Option<gdk::RGBA> {
-    // GTK 4.10 deprecated StyleContext colour lookup and did not replace it.
-    let context = widget.style_context();
-    names.iter().find_map(|name| context.lookup_color(name))
 }
 
 /// Canvas, text, and link colours from the view's CSS, or a light paper

@@ -202,7 +202,7 @@ impl MailModel {
                 }
                 let should_toast = self.should_toast_background_error(account, &message);
                 let is_network = looks_like_network_failure(&message);
-                let redacted = activity_log::redact_url_userinfo(&message);
+                let redacted = alcedo_core::redact_url_userinfo(&message);
                 let resolved =
                     account.and_then(|id| self.accounts.iter().find(|acct| acct.id == id));
                 let toast_text = resolved
