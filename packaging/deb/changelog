@@ -1,3 +1,10 @@
+alcedo (1.0.8-1) resolute; urgency=medium
+
+  * No changes to the free app. Released to keep Alcedo and Alcedo Pro on the
+    same version; Alcedo Pro is now also available as a Flatpak.
+
+ -- Windward Logic LLC <alcedo@windwardlogic.com>  Wed, 18 Nov 2026 23:33:00 +0000
+
 alcedo (1.0.7-1) resolute; urgency=medium
 
   * Layout: the mail window keeps its content inside narrower windows.

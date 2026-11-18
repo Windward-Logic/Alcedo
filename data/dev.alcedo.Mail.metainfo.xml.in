@@ -42,6 +42,11 @@
   </screenshots>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="1.0.8" date="2026-11-18">
+      <description>
+        <p>This release has no changes to the free app. It keeps Alcedo and Alcedo Pro on the same version, and Alcedo Pro is now also available as a Flatpak.</p>
+      </description>
+    </release>
     <release version="1.0.7" date="2026-11-18">
       <description>
         <p>The mail window now keeps its content inside narrower windows: toolbars drop their labels first, and the side panes make room at widths where they fit. Closed search and selection bars no longer take up space in the message list.</p>
