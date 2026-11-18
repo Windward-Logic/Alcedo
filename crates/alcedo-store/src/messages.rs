@@ -11,7 +11,10 @@ use alcedo_core::{
     sentinel_thread_id,
 };
 
-use crate::{MessageLocator, StoreResult, StoredAttachment, StoredMessage};
+use crate::{
+    FlagMirrorSource, MessageLocator, MirroredCopy, MirroredFlags, StoreResult, StoredAttachment,
+    StoredMessage,
+};
 
 /// SQL boolean for a downloadable file attachment (not benign CID inline images).
 ///
@@ -364,19 +367,23 @@ fn virtual_inbox_select(extra_where: &str) -> String {
     )
 }
 
-fn folder_messages_select() -> String {
-    format!(
-        "SELECT m.id, m.account_id, m.folder_id, m.uid, m.thread_id, m.date_utc,
+/// Columns [`map_envelope_row`] reads, for a query over `messages m JOIN accounts a`.
+const ENVELOPE_ROW_COLUMNS: &str =
+    "m.id, m.account_id, m.folder_id, m.uid, m.thread_id, m.date_utc,
                 m.subject, m.from_json, m.to_json, m.cc_json, m.snippet,
                 m.seen, m.flagged, m.answered, m.draft, m.list_has_attachments AS has_attachments,
                 m.deleted_at, a.accent_color, a.avatar_text,
-                m.list_size_bytes AS size_bytes, m.reply_to_json, m.sender_json, m.routing_json
+                m.list_size_bytes AS size_bytes, m.reply_to_json, m.sender_json, m.routing_json";
+
+fn folder_messages_select() -> String {
+    format!(
+        "SELECT {ENVELOPE_ROW_COLUMNS}
          FROM messages m
          JOIN accounts a ON a.id = m.account_id
          WHERE m.folder_id = ?1 AND m.deleted = 0
-         ORDER BY m.deleted_at DESC, {}
+         ORDER BY m.deleted_at DESC, {order}
          LIMIT ?2 OFFSET ?3",
-        list_order("m")
+        order = list_order("m")
     )
 }
 
@@ -495,17 +502,37 @@ pub fn folder_messages(
 }
 
 pub fn folder_messages_all(conn: &Connection, folder: FolderId) -> StoreResult<Vec<Envelope>> {
-    let sql = "SELECT m.id, m.account_id, m.folder_id, m.uid, m.thread_id, m.date_utc,
-                m.subject, m.from_json, m.to_json, m.cc_json, m.snippet,
-                m.seen, m.flagged, m.answered, m.draft, m.list_has_attachments AS has_attachments,
-                m.deleted_at, a.accent_color, a.avatar_text,
-                m.list_size_bytes AS size_bytes, m.reply_to_json, m.sender_json, m.routing_json
+    let sql = format!(
+        "SELECT {ENVELOPE_ROW_COLUMNS}
          FROM messages m
          JOIN accounts a ON a.id = m.account_id
          WHERE m.folder_id = ?1 AND m.deleted = 0
-         ORDER BY m.date_utc DESC";
-    let mut stmt = conn.prepare(sql)?;
+         ORDER BY m.date_utc DESC"
+    );
+    let mut stmt = conn.prepare(&sql)?;
     let rows = stmt.query_map(params![folder.0], map_envelope_row)?;
+    let mut envelopes = Vec::new();
+    for row in rows {
+        envelopes.push(row?);
+    }
+    Ok(envelopes)
+}
+
+/// Live envelopes for these ids, wherever they sit in their folder's order.
+pub fn envelopes_by_ids(conn: &Connection, ids: &[MessageId]) -> StoreResult<Vec<Envelope>> {
+    if ids.is_empty() {
+        return Ok(Vec::new());
+    }
+    let id_json = serde_json::to_string(&ids.iter().map(|id| id.0).collect::<Vec<_>>())?;
+    let sql = format!(
+        "SELECT {ENVELOPE_ROW_COLUMNS}
+         FROM messages m
+         JOIN accounts a ON a.id = m.account_id
+         WHERE m.deleted = 0
+           AND m.id IN (SELECT CAST(value AS INTEGER) FROM json_each(?1))"
+    );
+    let mut stmt = conn.prepare(&sql)?;
+    let rows = stmt.query_map(params![id_json], map_envelope_row)?;
     let mut envelopes = Vec::new();
     for row in rows {
         envelopes.push(row?);
@@ -1293,6 +1320,117 @@ pub fn live_sibling_ids(conn: &Connection, id: MessageId) -> StoreResult<Vec<Mes
         out.push(MessageId(row?));
     }
     Ok(out)
+}
+
+/// Source rows joined to their live copies in other folders of the account.
+///
+/// Date, subject and sender alone also match separate messages (two alerts sent
+/// in the same second), so both rows must carry the same Message-ID. A row
+/// without one is never treated as a copy; its folder's next sync corrects it.
+const FLAG_COPY_PAIRS: &str = "FROM messages source
+         JOIN messages copy
+           ON copy.account_id = source.account_id
+          AND copy.date_utc = source.date_utc
+          AND copy.message_id_hdr = source.message_id_hdr
+          AND copy.folder_id != source.folder_id
+          AND copy.subject = source.subject
+          AND copy.from_json = source.from_json
+          AND copy.deleted = 0
+         WHERE source.deleted = 0
+           AND TRIM(COALESCE(source.message_id_hdr, '')) != ''";
+
+/// Copy flags from the source rows onto their copies in other folders.
+///
+/// One set-based lookup, then one update per copy that differs, in a single
+/// transaction. O(c) in the copies found. Returns only the copies it changed.
+pub fn mirror_flags_to_copies(
+    conn: &Connection,
+    source: &FlagMirrorSource,
+    flags: MirroredFlags,
+) -> StoreResult<Vec<MirroredCopy>> {
+    if !flags.seen && !flags.flagged {
+        return Ok(Vec::new());
+    }
+    let (source_filter, source_param) = match source {
+        FlagMirrorSource::Messages(ids) if ids.is_empty() => return Ok(Vec::new()),
+        FlagMirrorSource::Messages(ids) => (
+            "source.id IN (SELECT CAST(value AS INTEGER) FROM json_each(?1))",
+            rusqlite::types::Value::Text(serde_json::to_string(
+                &ids.iter().map(|id| id.0).collect::<Vec<_>>(),
+            )?),
+        ),
+        FlagMirrorSource::Folder(folder) => (
+            "source.folder_id = ?1",
+            rusqlite::types::Value::Integer(folder.0),
+        ),
+    };
+
+    let tx = conn.unchecked_transaction()?;
+    let mut mirrored = Vec::new();
+    {
+        // Read every pair before writing: the update changes `seen`, which is
+        // part of an index this lookup may be walking.
+        let mut pairs = tx.prepare(&format!(
+            "SELECT copy.id, copy.folder_id, copy.seen, copy.flagged, source.seen, source.flagged
+             {FLAG_COPY_PAIRS} AND {source_filter}"
+        ))?;
+        let found = pairs
+            .query_map(params![source_param], |row| {
+                Ok((
+                    MirroredCopy {
+                        id: MessageId(row.get(0)?),
+                        folder_id: FolderId(row.get(1)?),
+                        previous_seen: row.get(2)?,
+                        previous_flagged: row.get(3)?,
+                    },
+                    row.get::<_, bool>(4)?,
+                    row.get::<_, bool>(5)?,
+                ))
+            })?
+            .collect::<rusqlite::Result<Vec<_>>>()?;
+
+        let mut update = tx.prepare("UPDATE messages SET seen = ?2, flagged = ?3 WHERE id = ?1")?;
+        let mut visited = HashSet::new();
+        for (copy, source_seen, source_flagged) in found {
+            if !visited.insert(copy.id) {
+                continue;
+            }
+            let seen = if flags.seen {
+                source_seen
+            } else {
+                copy.previous_seen
+            };
+            let flagged = if flags.flagged {
+                source_flagged
+            } else {
+                copy.previous_flagged
+            };
+            if (seen, flagged) != (copy.previous_seen, copy.previous_flagged) {
+                update.execute(params![copy.id.0, seen, flagged])?;
+                mirrored.push(copy);
+            }
+        }
+    }
+    tx.commit()?;
+    Ok(mirrored)
+}
+
+/// Put mirrored copies back to the flags they held before the mirror.
+pub fn restore_mirrored_copies(conn: &Connection, copies: &[MirroredCopy]) -> StoreResult<()> {
+    let tx = conn.unchecked_transaction()?;
+    {
+        let mut update = tx
+            .prepare("UPDATE messages SET seen = ?2, flagged = ?3 WHERE id = ?1 AND deleted = 0")?;
+        for copy in copies {
+            update.execute(params![
+                copy.id.0,
+                copy.previous_seen,
+                copy.previous_flagged
+            ])?;
+        }
+    }
+    tx.commit()?;
+    Ok(())
 }
 
 pub fn set_flags(

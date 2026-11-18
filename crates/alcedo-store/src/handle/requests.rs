@@ -99,6 +99,10 @@ pub(super) enum ReadRequest {
         id: MessageId,
         resp: oneshot::Sender<StoreResult<Vec<MessageId>>>,
     },
+    EnvelopesByIds {
+        ids: Vec<MessageId>,
+        resp: oneshot::Sender<StoreResult<Vec<Envelope>>>,
+    },
     UnreadCounts {
         resp: oneshot::Sender<StoreResult<Vec<(AccountId, u32, u32)>>>,
     },
@@ -273,6 +277,7 @@ impl ReadRequest {
             ReadRequest::LiveMessageIdHdrs { .. } => "live_message_id_hdrs",
             ReadRequest::HasLiveCopyElsewhere { .. } => "has_live_copy_elsewhere",
             ReadRequest::LiveSiblingIds { .. } => "live_sibling_ids",
+            ReadRequest::EnvelopesByIds { .. } => "envelopes_by_ids",
             ReadRequest::UnreadCounts { .. } => "unread_counts",
             ReadRequest::FolderUnreadCount { .. } => "folder_unread_count",
             ReadRequest::FolderLiveCount { .. } => "folder_live_count",
@@ -385,6 +390,15 @@ pub(super) enum WriteRequest {
         ids: Vec<MessageId>,
         seen: Option<bool>,
         flagged: Option<bool>,
+        resp: oneshot::Sender<StoreResult<()>>,
+    },
+    MirrorFlagsToCopies {
+        source: crate::FlagMirrorSource,
+        flags: crate::MirroredFlags,
+        resp: oneshot::Sender<StoreResult<Vec<crate::MirroredCopy>>>,
+    },
+    RestoreMirroredCopies {
+        copies: Vec<crate::MirroredCopy>,
         resp: oneshot::Sender<StoreResult<()>>,
     },
     MarkDeleted {
@@ -659,6 +673,8 @@ impl WriteRequest {
             WriteRequest::UpsertEnvelopes { .. } => "upsert_envelopes",
             WriteRequest::SetFlags { .. } => "set_flags",
             WriteRequest::SetFlagsMany { .. } => "set_flags_many",
+            WriteRequest::MirrorFlagsToCopies { .. } => "mirror_flags_to_copies",
+            WriteRequest::RestoreMirroredCopies { .. } => "restore_mirrored_copies",
             WriteRequest::MarkDeleted { .. } => "mark_deleted",
             WriteRequest::MarkDeletedByUids { .. } => "mark_deleted_by_uids",
             WriteRequest::ApplyServerFlags { .. } => "apply_server_flags",

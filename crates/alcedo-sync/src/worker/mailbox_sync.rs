@@ -5,6 +5,7 @@ use super::backfill::{
     backfill_missing_routing_headers, persist_fetched_list_unsubscribe,
     persist_fetched_message_ids, persist_fetched_sizes,
 };
+use super::flag_copies::{FlagScope, mirror_flags};
 use super::reactions::peek_reaction_bodies;
 use super::rules::auto_apply_inbox_rules;
 use super::sent_copy::{
@@ -13,6 +14,7 @@ use super::sent_copy::{
 };
 use super::session::is_recoverable_disconnect;
 use super::*;
+use alcedo_store::{FlagMirrorSource, MirroredFlags};
 
 pub(super) fn mailbox_select_is_needed(cached: &str, mailbox: &str) -> bool {
     cached != mailbox
@@ -268,9 +270,10 @@ pub(super) async fn sync_mailbox(
         }
 
         let live_count = store.folder_live_count(folder.id).await?;
-        let fetched =
-            fetch_envelopes_for_plan(client, folder, &selected, plan, live_count, store, events)
-                .await?;
+        let fetched = fetch_envelopes_for_plan(
+            account, client, folder, &selected, plan, live_count, store, events,
+        )
+        .await?;
         if !matches!(plan, MailboxSyncPlan::RecentWindow { .. }) {
             // A window fetch already carries flags; other plans only fetch new mail.
             refresh_window_flags(account, client, folder, &selected, store, events).await?;
@@ -531,6 +534,7 @@ pub(super) async fn publish_envelope_preview(
 }
 
 pub(super) async fn fetch_envelopes_for_plan(
+    account: &Account,
     client: &mut ImapClient,
     folder: &Folder,
     selected: &SelectedMailbox,
@@ -545,7 +549,8 @@ pub(super) async fn fetch_envelopes_for_plan(
     let mut fetched = match plan {
         MailboxSyncPlan::Incremental { changed_since } => {
             let (new_envelopes, saw_changes) =
-                sync_condstore_changes(client, folder, store, events, changed_since).await?;
+                sync_condstore_changes(account, client, folder, store, events, changed_since)
+                    .await?;
             server_changes_seen = saw_changes;
             new_envelopes
         }
@@ -606,6 +611,7 @@ pub(super) async fn fetch_envelopes_for_plan(
 ///
 /// Returns the new envelopes and whether the server reported any change.
 async fn sync_condstore_changes(
+    account: &Account,
     client: &mut ImapClient,
     folder: &Folder,
     store: &StoreHandle,
@@ -630,7 +636,8 @@ async fn sync_condstore_changes(
     let (known, unknown): (Vec<ServerFlags>, Vec<ServerFlags>) = flags
         .into_iter()
         .partition(|item| stored.contains(&item.uid));
-    apply_flag_updates(folder, known, store, events).await?;
+    let scope = FlagScope::of(client.capabilities());
+    apply_flag_updates(scope, account, folder, known, store, events).await?;
 
     let new_uids = condstore_uids_to_fetch(&unknown, folder.uidnext);
     let mut envelopes = Vec::new();
@@ -672,6 +679,8 @@ pub(super) fn condstore_uids_to_fetch(
 /// Write server flags onto stored rows and hide `\Deleted` ones. True when
 /// anything visible changed.
 async fn apply_flag_updates(
+    scope: FlagScope,
+    account: &Account,
     folder: &Folder,
     flags: Vec<ServerFlags>,
     store: &StoreHandle,
@@ -682,7 +691,17 @@ async fn apply_flag_updates(
     let deleted_uids: Vec<u32> = deleted.iter().map(|item| item.uid).collect();
     let hidden = hide_imap_deleted_uids(store, folder.id, &deleted_uids, events).await?;
     let changed = store.apply_server_flags(folder.id, live).await?;
-    Ok(hidden || !changed.is_empty())
+    let any_changed = !changed.is_empty();
+    if any_changed {
+        // The server just reported these values, so both flags are current.
+        let source = FlagMirrorSource::Messages(changed);
+        let mirrored =
+            mirror_flags(scope, account, source, MirroredFlags::ALL, store, events).await;
+        if !mirrored.is_empty() {
+            emit_unread_counts(store, events).await?;
+        }
+    }
+    Ok(hidden || any_changed)
 }
 
 /// Servers without CONDSTORE cannot say what changed, so re-read the flags of
@@ -717,7 +736,8 @@ async fn refresh_window_flags(
             return Ok(false);
         }
     };
-    let changed = apply_flag_updates(folder, flags, store, events).await?;
+    let scope = FlagScope::of(client.capabilities());
+    let changed = apply_flag_updates(scope, account, folder, flags, store, events).await?;
     if changed {
         persist_folder_unread(account, folder.id, store, events).await?;
     }
@@ -1067,7 +1087,7 @@ pub(crate) fn folder_is_syncable(folder: &Folder) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::worker::test_support::folder_with;
+    use crate::worker::test_support::{CopyFixture, folder_with};
     use alcedo_core::{AccountId, FolderId, SpecialUse};
     use alcedo_imap::SelectedMailbox;
     use uuid::Uuid;
@@ -1333,6 +1353,8 @@ mod tests {
         let (tx, rx) = flume::unbounded::<SyncEvent>();
 
         let changed = apply_flag_updates(
+            FlagScope::PerFolder,
+            &account,
             &folder,
             vec![
                 flags(1, true, false),
@@ -1356,6 +1378,8 @@ mod tests {
         ));
 
         let again = apply_flag_updates(
+            FlagScope::PerFolder,
+            &account,
             &folder,
             vec![flags(1, true, false), flags(2, false, true)],
             &store,
@@ -1364,6 +1388,38 @@ mod tests {
         .await
         .expect("apply again");
         assert!(!again, "an unchanged poll must not report a change");
+    }
+
+    #[tokio::test]
+    async fn read_on_another_device_reaches_the_copy_in_other_folders() {
+        let fx = CopyFixture::new().await;
+        let inbox = fx
+            .store
+            .get_folder(fx.inbox)
+            .await
+            .expect("get")
+            .expect("inbox");
+        let (tx, rx) = flume::unbounded::<SyncEvent>();
+
+        let changed = apply_flag_updates(
+            FlagScope::SharedAcrossLabels,
+            &fx.account,
+            &inbox,
+            vec![flags(1, true, false)],
+            &fx.store,
+            &tx,
+        )
+        .await
+        .expect("apply");
+
+        assert!(changed);
+        assert!(fx.is_seen(fx.copy).await);
+        assert!(!fx.is_seen(fx.lookalike).await);
+        assert!(
+            rx.try_iter()
+                .any(|event| matches!(event, SyncEvent::UnreadCounts { .. })),
+            "badges must refresh when only a copy in another folder changed"
+        );
     }
 
     #[test]

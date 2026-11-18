@@ -105,6 +105,50 @@ pub struct MessageLocator {
     pub message_id_hdr: Option<String>,
 }
 
+/// Which rows a flag change is copied from when mirroring it onto their copies.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum FlagMirrorSource {
+    Messages(Vec<MessageId>),
+    Folder(FolderId),
+}
+
+/// Which flags a mirror copies. A flag left out keeps the copy's own value, so
+/// a stale source row cannot overwrite a newer value on the copy.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct MirroredFlags {
+    pub seen: bool,
+    pub flagged: bool,
+}
+
+impl MirroredFlags {
+    pub const ALL: Self = Self {
+        seen: true,
+        flagged: true,
+    };
+    pub const SEEN: Self = Self {
+        seen: true,
+        flagged: false,
+    };
+
+    /// The flags a user-requested change actually sets.
+    pub fn requested(seen: Option<bool>, flagged: Option<bool>) -> Self {
+        Self {
+            seen: seen.is_some(),
+            flagged: flagged.is_some(),
+        }
+    }
+}
+
+/// A copy a mirror changed, with the flags it held before, so the change can be
+/// undone when the server rejects the write it anticipated.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct MirroredCopy {
+    pub id: MessageId,
+    pub folder_id: FolderId,
+    pub previous_seen: bool,
+    pub previous_flagged: bool,
+}
+
 /// Timestamps are stored as RFC 3339 text.
 pub(crate) fn format_ts(ts: chrono::DateTime<chrono::Utc>) -> String {
     ts.to_rfc3339()
@@ -1844,6 +1888,204 @@ mod tests {
                 .expect("deleted sibling")
                 .is_empty()
         );
+    }
+
+    /// The same message in two folders, plus a row in the second folder that
+    /// shares its date, subject and sender but has `other_hdr` as its Message-ID.
+    async fn flag_copy_rows(
+        store: &StoreHandle,
+        other_hdr: Option<&str>,
+    ) -> (FolderId, MessageId, MessageId, MessageId) {
+        let account = sample_account(Uuid::new_v4(), "copies@example.com", "#3584e4");
+        store.upsert_account(&account).await.expect("account");
+        let mut label = sample_folder(account.id, "Label");
+        label.special = SpecialUse::Other;
+        let folders = store
+            .replace_folders(account.id, &[sample_folder(account.id, "INBOX"), label])
+            .await
+            .expect("folders");
+        let (inbox, label) = (folders[0].id, folders[1].id);
+        let original = sample_envelope(&account, inbox, 1, "Same");
+        let copy = Envelope {
+            folder_id: label,
+            uid: 2,
+            ..original.clone()
+        };
+        let other = Envelope {
+            folder_id: label,
+            uid: 3,
+            ..original.clone()
+        };
+        store
+            .upsert_envelopes(&[original, copy, other], None)
+            .await
+            .expect("envelopes");
+        let hdr = "<same@example.com>".to_string();
+        store
+            .set_message_id_hdrs(inbox, &[(1, hdr.clone())])
+            .await
+            .expect("inbox header");
+        let mut label_hdrs = vec![(2, hdr)];
+        label_hdrs.extend(other_hdr.map(|value| (3, value.to_string())));
+        store
+            .set_message_id_hdrs(label, &label_hdrs)
+            .await
+            .expect("label headers");
+        let inbox_rows = store.folder_messages(inbox, 10, 0).await.expect("inbox");
+        let label_rows = store.folder_messages(label, 10, 0).await.expect("label");
+        let id_of = |uid| label_rows.iter().find(|e| e.uid == uid).expect("row").id;
+        (inbox, inbox_rows[0].id, id_of(2), id_of(3))
+    }
+
+    async fn flags_of(store: &StoreHandle, id: MessageId) -> (bool, bool) {
+        let row = store.envelopes_by_ids(&[id]).await.expect("load").remove(0);
+        (row.seen, row.flagged)
+    }
+
+    #[tokio::test]
+    async fn mirror_skips_a_different_message_id_with_the_same_date_subject_and_sender() {
+        let (store, _dir) = open_test_store().await;
+        let (_, original, copy, other) = flag_copy_rows(&store, Some("<other@example.com>")).await;
+        store
+            .set_flags(original, Some(true), None)
+            .await
+            .expect("read");
+
+        let mirrored = store
+            .mirror_flags_to_copies(
+                FlagMirrorSource::Messages(vec![original]),
+                MirroredFlags::SEEN,
+            )
+            .await
+            .expect("mirror");
+
+        assert_eq!(mirrored.len(), 1);
+        assert_eq!(mirrored[0].id, copy);
+        assert_eq!(flags_of(&store, copy).await, (true, false));
+        assert_eq!(flags_of(&store, other).await, (false, false));
+    }
+
+    #[tokio::test]
+    async fn mirror_skips_a_row_without_a_message_id() {
+        let (store, _dir) = open_test_store().await;
+        let (_, original, _, other) = flag_copy_rows(&store, None).await;
+        store
+            .set_flags(original, Some(true), None)
+            .await
+            .expect("read");
+
+        store
+            .mirror_flags_to_copies(
+                FlagMirrorSource::Messages(vec![original]),
+                MirroredFlags::SEEN,
+            )
+            .await
+            .expect("mirror");
+
+        assert_eq!(flags_of(&store, other).await, (false, false));
+    }
+
+    #[tokio::test]
+    async fn mirror_copies_only_the_requested_flags() {
+        let (store, _dir) = open_test_store().await;
+        let (_, original, copy, _) = flag_copy_rows(&store, None).await;
+        store
+            .set_flags(copy, None, Some(true))
+            .await
+            .expect("star copy");
+        store
+            .set_flags(original, Some(true), None)
+            .await
+            .expect("read");
+
+        store
+            .mirror_flags_to_copies(
+                FlagMirrorSource::Messages(vec![original]),
+                MirroredFlags::SEEN,
+            )
+            .await
+            .expect("mirror");
+
+        assert_eq!(flags_of(&store, copy).await, (true, true));
+    }
+
+    #[tokio::test]
+    async fn mirror_reports_nothing_when_the_copy_already_matches() {
+        let (store, _dir) = open_test_store().await;
+        let (_, original, copy, _) = flag_copy_rows(&store, None).await;
+        store
+            .set_flags_many(&[original, copy], Some(true), None)
+            .await
+            .expect("read both");
+
+        let mirrored = store
+            .mirror_flags_to_copies(
+                FlagMirrorSource::Messages(vec![original, copy]),
+                MirroredFlags::ALL,
+            )
+            .await
+            .expect("mirror");
+
+        assert!(mirrored.is_empty());
+    }
+
+    #[tokio::test]
+    async fn mirror_from_a_folder_reaches_every_copy_of_its_messages() {
+        let (store, _dir) = open_test_store().await;
+        let (inbox, _, copy, other) = flag_copy_rows(&store, Some("<other@example.com>")).await;
+        store.mark_folder_seen(inbox).await.expect("folder read");
+
+        store
+            .mirror_flags_to_copies(FlagMirrorSource::Folder(inbox), MirroredFlags::SEEN)
+            .await
+            .expect("mirror");
+
+        assert_eq!(flags_of(&store, copy).await, (true, false));
+        assert_eq!(flags_of(&store, other).await, (false, false));
+    }
+
+    #[tokio::test]
+    async fn restore_puts_back_the_flags_a_mirror_replaced() {
+        let (store, _dir) = open_test_store().await;
+        let (_, original, copy, _) = flag_copy_rows(&store, None).await;
+        store
+            .set_flags(copy, None, Some(true))
+            .await
+            .expect("star copy");
+        store
+            .set_flags(original, Some(true), Some(false))
+            .await
+            .expect("source");
+        let mirrored = store
+            .mirror_flags_to_copies(
+                FlagMirrorSource::Messages(vec![original]),
+                MirroredFlags::ALL,
+            )
+            .await
+            .expect("mirror");
+        assert_eq!(flags_of(&store, copy).await, (true, false));
+
+        store
+            .restore_mirrored_copies(&mirrored)
+            .await
+            .expect("restore");
+
+        assert_eq!(flags_of(&store, copy).await, (false, true));
+    }
+
+    #[tokio::test]
+    async fn envelopes_by_ids_leaves_out_deleted_rows() {
+        let (store, _dir) = open_test_store().await;
+        let (_, original, copy, _) = flag_copy_rows(&store, None).await;
+        store.mark_deleted(copy).await.expect("delete");
+
+        let rows = store
+            .envelopes_by_ids(&[original, copy])
+            .await
+            .expect("load");
+
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0].id, original);
     }
 
     #[tokio::test]

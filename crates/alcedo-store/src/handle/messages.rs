@@ -316,6 +316,38 @@ impl StoreHandle {
         .await
     }
 
+    /// Live envelopes for these ids, wherever they sit in their folder's order.
+    pub async fn envelopes_by_ids(&self, ids: &[MessageId]) -> Result<Vec<Envelope>> {
+        send_read(&self.read_tx, |resp| ReadRequest::EnvelopesByIds {
+            ids: ids.to_vec(),
+            resp,
+        })
+        .await
+    }
+
+    /// Copy flags onto the source rows' copies in other folders; returns the
+    /// copies that changed.
+    pub async fn mirror_flags_to_copies(
+        &self,
+        source: crate::FlagMirrorSource,
+        flags: crate::MirroredFlags,
+    ) -> Result<Vec<crate::MirroredCopy>> {
+        send_write(&self.write_tx, |resp| WriteRequest::MirrorFlagsToCopies {
+            source,
+            flags,
+            resp,
+        })
+        .await
+    }
+
+    pub async fn restore_mirrored_copies(&self, copies: &[crate::MirroredCopy]) -> Result<()> {
+        send_write(&self.write_tx, |resp| WriteRequest::RestoreMirroredCopies {
+            copies: copies.to_vec(),
+            resp,
+        })
+        .await
+    }
+
     pub async fn mark_folder_seen(&self, folder: FolderId) -> Result<()> {
         send_write(&self.write_tx, |resp| WriteRequest::MarkFolderSeen {
             folder,

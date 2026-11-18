@@ -79,7 +79,7 @@ The workspace is split by layer. New logic should land in small, testable module
 - `session`, `idle`, `queue`, `auth` – account loop, SMTP task and connect; Inbox IDLE and poll waits; command ordering/coalescing/retry; IMAP/SMTP auth and OAuth tokens
 - `mailbox_sync`, `watched`, `backfill` – folder list and mailbox sync; watched-folder STATUS polling, paging and body prefetch; header backfills
 - `bodies`, `reactions`, `pgp` – opening messages, attachments and `BodyReady`; reaction persistence; incoming/outgoing OpenPGP
-- `flags`, `moves`, `delete`, `folders` – flag changes; move/copy and UID resolution; delete/expunge/reconcile; folder operations
+- `flags`, `flag_copies`, `moves`, `delete`, `folders` – flag changes; mirroring flags onto a Gmail message's copies in other labels; move/copy and UID resolution; delete/expunge/reconcile; folder operations
 - `rules`, `search_import` – client-side rules and the server-rules backend hand-off (`server_rules::ServerRulesBackend`); cross-folder IMAP search import for extensions
 - `drafts`, `send`, `sent_copy` – IMAP Drafts; SMTP send; Sent copies, Message-ID dedupe and sent attachments
 

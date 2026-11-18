@@ -122,6 +122,9 @@ pub(super) fn dispatch_read(reader: &mut ReaderState, req: ReadRequest) {
         ReadRequest::LiveSiblingIds { id, resp } => {
             let _ = resp.send(messages::live_sibling_ids(&reader.conn, id));
         }
+        ReadRequest::EnvelopesByIds { ids, resp } => {
+            let _ = resp.send(messages::envelopes_by_ids(&reader.conn, &ids));
+        }
         ReadRequest::UnreadCounts { resp } => {
             let _ = resp.send(messages::unread_counts(&reader.conn));
         }
@@ -412,6 +415,20 @@ pub(super) fn dispatch_write(state: &mut WriterState, req: WriteRequest) {
         }
         WriteRequest::MarkDeletedByUids { folder, uids, resp } => {
             let _ = resp.send(messages::mark_deleted_by_uids(&state.conn, folder, &uids));
+        }
+        WriteRequest::MirrorFlagsToCopies {
+            source,
+            flags,
+            resp,
+        } => {
+            let _ = resp.send(messages::mirror_flags_to_copies(
+                &state.conn,
+                &source,
+                flags,
+            ));
+        }
+        WriteRequest::RestoreMirroredCopies { copies, resp } => {
+            let _ = resp.send(messages::restore_mirrored_copies(&state.conn, &copies));
         }
         WriteRequest::ApplyServerFlags {
             folder,

@@ -64,6 +64,7 @@ mod backfill;
 mod bodies;
 mod delete;
 mod drafts;
+mod flag_copies;
 mod flags;
 mod folders;
 mod idle;
