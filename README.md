@@ -120,15 +120,15 @@ Google Workspace admins can turn app passwords off. Yahoo and generic IMAP accou
 
 ## Microsoft sign-in
 
-Builds made with `ALCEDO_MICROSOFT_CLIENT_ID` set include that Microsoft public client, so personal Outlook.com accounts sign in through the browser with no configuration file. The official packages don't support work or school accounts through this client yet, because its publisher is not verified. Those accounts need a client registered for the organization, set as a `[microsoft]` entry in `oauth.toml`.
+Alcedo includes its own Microsoft public client, so personal Outlook.com accounts sign in through the browser with no configuration file. The official packages don't support work or school accounts through this client yet, because its publisher is not verified. Those accounts need a client registered for the organization, set as a `[microsoft]` entry in `oauth.toml`.
 
-To include a client in your own build:
+If you distribute a fork, please register your own client and build with it:
 
 ```bash
 ALCEDO_MICROSOFT_CLIENT_ID="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" cargo build --release -p alcedo
 ```
 
-Register the client for personal and organizational accounts, as a public client with the redirect URI `http://127.0.0.1/`. Add that URI in the app manifest, because the Azure portal's redirect form rejects `http` loopback addresses. Builds without the variable need a `[microsoft]` entry in `oauth.toml`.
+Register the client for personal and organizational accounts, as a public client with the redirect URI `http://127.0.0.1/`. Add that URI in the app manifest, because the Azure portal's redirect form rejects `http` loopback addresses.
 
 ## OAuth (advanced, optional)
 

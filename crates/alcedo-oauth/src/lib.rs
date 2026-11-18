@@ -172,10 +172,23 @@ impl ProviderOAuthConfig {
     }
 }
 
-/// Microsoft public client compiled into this build, if the build set
-/// `ALCEDO_MICROSOFT_CLIENT_ID`. Public clients have no secret, so the ID is
-/// safe to ship; it is a build setting so forks do not inherit the official app.
-const BUILT_IN_MICROSOFT_CLIENT_ID: Option<&str> = option_env!("ALCEDO_MICROSOFT_CLIENT_ID");
+/// Alcedo's Microsoft public client. Public clients have no secret, so the ID
+/// is safe to publish.
+const DEFAULT_MICROSOFT_CLIENT_ID: &str = "93c0cfa1-bf1c-4255-a787-005baa42771d";
+
+/// The client a build asked for, or Alcedo's own when it asked for none.
+const fn microsoft_client_id_for_build(build_setting: Option<&'static str>) -> &'static str {
+    match build_setting {
+        Some(id) if !id.is_empty() => id,
+        _ => DEFAULT_MICROSOFT_CLIENT_ID,
+    }
+}
+
+/// Microsoft public client compiled into this build. Forks can replace it by
+/// setting `ALCEDO_MICROSOFT_CLIENT_ID` at build time.
+const BUILT_IN_MICROSOFT_CLIENT_ID: Option<&str> = Some(microsoft_client_id_for_build(
+    option_env!("ALCEDO_MICROSOFT_CLIENT_ID"),
+));
 
 /// OAuth client IDs from `oauth.toml` and this build's built-in clients.
 #[derive(Clone, Debug, Default, Deserialize)]
@@ -553,11 +566,26 @@ redirect_uri = "http://127.0.0.1"
     }
 
     #[test]
-    fn build_without_a_client_id_leaves_microsoft_unconfigured() {
+    fn blank_built_in_client_leaves_microsoft_unconfigured() {
         for built_in in [None, Some(""), Some("   ")] {
             let config = OAuthConfig::default().with_microsoft_fallback(built_in);
             assert!(config.microsoft.is_none(), "{built_in:?}");
         }
+    }
+
+    #[test]
+    fn build_without_a_setting_uses_alcedos_microsoft_client() {
+        for build_setting in [None, Some("")] {
+            assert_eq!(
+                microsoft_client_id_for_build(build_setting),
+                "93c0cfa1-bf1c-4255-a787-005baa42771d"
+            );
+        }
+    }
+
+    #[test]
+    fn build_setting_replaces_alcedos_microsoft_client() {
+        assert_eq!(microsoft_client_id_for_build(Some("fork-id")), "fork-id");
     }
 
     #[test]

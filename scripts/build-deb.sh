@@ -77,10 +77,6 @@ CARGO_TARGET_DIR="$(cd "$CARGO_TARGET_DIR" && pwd -P)"
 export RUSTFLAGS="--remap-path-prefix=$ROOT=/usr/src/alcedo-$VERSION --remap-path-prefix=${CARGO_HOME:-$HOME/.cargo}=/cargo --remap-path-prefix=$CARGO_TARGET_DIR=/target"
 ensure_c_include_path
 
-if [[ -z "${ALCEDO_MICROSOFT_CLIENT_ID:-}" ]]; then
-  echo "Warning: ALCEDO_MICROSOFT_CLIENT_ID is not set; Microsoft sign-in in this package will need a user oauth.toml." >&2
-fi
-
 echo "Building alcedo $VERSION (release, locked)…"
 cargo build --release --locked -p alcedo
 
