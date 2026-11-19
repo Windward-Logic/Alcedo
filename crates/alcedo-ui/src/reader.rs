@@ -66,6 +66,12 @@ use webkit6::{
 /// Collapsed recipient clip height (~one chip row). GTK CSS has no max-height.
 const COLLAPSED_RECIPIENT_HEIGHT: i32 = 26;
 
+/// `AdwSplitButton` treats `label` and `icon-name` as mutually exclusive:
+/// setting one clears the other. These stay in sync with the reply/forward
+/// button builders below and with `set_reader_reply_icon_only`.
+const REPLY_ICON_NAME: &str = "mail-reply-sender-symbolic";
+const FORWARD_ICON_NAME: &str = "mail-forward-symbolic";
+
 thread_local! {
     static ENABLED_RISKY_ATTACHMENTS: RefCell<HashSet<String>> = RefCell::new(HashSet::new());
 }
@@ -388,7 +394,7 @@ pub fn build_reader_page(
     reply_actions.add_action(&reply_list_action);
 
     let reply_btn = adw::SplitButton::builder()
-        .icon_name("mail-reply-sender-symbolic")
+        .icon_name(REPLY_ICON_NAME)
         .label(tr!("Reply"))
         .css_classes(["suggested-action", "alcedo-reader-reply"])
         .menu_model(&reply_menu)
@@ -415,7 +421,7 @@ pub fn build_reader_page(
     forward_actions.add_action(&forward_window_action);
 
     let forward_btn = adw::SplitButton::builder()
-        .icon_name("mail-forward-symbolic")
+        .icon_name(FORWARD_ICON_NAME)
         .label(tr!("Forward"))
         .css_classes(["alcedo-reader-forward"])
         .menu_model(&forward_menu)
@@ -1044,10 +1050,15 @@ pub fn sync_reader_star(widgets: &ReaderWidgets, flagged: bool) {
 }
 
 /// Drop Reply / Forward text on compact layouts. Accessible names stay.
+///
+/// `label` and `icon-name` are mutually exclusive on `AdwSplitButton`
+/// (setting either one clears the other), so switching to icon-only mode
+/// must set `icon-name` rather than just clearing the label, or the button
+/// ends up with neither text nor icon.
 pub fn set_reader_reply_icon_only(widgets: &ReaderWidgets, icon_only: bool) {
     if icon_only {
-        widgets.reply_btn.set_label("");
-        widgets.forward_btn.set_label("");
+        widgets.reply_btn.set_icon_name(REPLY_ICON_NAME);
+        widgets.forward_btn.set_icon_name(FORWARD_ICON_NAME);
     } else {
         widgets.reply_btn.set_label(&tr!("Reply"));
         widgets.forward_btn.set_label(&tr!("Forward"));
