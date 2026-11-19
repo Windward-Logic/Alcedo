@@ -1,6 +1,7 @@
 //! Reader-facing updates: bodies, reactions, unsubscribe, raw source and remote-image senders.
 
 use super::*;
+use alcedo_i18n::trf;
 
 impl MailModel {
     pub(super) fn on_reader_sync_event(&mut self, event: SyncEvent, root: &adw::ApplicationWindow) {
@@ -38,7 +39,7 @@ impl MailModel {
                     if notify && !notifications::is_attending_main(root) {
                         notifications::send_named_notification(
                             &format!("reaction-{}", reaction_id.0),
-                            &format!("{from_name} reacted {emoji}"),
+                            &trf!("{name} reacted {emoji}", name = from_name, emoji = emoji),
                             &subject,
                             Some(target_id),
                         );

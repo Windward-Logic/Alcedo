@@ -1,5 +1,8 @@
 //! Core domain types for Alcedo.
 
+/// gettext domain of the text shown to people, read by the `alcedo_i18n` macros.
+const I18N_DOMAIN: &str = "alcedo";
+
 mod account;
 mod attachment;
 mod attachment_integrity;
@@ -91,10 +94,11 @@ pub use contact::{
     promote_contact_in_memory, remove_contacts_in_memory,
 };
 pub use envelope::{
-    Address, Conversation, Envelope, MessageListMode, PREVIEW_SCAN_MAX, PREVIEW_SNIPPET_MAX,
-    ServerFlags, address_emails_equal, clean_display_name, clean_preview_text, contains_html_tag,
-    format_mailbox, group_envelopes, html_tag_prefix, parse_address_token, participant_summary,
-    preview_scan, preview_snippet, preview_without_embedded_mime, show_distinct_address_row,
+    Address, Conversation, ENCRYPTED_SNIPPET, Envelope, MessageListMode, PREVIEW_SCAN_MAX,
+    PREVIEW_SNIPPET_MAX, ServerFlags, address_emails_equal, clean_display_name, clean_preview_text,
+    contains_html_tag, format_mailbox, group_envelopes, html_tag_prefix, parse_address_token,
+    participant_summary, preview_scan, preview_snippet, preview_without_embedded_mime,
+    show_distinct_address_row,
 };
 pub use error::{
     Error, Result, SYNC_NETWORK_TOAST_GRACE, auth_retry_delay, is_auth_failure,
@@ -137,7 +141,7 @@ pub use reaction::{
     disposition_is_attachment, encrypted_reaction_block, escape_reaction_html, group_reactions,
     is_single_reaction_emoji, parse_email_reaction, parse_email_reaction_from_message,
     reaction_block_reason, reaction_bodies, reaction_from_display_name, reaction_reader_body,
-    sanitize_sender_name,
+    sanitize_sender_name, you_label,
 };
 pub use remote_images::{normalize_sender_email, should_load_remote_images};
 pub use reply_planner::{

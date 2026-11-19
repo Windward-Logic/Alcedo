@@ -1,5 +1,6 @@
 //! Message rules list dialog.
 
+use alcedo_i18n::{ntr, tr, trf, trs};
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
@@ -56,13 +57,13 @@ pub fn open_rules_dialog(
     spec: RulesDialogSpec,
     sender: Sender<MailMsg>,
 ) -> RulesDialogHandle {
-    let close_btn = gtk::Button::builder().label("Close").build();
+    let close_btn = gtk::Button::builder().label(tr!("Close")).build();
 
     let header = adw::HeaderBar::new();
     header.set_show_start_title_buttons(false);
     header.set_show_end_title_buttons(false);
     let title_label = gtk::Label::builder()
-        .label("Message Rules")
+        .label(tr!("Message Rules"))
         .css_classes(["title"])
         .build();
     header.set_title_widget(Some(&title_label));
@@ -76,7 +77,7 @@ pub fn open_rules_dialog(
         .css_classes(["boxed-list"])
         .activate_on_single_click(false)
         .build();
-    listbox.update_property(&[gtk::accessible::Property::Label("Message rules")]);
+    listbox.update_property(&[gtk::accessible::Property::Label(&tr!("Message rules"))]);
 
     let list_scroll = gtk::ScrolledWindow::builder()
         .hscrollbar_policy(gtk::PolicyType::Never)
@@ -86,12 +87,12 @@ pub fn open_rules_dialog(
         .child(&listbox)
         .build();
 
-    let toolbar_edit = flat_toolbar_button("document-edit-symbolic", "Edit Rule", false);
-    let toolbar_delete = flat_toolbar_button("user-trash-symbolic", "Delete Rule", false);
-    let toolbar_up = flat_toolbar_button("go-up-symbolic", "Move Up", false);
-    let toolbar_down = flat_toolbar_button("go-down-symbolic", "Move Down", false);
-    let toolbar_run = flat_toolbar_button(RULES_SYMBOLIC, "Run Rules", true);
-    let toolbar_add = flat_toolbar_button("list-add-symbolic", "Add Rule", false);
+    let toolbar_edit = flat_toolbar_button("document-edit-symbolic", &tr!("Edit Rule"), false);
+    let toolbar_delete = flat_toolbar_button("user-trash-symbolic", &tr!("Delete Rule"), false);
+    let toolbar_up = flat_toolbar_button("go-up-symbolic", &tr!("Move Up"), false);
+    let toolbar_down = flat_toolbar_button("go-down-symbolic", &tr!("Move Down"), false);
+    let toolbar_run = flat_toolbar_button(RULES_SYMBOLIC, &tr!("Run Rules"), true);
+    let toolbar_add = flat_toolbar_button("list-add-symbolic", &tr!("Add Rule"), false);
 
     let toolbar = gtk::Box::new(gtk::Orientation::Horizontal, 6);
     toolbar.append(&toolbar_add);
@@ -119,7 +120,7 @@ pub fn open_rules_dialog(
     toolbar_view.set_content(Some(&toast_overlay));
 
     let dialog = adw::Dialog::builder()
-        .title("Message Rules")
+        .title(tr!("Message Rules"))
         .content_width(640)
         .content_height(620)
         .child(&toolbar_view)
@@ -173,14 +174,14 @@ pub fn refresh_rules_dialog(
     }
 
     if spec.accounts.is_empty() {
-        let add_account = suggested_cta("Add Account");
+        let add_account = suggested_cta(&tr!("Add Account"));
         let sender_add = sender.clone();
         add_account.connect_clicked(move |_| {
             sender_add.send(MailMsg::AddAccount).ok();
         });
         let page = adw::StatusPage::builder()
-            .title("Message Rules")
-            .description("Add an account to create rules.")
+            .title(tr!("Message Rules"))
+            .description(tr!("Add an account to create rules."))
             .child(&add_account)
             .build();
         handle.content_host.append(&page);
@@ -210,7 +211,7 @@ pub fn refresh_rules_dialog(
             .position(|a| a.id == spec.selected)
             .unwrap_or(0) as u32;
         let account_row = adw::ComboRow::builder()
-            .title("Account")
+            .title(tr!("Account"))
             .model(&account_model)
             .expression(gtk::PropertyExpression::new(
                 gtk::StringObject::static_type(),
@@ -245,7 +246,7 @@ pub fn refresh_rules_dialog(
 
     if matches!(spec.server_rules, ServerRulesStatus::ForeignActive { .. }) {
         let adopt_btn = gtk::Button::builder()
-            .label("Use server instead…")
+            .label(tr!("Use server instead…"))
             .css_classes(["flat"])
             .halign(gtk::Align::Start)
             .build();
@@ -253,13 +254,13 @@ pub fn refresh_rules_dialog(
         let account_adopt = spec.selected;
         adopt_btn.connect_clicked(move |_| {
             let confirm = adw::AlertDialog::builder()
-                .heading("Replace server filters?")
+                .heading(tr!("Replace server filters?"))
                 .body(
-                    "Alcedo will turn on its own server rules. Existing server filters stay on the server but will not run.",
+                    tr!("Alcedo will turn on its own server rules. Existing server filters stay on the server but will not run."),
                 )
                 .build();
-            confirm.add_response("cancel", "Cancel");
-            confirm.add_response("replace", "Replace");
+            confirm.add_response("cancel", &tr!("Cancel"));
+            confirm.add_response("replace", &tr!("Replace"));
             confirm.set_response_appearance("replace", adw::ResponseAppearance::Destructive);
             confirm.set_close_response("cancel");
             let sender_adopt = sender_adopt.clone();
@@ -284,14 +285,16 @@ pub fn refresh_rules_dialog(
     if show_server {
         let preview = spec.preview.as_ref().expect("preview checked");
         let server_group = adw::PreferencesGroup::builder()
-            .title("On the server")
-            .description("Already running on this account. Alcedo cannot edit them here.")
+            .title(tr!("On the server"))
+            .description(tr!(
+                "Already running on this account. Alcedo cannot edit them here."
+            ))
             .build();
         let server_list = gtk::ListBox::builder()
             .selection_mode(gtk::SelectionMode::None)
             .css_classes(["boxed-list"])
             .build();
-        server_list.update_property(&[gtk::accessible::Property::Label("Server rules")]);
+        server_list.update_property(&[gtk::accessible::Property::Label(&tr!("Server rules"))]);
 
         let folders = spec
             .folders
@@ -303,18 +306,20 @@ pub fn refresh_rules_dialog(
         }
         if preview.unsupported_count > 0 {
             let n = preview.unsupported_count;
-            let subtitle = if n == 1 {
-                "1 more filter Alcedo can’t display".to_string()
-            } else {
-                format!("{n} more filters Alcedo can’t display")
-            };
+            let subtitle = ntr!(
+                "{n} more filter Alcedo can’t display",
+                "{n} more filters Alcedo can’t display",
+                n
+            );
             let remainder = adw::ActionRow::builder()
-                .title("Other server filters")
+                .title(tr!("Other server filters"))
                 .subtitle(&subtitle)
                 .activatable(false)
                 .css_classes(["alcedo-rule-row", "alcedo-rule-row-server"])
                 .build();
-            remainder.update_property(&[gtk::accessible::Property::Label("Other server filters")]);
+            remainder.update_property(&[gtk::accessible::Property::Label(&tr!(
+                "Other server filters"
+            ))]);
             let info = gtk::Image::from_icon_name("dialog-information-symbolic");
             remainder.add_suffix(&info);
             server_list.append(&remainder);
@@ -331,7 +336,7 @@ pub fn refresh_rules_dialog(
     let show_local_empty_label = local_empty && show_server;
     if show_local_empty_label {
         let none_label = gtk::Label::builder()
-            .label("None on this computer")
+            .label(tr!("None on this computer"))
             .css_classes(["dim-label"])
             .halign(gtk::Align::Start)
             .build();
@@ -339,7 +344,7 @@ pub fn refresh_rules_dialog(
     }
 
     if local_empty && !show_server {
-        let add_rule = suggested_cta("Add Rule");
+        let add_rule = suggested_cta(&tr!("Add Rule"));
         let sender_empty = sender.clone();
         let parent_empty = parent.clone();
         let folders_empty = spec.folders.clone();
@@ -357,8 +362,10 @@ pub fn refresh_rules_dialog(
             );
         });
         let page = adw::StatusPage::builder()
-            .title("No message rules")
-            .description("Rules file, star, or delete mail automatically when it arrives.")
+            .title(tr!("No message rules"))
+            .description(tr!(
+                "Rules file, star, or delete mail automatically when it arrives."
+            ))
             .child(&add_rule)
             .build();
         page.set_paintable(icons::paintable(RULES_SYMBOLIC, 128).as_ref());
@@ -536,11 +543,14 @@ fn wire_toolbar_actions(
             let name = rule.name.clone();
             let id = rule.id;
             let confirm = adw::AlertDialog::builder()
-                .heading("Delete rule?")
-                .body(format!("“{name}” will no longer apply to incoming mail."))
+                .heading(tr!("Delete rule?"))
+                .body(trf!(
+                    "“{name}” will no longer apply to incoming mail.",
+                    name = name
+                ))
                 .build();
-            confirm.add_response("cancel", "Cancel");
-            confirm.add_response("delete", "Delete");
+            confirm.add_response("cancel", &tr!("Cancel"));
+            confirm.add_response("delete", &tr!("Delete"));
             confirm.set_response_appearance("delete", adw::ResponseAppearance::Destructive);
             confirm.set_close_response("cancel");
             let sender_delete = sender_delete.clone();
@@ -828,13 +838,13 @@ fn expand_account_combo(row: &adw::ComboRow) {
 fn banner_message(server_rules: &ServerRulesStatus) -> &'static str {
     match server_rules {
         ServerRulesStatus::Ready => {
-            "These rules run on the server, including when Alcedo is closed."
+            trs!("These rules run on the server, including when Alcedo is closed.")
         }
         ServerRulesStatus::ForeignActive { .. } => {
-            "This account already has server filters. Alcedo rules run on this computer."
+            trs!("This account already has server filters. Alcedo rules run on this computer.")
         }
         ServerRulesStatus::Unavailable | ServerRulesStatus::Unknown => {
-            "These rules run on this computer when Alcedo checks the Inbox."
+            trs!("These rules run on this computer when Alcedo checks the Inbox.")
         }
     }
 }
@@ -854,9 +864,9 @@ fn list_subtitle(
         return base;
     }
     let suffix = if rule.execution == RuleExecution::Server {
-        " · On the server"
+        trs!(" · On the server")
     } else {
-        " · On this computer"
+        trs!(" · On this computer")
     };
     format!("{base}{suffix}")
 }
@@ -1037,8 +1047,8 @@ fn local_rule_row(
         .valign(gtk::Align::Center)
         .css_classes(["alcedo-rule-drag-handle"])
         .build();
-    handle_img.update_property(&[gtk::accessible::Property::Label("Reorder rule")]);
-    handle_img.set_tooltip_text(Some("Reorder rule"));
+    handle_img.update_property(&[gtk::accessible::Property::Label(&tr!("Reorder rule"))]);
+    handle_img.set_tooltip_text(Some(&tr!("Reorder rule")));
     handle_img.set_can_target(false);
     let handle_box = gtk::Box::new(gtk::Orientation::Horizontal, 0);
     handle_box.set_valign(gtk::Align::Center);
@@ -1048,9 +1058,9 @@ fn local_rule_row(
         .active(rule.enabled)
         .valign(gtk::Align::Center)
         .build();
-    switch.update_property(&[gtk::accessible::Property::Label(&format!(
-        "Enable {}",
-        rule.name
+    switch.update_property(&[gtk::accessible::Property::Label(&trf!(
+        "Enable {rule}",
+        rule = rule.name
     ))]);
     row.add_prefix(&switch);
     row.add_prefix(&handle_box);

@@ -1,5 +1,6 @@
 //! WebKitGTK contenteditable HTML compose editor.
 
+use alcedo_i18n::tr;
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -88,7 +89,7 @@ impl ComposeHtmlEditor {
             .wrap_mode(gtk::WrapMode::Word)
             .editable(true)
             .build();
-        source_view.update_property(&[gtk::accessible::Property::Label("HTML source")]);
+        source_view.update_property(&[gtk::accessible::Property::Label(&tr!("HTML source"))]);
         source_view.buffer().connect_changed({
             let on_html_input = on_html_input.clone();
             move |_| (**on_html_input.borrow())()
@@ -100,7 +101,7 @@ impl ComposeHtmlEditor {
         source_scroll.add_css_class("alcedo-composer-source");
         let preview_scroll = wrap_min_height(&preview_view);
         preview_scroll.add_css_class("alcedo-composer-preview");
-        preview_view.update_property(&[gtk::accessible::Property::Label("Markdown preview")]);
+        preview_view.update_property(&[gtk::accessible::Property::Label(&tr!("Markdown preview"))]);
 
         let stack = gtk::Stack::new();
         stack.set_hexpand(true);

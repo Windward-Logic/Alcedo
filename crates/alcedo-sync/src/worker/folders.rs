@@ -11,6 +11,7 @@ use super::mailbox_sync::{
 };
 use super::session::is_recoverable_disconnect;
 use super::*;
+use alcedo_i18n::{tr, trf};
 
 pub(super) fn is_selected_or_descendant(selected: &str, imap_name: &str, delimiter: &str) -> bool {
     selected == imap_name
@@ -38,7 +39,7 @@ pub(super) fn resolve_parent_imap(
             .iter()
             .find(|folder| folder.id == id)
             .map(|folder| folder.imap_name.clone())
-            .ok_or_else(|| Error::Other("Folder not found".to_string()))
+            .ok_or_else(|| Error::Other(tr!("Folder not found")))
             .map(Some),
     }
 }
@@ -85,12 +86,12 @@ pub(super) async fn create_folder(
         emit_error(
             events,
             Some(account.id),
-            "A folder with this name already exists".to_string(),
+            tr!("A folder with this name already exists"),
         );
         return Ok(());
     }
 
-    emit_status(events, account, format!("Creating {leaf}…"));
+    emit_status(events, account, trf!("Creating {folder}…", folder = leaf));
 
     if let Err(err) = state.client_mut().create_mailbox(&imap_path).await {
         emit_error(events, Some(account.id), err.to_string());
@@ -108,7 +109,10 @@ pub(super) async fn create_folder(
         emit_status(
             events,
             account,
-            format!("Syncing {}…", folder_display_name(&new_folder)),
+            trf!(
+                "Syncing {folder}…",
+                folder = folder_display_name(&new_folder)
+            ),
         );
         sync_selected_mailbox(
             state,
@@ -137,14 +141,14 @@ pub(super) async fn rename_folder(
 ) -> Result<()> {
     let folders = store.list_folders(account.id).await?;
     let Some(folder) = folders.iter().find(|folder| folder.id == id) else {
-        emit_error(events, Some(account.id), "Folder not found".to_string());
+        emit_error(events, Some(account.id), tr!("Folder not found"));
         return Ok(());
     };
     if !folder_is_mutable(folder) {
         emit_error(
             events,
             Some(account.id),
-            "This folder cannot be modified".to_string(),
+            tr!("This folder cannot be modified"),
         );
         return Ok(());
     }
@@ -174,7 +178,7 @@ pub(super) async fn rename_folder(
         emit_error(
             events,
             Some(account.id),
-            "A folder with this name already exists".to_string(),
+            tr!("A folder with this name already exists"),
         );
         return Ok(());
     }
@@ -192,7 +196,7 @@ pub(super) async fn rename_folder(
     emit_status(
         events,
         account,
-        format!("Renaming {}…", folder_display_name(folder)),
+        trf!("Renaming {folder}…", folder = folder_display_name(folder)),
     );
 
     let mut imap_renames = rename_pairs.clone();
@@ -229,14 +233,14 @@ pub(super) async fn delete_folder(
 ) -> Result<()> {
     let folders = store.list_folders(account.id).await?;
     let Some(folder) = folders.iter().find(|folder| folder.id == folder_id) else {
-        emit_error(events, Some(account.id), "Folder not found".to_string());
+        emit_error(events, Some(account.id), tr!("Folder not found"));
         return Ok(());
     };
     if !folder_is_mutable(folder) {
         emit_error(
             events,
             Some(account.id),
-            "This folder cannot be modified".to_string(),
+            tr!("This folder cannot be modified"),
         );
         return Ok(());
     }
@@ -267,7 +271,7 @@ pub(super) async fn delete_folder(
     emit_status(
         events,
         account,
-        format!("Deleting {}…", folder_display_name(folder)),
+        trf!("Deleting {folder}…", folder = folder_display_name(folder)),
     );
 
     let mut failure = None;
@@ -302,11 +306,15 @@ pub(super) async fn delete_folder(
         if !stuck.is_empty() {
             let detail = failure
                 .map(|err| err.to_string())
-                .unwrap_or_else(|| "the server kept the folder".to_string());
+                .unwrap_or_else(|| tr!("the server kept the folder"));
             emit_error(
                 events,
                 Some(account.id),
-                format!("Couldn't delete {}: {detail}", stuck.join(", ")),
+                trf!(
+                    "Couldn't delete {folders}: {reason}",
+                    folders = stuck.join(", "),
+                    reason = detail
+                ),
             );
         }
     } else if let Some(err) = failure {
@@ -378,7 +386,7 @@ pub(super) async fn empty_folder(
     emit_status(
         events,
         account,
-        format!("Emptying {}…", folder_display_name(&folder)),
+        trf!("Emptying {folder}…", folder = folder_display_name(&folder)),
     );
 
     if matches!(folder.special, SpecialUse::Trash | SpecialUse::Junk) {
@@ -530,7 +538,7 @@ pub(super) async fn delete_folder_on_or_before(
     }
 
     let date_text = format_delete_through_date(through);
-    emit_status(events, account, "Deleting older mail…".to_string());
+    emit_status(events, account, tr!("Deleting older mail…"));
 
     ensure_selected(state, &folder.imap_name).await?;
     let uids = state
@@ -545,7 +553,7 @@ pub(super) async fn delete_folder_on_or_before(
         emit_status(
             events,
             account,
-            format!("No messages on or before {date_text}."),
+            trf!("No messages on or before {date}.", date = date_text),
         );
         let _ = events.send(SyncEvent::FolderDeleteFinished {
             folder: folder_id,

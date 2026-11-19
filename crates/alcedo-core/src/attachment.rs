@@ -1,5 +1,6 @@
 //! Attachment limits, filename helpers, and configurable type lists.
 
+use alcedo_i18n::trf;
 use std::path::Path;
 
 pub const MAX_COMPOSE_INLINES: usize = 10;
@@ -215,9 +216,9 @@ pub fn compose_size_limit(smtp_size: Option<u64>) -> u64 {
 fn format_megabytes(bytes: u64) -> String {
     let mb = bytes as f64 / (1024.0 * 1024.0);
     if mb >= 10.0 {
-        format!("{} MB", mb.round() as u64)
+        trf!("{size} MB", size = mb.round() as u64)
     } else {
-        format!("{mb:.1} MB")
+        trf!("{size} MB", size = format!("{mb:.1}"))
     }
 }
 
@@ -232,9 +233,15 @@ pub fn attachment_size_warning(total_bytes: u64, smtp_size: Option<u64>) -> Opti
     let total = format_megabytes(total_bytes);
     let limit = format_megabytes(limit);
     Some(match smtp_size.filter(|size| *size > 0) {
-        Some(_) => format!("Attachments total about {total}, over this server's {limit} limit"),
-        None => format!(
-            "Attachments total about {total}. Many mail servers reject messages over {limit}"
+        Some(_) => trf!(
+            "Attachments total about {total}, over this server's {limit} limit",
+            total = total,
+            limit = limit
+        ),
+        None => trf!(
+            "Attachments total about {total}. Many mail servers reject messages over {limit}",
+            total = total,
+            limit = limit
         ),
     })
 }

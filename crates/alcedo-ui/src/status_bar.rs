@@ -1,5 +1,6 @@
 //! Window status bar: sync, folder, counts, and network.
 
+use alcedo_i18n::{ntr, tr, trf, trs};
 use std::time::Duration;
 
 use chrono::{DateTime, Utc};
@@ -8,7 +9,7 @@ use relm4::gtk;
 use relm4::gtk::gio;
 use relm4::gtk::prelude::*;
 
-use crate::folder_bar::UNIFIED_INBOX_TITLE;
+use crate::folder_bar::everything_title;
 
 /// Which collection the status bar describes.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -67,10 +68,10 @@ pub fn build_status_bar() -> StatusBar {
     root.set_hexpand(true);
 
     let sync_spinner = adw::Spinner::builder()
-        .tooltip_text("Syncing")
+        .tooltip_text(tr!("Syncing"))
         .visible(false)
         .build();
-    crate::a11y::set_label(&sync_spinner, "Syncing");
+    crate::a11y::set_label(&sync_spinner, &tr!("Syncing"));
     sync_spinner.add_css_class("alcedo-sync-spinner");
 
     let sync_label = gtk::Label::builder()
@@ -88,7 +89,7 @@ pub fn build_status_bar() -> StatusBar {
         .css_classes(["flat", "alcedo-status-activity"])
         .has_frame(false)
         .focus_on_click(false)
-        .tooltip_text("Activity log")
+        .tooltip_text(tr!("Activity log"))
         .action_name("win.activity-log")
         .child(&sync_inner)
         .build();
@@ -211,7 +212,7 @@ impl StatusBar {
     pub fn set_last_sync(&self, at: Option<DateTime<Utc>>, now: DateTime<Utc>) {
         let text = match at {
             Some(at) => format_last_sync(at, now),
-            None => "Never synced".to_string(),
+            None => tr!("Never synced"),
         };
         self.last_sync_label.set_text(&text);
     }
@@ -230,17 +231,30 @@ pub fn format_sync_activity_tooltip(email: Option<&str>, raw: Option<&str>) -> S
     if let Some(email) = email.filter(|value| !value.is_empty())
         && !status.is_empty()
     {
-        return format!("{email} — {status}. Activity log");
+        // TRANSLATORS: tooltip; {status} is a sync state such as "Up to date".
+        return trf!(
+            "{email} — {status}. Activity log",
+            email = email,
+            status = status
+        );
     }
-    "Activity log".to_string()
+    tr!("Activity log")
 }
 
 /// Human-readable sync status (IDLE becomes Up to date).
+///
+/// The raw status is a fixed English token from the sync worker (or the UI's
+/// own "Mock data" / "No accounts"), which `sync_is_busy` also compares, so it
+/// is translated only here. Progress text the worker writes is already
+/// translated where it is made.
 pub fn format_sync_status(raw: Option<&str>) -> String {
     match raw.map(str::trim).filter(|s| !s.is_empty()) {
-        None => "Ready".to_string(),
-        Some(s) if s.eq_ignore_ascii_case("IDLE") => "Up to date".to_string(),
-        Some(s) if s.eq_ignore_ascii_case("Polling") => "Polling".to_string(),
+        None => tr!("Ready"),
+        Some(s) if s.eq_ignore_ascii_case("IDLE") => tr!("Up to date"),
+        Some(s) if s.eq_ignore_ascii_case("Polling") => tr!("Polling"),
+        Some(s) if s.eq_ignore_ascii_case("Sign-in required") => tr!("Sign-in required"),
+        Some(s) if s.eq_ignore_ascii_case("Mock data") => tr!("Mock data"),
+        Some(s) if s.eq_ignore_ascii_case("No accounts") => tr!("No accounts"),
         Some(s) => s.to_string(),
     }
 }
@@ -276,8 +290,9 @@ pub fn sync_is_busy(raw: Option<&str>) -> bool {
 pub fn format_folder(folder: &StatusFolder) -> String {
     match folder {
         StatusFolder::None => String::new(),
-        StatusFolder::UnifiedInbox => UNIFIED_INBOX_TITLE.to_string(),
-        StatusFolder::Search { scope } => format!("Search · {scope}"),
+        StatusFolder::UnifiedInbox => everything_title(),
+        // TRANSLATORS: status bar; {scope} is a folder name or "All mail".
+        StatusFolder::Search { scope } => trf!("Search · {scope}", scope = scope),
         StatusFolder::Extension { title, detail } if detail.is_empty() => title.clone(),
         StatusFolder::Extension { title, detail } => format!("{title} · {detail}"),
         StatusFolder::Folder {
@@ -294,26 +309,17 @@ pub fn format_folder(folder: &StatusFolder) -> String {
 /// Counts line: messages, unread, optional starred.
 pub fn format_stats(stats: FolderStats) -> String {
     if stats.total == 0 {
-        return "No messages".to_string();
+        return tr!("No messages");
     }
-    let messages = if stats.total == 1 {
-        "1 message".to_string()
-    } else {
-        format!("{} messages", stats.total)
-    };
+    let messages = ntr!("{n} message", "{n} messages", stats.total);
     let unread = match stats.unread {
-        0 => "no unread".to_string(),
-        1 => "1 unread".to_string(),
-        n => format!("{n} unread"),
+        0 => tr!("no unread"),
+        n => ntr!("{n} unread", "{n} unread", n),
     };
     if stats.starred == 0 {
         format!("{messages} · {unread}")
     } else {
-        let starred = if stats.starred == 1 {
-            "1 starred".to_string()
-        } else {
-            format!("{} starred", stats.starred)
-        };
+        let starred = ntr!("{n} starred", "{n} starred", stats.starred);
         format!("{messages} · {unread} · {starred}")
     }
 }
@@ -323,7 +329,8 @@ pub fn format_selection(index: u32, total: u32) -> Option<String> {
     if total == 0 || index == 0 || index > total {
         None
     } else {
-        Some(format!("{index} of {total}"))
+        // TRANSLATORS: position of the selected message, e.g. "3 of 40".
+        Some(trf!("{index} of {total}", index = index, total = total))
     }
 }
 
@@ -332,8 +339,7 @@ pub fn format_selection_info(info: SelectionInfo) -> Option<String> {
     match info {
         SelectionInfo::Position { index, total } => format_selection(index, total),
         SelectionInfo::Count(0) => None,
-        SelectionInfo::Count(1) => Some("1 selected".to_string()),
-        SelectionInfo::Count(count) => Some(format!("{count} selected")),
+        SelectionInfo::Count(count) => Some(ntr!("{n} selected", "{n} selected", count)),
     }
 }
 
@@ -341,13 +347,14 @@ pub fn format_selection_info(info: SelectionInfo) -> Option<String> {
 pub fn format_last_sync(at: DateTime<Utc>, now: DateTime<Utc>) -> String {
     let secs = (now - at).num_seconds().max(0);
     if secs < 60 {
-        "Last sync just now".to_string()
+        tr!("Last sync just now")
     } else if secs < 3600 {
-        format!("Last sync {}m ago", secs / 60)
+        // TRANSLATORS: {n} minutes; keep it short, it sits in the status bar.
+        ntr!("Last sync {n}m ago", "Last sync {n}m ago", secs / 60)
     } else if secs < 86_400 {
-        format!("Last sync {}h ago", secs / 3600)
+        ntr!("Last sync {n}h ago", "Last sync {n}h ago", secs / 3600)
     } else {
-        format!("Last sync {}d ago", secs / 86_400)
+        ntr!("Last sync {n}d ago", "Last sync {n}d ago", secs / 86_400)
     }
 }
 
@@ -357,16 +364,17 @@ pub fn format_network(
     connectivity: gio::NetworkConnectivity,
 ) -> (&'static str, &'static str) {
     if !available {
-        return ("network-offline-symbolic", "Offline");
+        return ("network-offline-symbolic", trs!("Offline"));
     }
     match connectivity {
-        gio::NetworkConnectivity::Full => ("network-transmit-receive-symbolic", "Online"),
-        gio::NetworkConnectivity::Limited => ("network-error-symbolic", "Limited"),
-        gio::NetworkConnectivity::Portal => {
-            ("network-cellular-acquiring-symbolic", "Captive portal")
-        }
-        gio::NetworkConnectivity::Local => ("network-offline-symbolic", "Local only"),
-        _ => ("network-offline-symbolic", "Offline"),
+        gio::NetworkConnectivity::Full => ("network-transmit-receive-symbolic", trs!("Online")),
+        gio::NetworkConnectivity::Limited => ("network-error-symbolic", trs!("Limited")),
+        gio::NetworkConnectivity::Portal => (
+            "network-cellular-acquiring-symbolic",
+            trs!("Captive portal"),
+        ),
+        gio::NetworkConnectivity::Local => ("network-offline-symbolic", trs!("Local only")),
+        _ => ("network-offline-symbolic", trs!("Offline")),
     }
 }
 

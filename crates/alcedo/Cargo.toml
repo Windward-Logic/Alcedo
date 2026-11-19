@@ -22,6 +22,7 @@ alcedo-smtp = { workspace = true }
 alcedo-oauth = { workspace = true }
 alcedo-sync = { workspace = true }
 alcedo-html = { workspace = true }
+alcedo-i18n = { workspace = true }
 alcedo-widgets = { workspace = true }
 alcedo-ui = { workspace = true }
 tokio = { workspace = true }

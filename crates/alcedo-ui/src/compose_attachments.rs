@@ -1,5 +1,6 @@
 //! Compose attachment chips, file dialogs, and inline image helpers.
 
+use alcedo_i18n::{n_, tr, trf, trm, trs};
 use std::cell::{Cell, RefCell};
 use std::collections::{HashMap, HashSet};
 use std::path::{Component, Path, PathBuf};
@@ -25,11 +26,18 @@ pub fn format_part_size(size: u64) -> String {
     const KB: u64 = 1024;
     const MB: u64 = KB * 1024;
     if size >= MB {
-        format!("{:.1} MB", size as f64 / MB as f64)
+        trf!(
+            "{size} MB",
+            size = format!("{:.1}", size as f64 / MB as f64)
+        )
     } else if size >= KB {
-        format!("{:.0} KB", size as f64 / KB as f64)
+        trf!(
+            "{size} KB",
+            size = format!("{:.0}", size as f64 / KB as f64)
+        )
     } else {
-        format!("{size} B")
+        // TRANSLATORS: a file size in bytes.
+        trf!("{size} B", size = size)
     }
 }
 
@@ -40,7 +48,7 @@ pub fn cid_from_widget_name(name: &str) -> Option<&str> {
 fn read_compose_file(path: &Path) -> Result<ComposeAttachment, &'static str> {
     let filename = compose_basename(path)?;
     if !filename_is_safe(&filename) {
-        return Err("Could not read file");
+        return Err(trs!("Could not read file"));
     }
 
     let bytes = std::fs::read(path).map_err(|_| "Could not read file")?;
@@ -55,7 +63,7 @@ fn read_compose_file(path: &Path) -> Result<ComposeAttachment, &'static str> {
 fn read_inline_image(path: &Path) -> Result<ComposeInline, &'static str> {
     let filename = compose_basename(path)?;
     if !filename_is_safe(&filename) {
-        return Err("Could not read file");
+        return Err(trs!("Could not read file"));
     }
 
     let bytes = std::fs::read(path).map_err(|_| "Could not read file")?;
@@ -68,7 +76,7 @@ fn read_inline_image(path: &Path) -> Result<ComposeInline, &'static str> {
     })
 }
 
-const READ_FAILED: &str = "Could not read file";
+const READ_FAILED: &str = n_!("Could not read file");
 
 /// Read files to attach without blocking the GTK thread. Results are in the
 /// order of `paths`.
@@ -76,14 +84,14 @@ async fn load_compose_files(paths: Vec<PathBuf>) -> Vec<Result<ComposeAttachment
     let count = paths.len();
     crate::blocking_io::run(move || paths.iter().map(|path| read_compose_file(path)).collect())
         .await
-        .unwrap_or_else(|| vec![Err(READ_FAILED); count])
+        .unwrap_or_else(|| vec![Err(trm!(READ_FAILED)); count])
 }
 
 /// Read an image to insert inline without blocking the GTK thread.
 pub async fn load_inline_image(path: PathBuf) -> Result<ComposeInline, &'static str> {
     crate::blocking_io::run(move || read_inline_image(&path))
         .await
-        .unwrap_or(Err(READ_FAILED))
+        .unwrap_or(Err(trm!(READ_FAILED)))
 }
 
 pub fn inline_image_client_warning(filename: &str) -> Option<String> {
@@ -110,7 +118,7 @@ fn compose_basename(path: &Path) -> Result<String, &'static str> {
                     .components()
                     .all(|component| !matches!(component, Component::ParentDir))
         })
-        .ok_or("Could not read file")
+        .ok_or_else(|| trs!("Could not read file"))
 }
 
 pub fn show_composer_toast(widget: &gtk::Widget, message: &str) {
@@ -170,7 +178,7 @@ pub fn refresh_attachment_chips(
             .build();
         let close_btn = gtk::Button::builder()
             .icon_name("window-close-symbolic")
-            .tooltip_text(format!("Remove {}", attachment.filename))
+            .tooltip_text(trf!("Remove {filename}", filename = attachment.filename))
             .css_classes(["flat", "circular", "alcedo-recipient-chip-remove"])
             .build();
         let on_remove = on_remove.clone();
@@ -184,7 +192,7 @@ pub fn refresh_attachment_chips(
 
 fn build_image_filter() -> gtk::FileFilter {
     let filter = gtk::FileFilter::new();
-    filter.set_name(Some("Images"));
+    filter.set_name(Some(trs!("Images")));
     filter.add_mime_type("image/*");
     for ext in crate::settings::attachment_lists().typical_inline_image_extensions {
         filter.add_pattern(&format!("*.{ext}"));
@@ -194,7 +202,7 @@ fn build_image_filter() -> gtk::FileFilter {
 
 fn build_all_files_filter() -> gtk::FileFilter {
     let filter = gtk::FileFilter::new();
-    filter.set_name(Some("All files"));
+    filter.set_name(Some(trs!("All files")));
     filter.add_pattern("*");
     filter
 }
@@ -213,9 +221,9 @@ pub fn open_attach_dialog(
 ) {
     let dialog = gtk::FileDialog::new();
     dialog.set_title(if images_only {
-        "Insert image"
+        trs!("Insert image")
     } else {
-        "Attach files"
+        trs!("Attach files")
     });
     if images_only {
         let filters = gio::ListStore::new::<gtk::FileFilter>();
@@ -599,7 +607,7 @@ impl ComposePartsState {
     ) -> Option<ComposeInline> {
         self.prune_unreferenced_inlines(body_view, format, html_editor);
         if self.inlines.borrow().len() >= MAX_COMPOSE_INLINES {
-            show_composer_toast(toast_host, "Too many inline images (max 10)");
+            show_composer_toast(toast_host, &tr!("Too many inline images (max 10)"));
             return None;
         }
         self.inlines

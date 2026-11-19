@@ -1,3 +1,4 @@
+use alcedo_i18n::trs;
 use serde::{Deserialize, Serialize};
 
 use crate::commands::ComposeFormat;
@@ -40,10 +41,10 @@ impl Snippet {
     pub fn validate(&self) -> Result<(), &'static str> {
         let name = self.name.trim();
         if name.is_empty() || name.len() > SNIPPET_NAME_MAX {
-            return Err("Snippet name must be 1–80 characters");
+            return Err(trs!("Snippet name must be 1–80 characters"));
         }
         if self.body.len() > SNIPPET_BODY_MAX {
-            return Err("Snippet body is too long");
+            return Err(trs!("Snippet body is too long"));
         }
         Ok(())
     }
@@ -52,10 +53,10 @@ impl Snippet {
 impl AccountSignature {
     pub fn validate(&self) -> Result<(), &'static str> {
         if self.body.len() > SNIPPET_BODY_MAX {
-            return Err("Signature body is too long");
+            return Err(trs!("Signature body is too long"));
         }
         if self.inlines.len() > crate::MAX_COMPOSE_INLINES {
-            return Err("Too many inline images (max 10)");
+            return Err(trs!("Too many inline images (max 10)"));
         }
         for inline in &self.inlines {
             if !crate::content_id_is_safe(&inline.content_id) {

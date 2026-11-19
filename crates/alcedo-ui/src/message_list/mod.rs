@@ -1,5 +1,6 @@
 //! Message list (P4) — ColumnView with a flex Subject column and fixed From/Date.
 
+use alcedo_i18n::{ntr, tr, trs};
 use std::cell::{Cell, RefCell};
 use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
@@ -955,8 +956,8 @@ fn at_arrival_edge_values(
 
 fn new_mail_chip_label(count: u32) -> String {
     match count {
-        1 => "New message".to_string(),
-        n => format!("{n} new messages"),
+        1 => tr!("New message"),
+        n => ntr!("{n} new message", "{n} new messages", n),
     }
 }
 
@@ -1175,27 +1176,27 @@ pub fn empty_list_copy(
 ) -> (&'static str, Option<&'static str>) {
     if loading {
         if conversation_mode {
-            ("Loading conversations…", None)
+            (trs!("Loading conversations…"), None)
         } else {
-            ("Loading messages…", None)
+            (trs!("Loading messages…"), None)
         }
     } else if searching {
         if conversation_mode {
             (
-                "No matching conversations",
-                Some("Try folder:inbox from:name, or switch to All mail."),
+                trs!("No matching conversations"),
+                Some(trs!("Try folder:inbox from:name, or switch to All mail.")),
             )
         } else {
             (
-                "No matching messages",
-                Some("Try folder:inbox from:name, or switch to All mail."),
+                trs!("No matching messages"),
+                Some(trs!("Try folder:inbox from:name, or switch to All mail.")),
             )
         }
     } else {
         match list_empty_view {
             ListEmptyView::Extension { title, description } => (title, description),
-            ListEmptyView::Default if conversation_mode => ("No conversations", None),
-            ListEmptyView::Default => ("No messages", None),
+            ListEmptyView::Default if conversation_mode => (trs!("No conversations"), None),
+            ListEmptyView::Default => (trs!("No messages"), None),
         }
     }
 }
@@ -2211,10 +2212,11 @@ mod tests {
 
     #[test]
     fn header_title_maps_deleted_column() {
-        assert_eq!(column_id_from_header_title("Deleted"), Some("deleted"));
-        assert_eq!(column_id_from_header_title("Date"), Some("date"));
-        assert_eq!(column_id_from_header_title("From"), Some("from"));
-        assert_eq!(column_id_from_header_title(""), None);
+        let columns = [("from", "De"), ("date", "Date"), ("deleted", "Supprimé")];
+        assert_eq!(column_id_for_title(columns, "Supprimé"), Some("deleted"));
+        assert_eq!(column_id_for_title(columns, "De"), Some("from"));
+        assert_eq!(column_id_for_title(columns, "From"), None);
+        assert_eq!(column_id_for_title(columns, ""), None);
     }
 
     #[test]
@@ -2250,10 +2252,14 @@ mod tests {
 
     #[test]
     fn today_shows_local_clock_only() {
-        let label = format_relative_time(Utc::now());
+        let now = Utc::now();
+        let label = format_relative_time(now);
         assert!(!label.contains('·'), "{label}");
-        assert!(label.contains(':'), "{label}");
-        assert!(label.ends_with(" AM") || label.ends_with(" PM"), "{label}");
+        // Follows the desktop clock style (12- or 24-hour), so compare with it.
+        assert_eq!(
+            label,
+            crate::calendar_clock::format_time_of_day(&now.with_timezone(&chrono::Local))
+        );
     }
 
     #[test]

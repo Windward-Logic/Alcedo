@@ -1,5 +1,6 @@
 //! Verification code banner for the message reader.
 
+use alcedo_i18n::tr;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::time::Duration;
@@ -47,9 +48,9 @@ pub fn build_otp_banner(on_copied: impl Fn(MessageId) + 'static) -> OtpBanner {
         .build();
 
     let copy_btn = gtk::Button::builder()
-        .label("Copy")
+        .label(tr!("Copy"))
         .css_classes(["suggested-action"])
-        .tooltip_text("Copy verification code to clipboard")
+        .tooltip_text(tr!("Copy verification code to clipboard"))
         .valign(gtk::Align::Center)
         .halign(gtk::Align::End)
         .build();
@@ -69,7 +70,7 @@ pub fn build_otp_banner(on_copied: impl Fn(MessageId) + 'static) -> OtpBanner {
         .visible(false)
         .accessible_role(gtk::AccessibleRole::Group)
         .build();
-    root.update_property(&[gtk::accessible::Property::Label("Verification code")]);
+    root.update_property(&[gtk::accessible::Property::Label(&tr!("Verification code"))]);
     root.append(&icon);
     root.append(&labels);
     root.append(&copy_btn);
@@ -99,7 +100,7 @@ pub fn build_otp_banner(on_copied: impl Fn(MessageId) + 'static) -> OtpBanner {
                 return;
             }
             if !cleanup_verification_codes() {
-                show_composer_toast(copy_btn.upcast_ref(), "Code copied");
+                show_composer_toast(copy_btn.upcast_ref(), &tr!("Code copied"));
             }
             if let Some(id) = message_id.get() {
                 on_copied(id);
@@ -135,7 +136,7 @@ pub fn build_otp_banner(on_copied: impl Fn(MessageId) + 'static) -> OtpBanner {
 fn set_copied_state(copy_btn: &gtk::Button, root: &gtk::Box, copy_gen: &Rc<Cell<u32>>) {
     let generation = copy_gen.get() + 1;
     copy_gen.set(generation);
-    copy_btn.set_label("Copied");
+    copy_btn.set_label(&tr!("Copied"));
     root.add_css_class("alcedo-otp-copied");
     copy_btn.set_sensitive(false);
     let copy_btn = copy_btn.clone();
@@ -150,7 +151,7 @@ fn set_copied_state(copy_btn: &gtk::Button, root: &gtk::Box, copy_gen: &Rc<Cell<
 }
 
 fn reset_copied_chrome(copy_btn: &gtk::Button, root: &gtk::Box) {
-    copy_btn.set_label("Copy");
+    copy_btn.set_label(&tr!("Copy"));
     root.remove_css_class("alcedo-otp-copied");
     copy_btn.set_sensitive(true);
 }
@@ -172,7 +173,7 @@ pub fn update_otp_banner(
     let extracted = extract_verification_code(subject, text, html);
     if let Some(verification) = extracted {
         banner.root.set_visible(true);
-        banner.title.set_label("Verification code");
+        banner.title.set_label(&tr!("Verification code"));
         banner
             .code
             .set_label(&format_code_display(&verification.code));

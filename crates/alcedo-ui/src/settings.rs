@@ -1,5 +1,6 @@
 //! Application preferences backed by GSettings.
 
+use alcedo_i18n::{trf, trs};
 use std::cell::{Cell, RefCell};
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
@@ -198,7 +199,8 @@ fn save_strv_csv(
     if let Some(previous) = last_toast.borrow_mut().take() {
         previous.dismiss();
     }
-    let toast = crate::toast::plain(&format!("{} saved", entry.title()));
+    // TRANSLATORS: toast; {setting} is the name of a preference.
+    let toast = crate::toast::plain(&trf!("{setting} saved", setting = entry.title()));
     dialog.add_toast(toast.clone());
     *last_toast.borrow_mut() = Some(toast);
 }
@@ -1044,16 +1046,16 @@ impl AccentColor {
 
     pub fn label(self) -> &'static str {
         match self {
-            Self::Default => "Default",
-            Self::Blue => "Blue",
-            Self::Teal => "Teal",
-            Self::Green => "Green",
-            Self::Yellow => "Yellow",
-            Self::Orange => "Orange",
-            Self::Red => "Red",
-            Self::Pink => "Pink",
-            Self::Purple => "Purple",
-            Self::Slate => "Slate",
+            Self::Default => trs!("Default"),
+            Self::Blue => trs!("Blue"),
+            Self::Teal => trs!("Teal"),
+            Self::Green => trs!("Green"),
+            Self::Yellow => trs!("Yellow"),
+            Self::Orange => trs!("Orange"),
+            Self::Red => trs!("Red"),
+            Self::Pink => trs!("Pink"),
+            Self::Purple => trs!("Purple"),
+            Self::Slate => trs!("Slate"),
         }
     }
 }

@@ -1,7 +1,9 @@
 //! Reply subject prefixing.
 
+use alcedo_i18n::n_;
 /// Shown when a message has no subject. One spelling everywhere.
-pub const NO_SUBJECT: &str = "(No Subject)";
+/// Marked for translation; show it with `alcedo_i18n::trm!`.
+pub const NO_SUBJECT: &str = n_!("(No Subject)");
 
 /// `Re: <subject>` without stacking prefixes. Leading reply markers in common
 /// languages and forms (`Re:`, `RE :`, `Aw:`, `Antw:`, `SV:`, `Re[2]:`) are

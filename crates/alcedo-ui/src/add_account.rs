@@ -1,5 +1,7 @@
 //! Add Account dialog (Generic IMAP / Yahoo / OAuth).
 
+use crate::account_validation::validation_text;
+use alcedo_i18n::tr;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -71,21 +73,25 @@ pub fn build_add_account_dialog(sender: Sender<MailMsg>, runtime: Handle) -> adw
     let security_labels = smtp_security_labels();
     let security_model = gtk::StringList::new(&security_labels);
 
-    let name_row = adw::EntryRow::builder().title("Account name").build();
-    let email_row = adw::EntryRow::builder().title("Email").build();
-    let username_row = adw::EntryRow::builder().title("Username").build();
-    let password_row = adw::PasswordEntryRow::builder().title("Password").build();
+    let name_row = adw::EntryRow::builder().title(tr!("Account name")).build();
+    let email_row = adw::EntryRow::builder().title(tr!("Email")).build();
+    let username_row = adw::EntryRow::builder().title(tr!("Username")).build();
+    let password_row = adw::PasswordEntryRow::builder()
+        .title(tr!("Password"))
+        .build();
     let split_row = adw::SwitchRow::builder()
-        .title("Different SMTP sign-in")
-        .subtitle("Use a separate username and password for outgoing mail.")
+        .title(tr!("Different SMTP sign-in"))
+        .subtitle(tr!(
+            "Use a separate username and password for outgoing mail."
+        ))
         .active(false)
         .build();
-    let smtp_username_row = adw::EntryRow::builder().title("SMTP username").build();
+    let smtp_username_row = adw::EntryRow::builder().title(tr!("SMTP username")).build();
     let smtp_password_row = adw::PasswordEntryRow::builder()
-        .title("SMTP password")
+        .title(tr!("SMTP password"))
         .build();
     let provider_row = adw::ComboRow::builder()
-        .title("Provider")
+        .title(tr!("Provider"))
         .model(&provider_model)
         .expression(gtk::PropertyExpression::new(
             gtk::StringObject::static_type(),
@@ -95,18 +101,18 @@ pub fn build_add_account_dialog(sender: Sender<MailMsg>, runtime: Handle) -> adw
         .build();
     provider_row.set_selected(PROVIDER_GENERIC);
 
-    let imap_host_row = adw::EntryRow::builder().title("IMAP host").build();
+    let imap_host_row = adw::EntryRow::builder().title(tr!("IMAP host")).build();
     let imap_port_row = adw::SpinRow::with_range(1.0, 65535.0, 1.0);
-    imap_port_row.set_title("IMAP port");
+    imap_port_row.set_title(&tr!("IMAP port"));
     imap_port_row.set_value(993.0);
 
-    let smtp_host_row = adw::EntryRow::builder().title("SMTP host").build();
+    let smtp_host_row = adw::EntryRow::builder().title(tr!("SMTP host")).build();
     let smtp_port_row = adw::SpinRow::with_range(1.0, 65535.0, 1.0);
-    smtp_port_row.set_title("SMTP port");
+    smtp_port_row.set_title(&tr!("SMTP port"));
     smtp_port_row.set_value(465.0);
 
     let smtp_security_row = adw::ComboRow::builder()
-        .title("SMTP security")
+        .title(tr!("SMTP security"))
         .model(&security_model)
         .expression(gtk::PropertyExpression::new(
             gtk::StringObject::static_type(),
@@ -127,8 +133,10 @@ pub fn build_add_account_dialog(sender: Sender<MailMsg>, runtime: Handle) -> adw
     account_group.add(&smtp_password_row);
 
     let server_expander = adw::ExpanderRow::builder()
-        .title("Server Settings")
-        .subtitle("Filled in from your email address when Alcedo recognizes it.")
+        .title(tr!("Server Settings"))
+        .subtitle(tr!(
+            "Filled in from your email address when Alcedo recognizes it."
+        ))
         .expanded(false)
         .build();
     server_expander.add_row(&imap_host_row);
@@ -140,8 +148,8 @@ pub fn build_add_account_dialog(sender: Sender<MailMsg>, runtime: Handle) -> adw
     server_group.add(&server_expander);
 
     let oauth_info = adw::ActionRow::builder()
-        .title("Browser sign-in")
-        .subtitle("Click Add to open your browser and complete sign-in.")
+        .title(tr!("Browser sign-in"))
+        .subtitle(tr!("Click Add to open your browser and complete sign-in."))
         .build();
     let oauth_group = adw::PreferencesGroup::new();
     oauth_group.add(&oauth_info);
@@ -155,15 +163,17 @@ pub fn build_add_account_dialog(sender: Sender<MailMsg>, runtime: Handle) -> adw
     let toast_overlay = adw::ToastOverlay::new();
     toast_overlay.set_child(Some(&page));
 
-    let cancel_btn = gtk::Button::builder().label("Cancel").build();
+    let cancel_btn = gtk::Button::builder().label(tr!("Cancel")).build();
     let oauth_spinner = adw::Spinner::new();
     oauth_spinner.set_visible(false);
     let add_btn = gtk::Button::builder()
-        .label("Add")
+        .label(tr!("Add"))
         .css_classes(["suggested-action"])
         .build();
 
-    let window_title = adw::WindowTitle::builder().title("Add Account").build();
+    let window_title = adw::WindowTitle::builder()
+        .title(tr!("Add Account"))
+        .build();
     let header = adw::HeaderBar::new();
     header.set_title_widget(Some(&window_title));
     header.pack_start(&cancel_btn);
@@ -175,7 +185,7 @@ pub fn build_add_account_dialog(sender: Sender<MailMsg>, runtime: Handle) -> adw
     toolbar.set_content(Some(&toast_overlay));
 
     let dialog = adw::Dialog::builder()
-        .title("Add Account")
+        .title(tr!("Add Account"))
         .content_width(480)
         .child(&toolbar)
         .build();
@@ -260,25 +270,27 @@ pub fn build_add_account_dialog(sender: Sender<MailMsg>, runtime: Handle) -> adw
             widgets.smtp_username_row.set_visible(!oauth && split);
             widgets.smtp_password_row.set_visible(!oauth && split);
             if oauth {
-                widgets.password_row.set_title("Password");
+                widgets.password_row.set_title(&tr!("Password"));
             } else if split {
-                widgets.password_row.set_title(if yahoo {
-                    "IMAP app password"
+                widgets.password_row.set_title(&if yahoo {
+                    tr!("IMAP app password")
                 } else {
-                    "IMAP password"
+                    tr!("IMAP password")
                 });
-                widgets.smtp_password_row.set_title(if yahoo {
-                    "SMTP app password"
+                widgets.smtp_password_row.set_title(&if yahoo {
+                    tr!("SMTP app password")
                 } else {
-                    "SMTP password"
+                    tr!("SMTP password")
                 });
-                widgets.username_row.set_title("IMAP username");
-                widgets.smtp_username_row.set_title("SMTP username");
+                widgets.username_row.set_title(&tr!("IMAP username"));
+                widgets.smtp_username_row.set_title(&tr!("SMTP username"));
             } else {
-                widgets
-                    .password_row
-                    .set_title(if yahoo { "App password" } else { "Password" });
-                widgets.username_row.set_title("Username");
+                widgets.password_row.set_title(&if yahoo {
+                    tr!("App password")
+                } else {
+                    tr!("Password")
+                });
+                widgets.username_row.set_title(&tr!("Username"));
             }
             widgets.server_group.set_visible(!oauth);
             widgets.oauth_group.set_visible(oauth);
@@ -457,7 +469,7 @@ pub fn build_add_account_dialog(sender: Sender<MailMsg>, runtime: Handle) -> adw
                     }
                 };
 
-                show_validation_toast(&widgets.toast_overlay, "Opening browser for sign-in…");
+                show_validation_toast(&widgets.toast_overlay, &tr!("Opening browser for sign-in…"));
 
                 let sender = sender_add.clone();
                 let widgets = widgets.clone();
@@ -476,9 +488,9 @@ pub fn build_add_account_dialog(sender: Sender<MailMsg>, runtime: Handle) -> adw
                     let _ = tx.send(auth_result);
                 });
                 glib::spawn_future_local(async move {
-                    let auth_result = rx.await.unwrap_or_else(|_| {
-                        Err(Error::Auth("OAuth sign-in was interrupted".to_string()))
-                    });
+                    let auth_result = rx
+                        .await
+                        .unwrap_or_else(|_| Err(Error::Auth(tr!("OAuth sign-in was interrupted"))));
 
                     let cancelled = {
                         let mut st = state.borrow_mut();
@@ -731,7 +743,7 @@ fn apply_smtp_security_from_port(widgets: &DialogWidgets) {
 }
 
 fn show_validation_toast(overlay: &adw::ToastOverlay, message: &str) {
-    overlay.add_toast(crate::toast::plain(message));
+    overlay.add_toast(crate::toast::plain(&validation_text(message)));
 }
 
 fn clear_row_errors(widgets: &DialogWidgets) {
@@ -801,7 +813,7 @@ fn reset_dialog(widgets: &DialogWidgets, state: &RefCell<DialogState>) {
     widgets.smtp_host_row.set_text("");
     widgets.smtp_port_row.set_value(465.0);
     widgets.smtp_security_row.set_selected(SMTP_IMPLICIT_TLS);
-    widgets.password_row.set_title("Password");
+    widgets.password_row.set_title(&tr!("Password"));
     widgets.server_group.set_visible(true);
     widgets.server_expander.set_expanded(false);
     widgets.oauth_group.set_visible(false);

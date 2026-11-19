@@ -1,6 +1,7 @@
 //! Message rules dialog and server-rule commands.
 
 use super::*;
+use alcedo_i18n::trf;
 
 impl MailModel {
     pub(super) fn update_rules(&mut self, msg: MailMsg, sender: ComponentSender<MailModel>) {
@@ -163,7 +164,7 @@ impl MailModel {
         let rule = MessageRule {
             id: RuleId(uuid::Uuid::new_v4()),
             account_id,
-            name: format!("Mail from {display_name}"),
+            name: trf!("Mail from {sender}", sender = display_name),
             enabled: true,
             position: -1,
             match_mode: RuleMatchMode::All,

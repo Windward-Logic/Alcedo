@@ -1,5 +1,6 @@
 //! View raw RFC822 source and save messages to `.eml` files.
 
+use alcedo_i18n::{tr, trs};
 use relm4::adw;
 
 use crate::attachment_save::sanitize_filename;
@@ -29,10 +30,10 @@ fn dialog_parent(parent: &gtk::Widget) -> Option<gtk::Window> {
 
 pub fn save_message_to_file(parent: &impl IsA<gtk::Widget>, raw: &[u8], suggested_filename: &str) {
     let dialog = gtk::FileDialog::new();
-    dialog.set_title("Save message");
+    dialog.set_title(&tr!("Save message"));
     dialog.set_initial_name(Some(suggested_filename));
     let filter = gtk::FileFilter::new();
-    filter.set_name(Some("Email message"));
+    filter.set_name(Some(trs!("Email message")));
     filter.add_mime_type("message/rfc822");
     filter.add_pattern("*.eml");
     dialog.set_default_filter(Some(&filter));
@@ -84,9 +85,9 @@ pub fn open_source_viewer(parent: &impl IsA<gtk::Widget>, raw: Vec<u8>, suggeste
         .hexpand(true)
         .build();
 
-    let close_btn = gtk::Button::builder().label("Close").build();
+    let close_btn = gtk::Button::builder().label(tr!("Close")).build();
     let save_btn = gtk::Button::builder()
-        .label("Save to File…")
+        .label(tr!("Save to File…"))
         .css_classes(["suggested-action"])
         .build();
 
@@ -94,7 +95,7 @@ pub fn open_source_viewer(parent: &impl IsA<gtk::Widget>, raw: Vec<u8>, suggeste
     header.set_show_start_title_buttons(false);
     header.set_show_end_title_buttons(false);
     let title_label = gtk::Label::builder()
-        .label("Message Source")
+        .label(tr!("Message Source"))
         .css_classes(["title"])
         .build();
     header.set_title_widget(Some(&title_label));
@@ -106,7 +107,7 @@ pub fn open_source_viewer(parent: &impl IsA<gtk::Widget>, raw: Vec<u8>, suggeste
     toolbar.set_content(Some(&scroller));
 
     let dialog = adw::Dialog::builder()
-        .title("Message Source")
+        .title(tr!("Message Source"))
         .content_width(720)
         .content_height(560)
         .default_widget(&close_btn)

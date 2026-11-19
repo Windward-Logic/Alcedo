@@ -1,24 +1,26 @@
 //! Column picker popover: show/hide and reorder message-list columns.
 
 use super::*;
+use alcedo_i18n::{n_, tr, trf, trm};
 
+// (column id, label); labels are translated on display.
 pub(super) const COLUMN_PICKER_ITEMS: &[(&str, &str)] = &[
-    ("unread", "Unread"),
-    ("from", "From"),
-    ("folder", "Folder"),
-    ("account", "Account"),
-    ("account-chip", "Account chip"),
-    ("subject", "Subject"),
-    ("attachments", "Attachments"),
-    ("star", "Starred"),
-    ("size", "Size"),
-    ("date", "Date"),
+    ("unread", n_!("Unread")),
+    ("from", n_!("From")),
+    ("folder", n_!("Folder")),
+    ("account", n_!("Account")),
+    ("account-chip", n_!("Account chip")),
+    ("subject", n_!("Subject")),
+    ("attachments", n_!("Attachments")),
+    ("star", n_!("Starred")),
+    ("size", n_!("Size")),
+    ("date", n_!("Date")),
 ];
 
 pub(super) fn column_picker_menu() -> gio::Menu {
     let menu = gio::Menu::new();
     for (id, label) in COLUMN_PICKER_ITEMS {
-        menu.append(Some(label), Some(&format!("cols.{id}")));
+        menu.append(Some(trm!(label)), Some(&format!("cols.{id}")));
     }
     menu
 }
@@ -51,11 +53,12 @@ pub(super) fn update_text_column_actions_enabled(
     }
 }
 
+/// The column's label in the user's language, or its id when it has none.
 pub(super) fn column_picker_title(id: &str) -> &str {
     COLUMN_PICKER_ITEMS
         .iter()
         .find(|(column_id, _)| *column_id == id)
-        .map(|(_, title)| *title)
+        .map(|(_, title)| trm!(title))
         .unwrap_or(id)
 }
 
@@ -147,14 +150,14 @@ pub(super) fn fill_column_order_list(
         let up_btn = gtk::Button::builder()
             .name(format!("{id}-up"))
             .icon_name("go-up-symbolic")
-            .tooltip_text(format!("Move {title} up"))
+            .tooltip_text(trf!("Move {column} up", column = title))
             .css_classes(["flat"])
             .sensitive(index > 0)
             .build();
         let down_btn = gtk::Button::builder()
             .name(format!("{id}-down"))
             .icon_name("go-down-symbolic")
-            .tooltip_text(format!("Move {title} down"))
+            .tooltip_text(trf!("Move {column} down", column = title))
             .css_classes(["flat"])
             .sensitive(index < last_index)
             .build();
@@ -203,7 +206,7 @@ pub(super) fn fill_column_order_list(
         list_box.append(&row);
     }
 
-    let reset_row = adw::ButtonRow::builder().title("Reset order").build();
+    let reset_row = adw::ButtonRow::builder().title(tr!("Reset order")).build();
     let view_for_reset = view.clone();
     let list_box_for_reset = list_box.clone();
     let actions_for_reset = actions.clone();
@@ -279,7 +282,7 @@ pub(super) fn install_column_picker(
 
     update_text_column_actions_enabled(&list.view, &actions.borrow());
 
-    let caption = gtk::Label::new(Some("Top of the list is the leftmost column."));
+    let caption = gtk::Label::new(Some(&tr!("Top of the list is the leftmost column.")));
     caption.add_css_class("dim-label");
     caption.set_wrap(true);
     caption.set_xalign(0.0);

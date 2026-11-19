@@ -1,5 +1,6 @@
 //! New / Edit message rule dialog.
 
+use alcedo_i18n::{tr, trs};
 use std::cell::RefCell;
 use std::collections::HashSet;
 use std::rc::Rc;
@@ -63,30 +64,37 @@ fn op_at(index: u32) -> RuleOp {
     OPS.get(index as usize).copied().unwrap_or(RuleOp::Contains)
 }
 
-fn field_labels() -> &'static [&'static str] {
-    &["From", "To", "Cc", "Recipient", "Subject", "Has attachment"]
-}
-
-fn op_labels() -> &'static [&'static str] {
-    &[
-        "contains",
-        "does not contain",
-        "is",
-        "is not",
-        "starts with",
-        "ends with",
+fn field_labels() -> Vec<&'static str> {
+    vec![
+        trs!("From"),
+        trs!("To"),
+        trs!("Cc"),
+        trs!("Recipient"),
+        trs!("Subject"),
+        trs!("Has attachment"),
     ]
 }
 
-fn action_labels() -> &'static [&'static str] {
-    &[
-        "Move to folder",
-        "Copy to folder",
-        "Mark as read",
-        "Mark as unread",
-        "Star",
-        "Unstar",
-        "Move to Trash",
+fn op_labels() -> Vec<&'static str> {
+    vec![
+        trs!("contains"),
+        trs!("does not contain"),
+        trs!("is"),
+        trs!("is not"),
+        trs!("starts with"),
+        trs!("ends with"),
+    ]
+}
+
+fn action_labels() -> Vec<&'static str> {
+    vec![
+        trs!("Move to folder"),
+        trs!("Copy to folder"),
+        trs!("Mark as read"),
+        trs!("Mark as unread"),
+        trs!("Star"),
+        trs!("Unstar"),
+        trs!("Move to Trash"),
     ]
 }
 
@@ -145,14 +153,21 @@ pub fn open_rule_editor(
     let show_run_checkbox = spec.show_run_checkbox;
     let on_save = Rc::new(on_save);
 
-    let dialog_title = if is_new { "New Rule" } else { "Edit Rule" };
+    let dialog_title = if is_new {
+        tr!("New Rule")
+    } else {
+        tr!("Edit Rule")
+    };
 
-    let name_row = adw::EntryRow::builder().title("Rule name").build();
+    let name_row = adw::EntryRow::builder().title(tr!("Rule name")).build();
     name_row.set_text(&rule.name);
 
-    let match_model = gtk::StringList::new(&["All conditions", "Any condition"]);
+    let match_model = gtk::StringList::new(&[
+        tr!("All conditions").as_str(),
+        tr!("Any condition").as_str(),
+    ]);
     let match_row = adw::ComboRow::builder()
-        .title("Match")
+        .title(tr!("Match"))
         .model(&match_model)
         .expression(gtk::PropertyExpression::new(
             gtk::StringObject::static_type(),
@@ -163,21 +178,22 @@ pub fn open_rule_editor(
         .build();
 
     let (conditions_group, conditions_list, add_condition_btn) =
-        clause_group("Conditions", "Add Condition");
-    let (actions_group, actions_list, add_action_btn) = clause_group("Actions", "Add Action");
+        clause_group(&tr!("Conditions"), &tr!("Add Condition"));
+    let (actions_group, actions_list, add_action_btn) =
+        clause_group(&tr!("Actions"), &tr!("Add Action"));
     let options_group = adw::PreferencesGroup::new();
 
     let condition_rows: Rc<RefCell<Vec<ConditionRow>>> = Rc::new(RefCell::new(Vec::new()));
     let action_rows: Rc<RefCell<Vec<ActionRow>>> = Rc::new(RefCell::new(Vec::new()));
 
     let stop_row = adw::SwitchRow::builder()
-        .title("Stop after this rule")
-        .subtitle("Do not apply later rules to the same message")
+        .title(tr!("Stop after this rule"))
+        .subtitle(tr!("Do not apply later rules to the same message"))
         .active(rule.stop_processing)
         .build();
 
     let also_apply_row = adw::SwitchRow::builder()
-        .title("Also apply to messages in this folder")
+        .title(tr!("Also apply to messages in this folder"))
         .visible(show_run_checkbox)
         .build();
 
@@ -186,9 +202,9 @@ pub fn open_rule_editor(
         options_group.add(&also_apply_row);
     }
 
-    let cancel_btn = gtk::Button::builder().label("Cancel").build();
+    let cancel_btn = gtk::Button::builder().label(tr!("Cancel")).build();
     let save_btn = gtk::Button::builder()
-        .label("Save")
+        .label(tr!("Save"))
         .css_classes(["suggested-action"])
         .sensitive(false)
         .build();
@@ -197,7 +213,7 @@ pub fn open_rule_editor(
     header.set_show_start_title_buttons(false);
     header.set_show_end_title_buttons(false);
     let title_label = gtk::Label::builder()
-        .label(dialog_title)
+        .label(dialog_title.as_str())
         .css_classes(["title"])
         .build();
     header.set_title_widget(Some(&title_label));
@@ -214,7 +230,7 @@ pub fn open_rule_editor(
     if !account_email.is_empty() {
         let account_row = adw::ActionRow::builder()
             .use_markup(false)
-            .title("Account")
+            .title(tr!("Account"))
             .subtitle(&account_email)
             .activatable(false)
             .build();
@@ -516,28 +532,28 @@ fn build_condition_row(
     condition: RuleCondition,
     update_save: Rc<dyn Fn()>,
 ) -> ConditionRow {
-    let field_model = gtk::StringList::new(field_labels());
+    let field_model = gtk::StringList::new(&field_labels());
     let field_combo = gtk::DropDown::builder()
         .model(&field_model)
         .selected(field_index(condition.field))
         .width_request(160)
         .hexpand(false)
         .valign(gtk::Align::Center)
-        .tooltip_text("Field")
+        .tooltip_text(tr!("Field"))
         .build();
 
-    let op_model = gtk::StringList::new(op_labels());
+    let op_model = gtk::StringList::new(&op_labels());
     let op_combo = gtk::DropDown::builder()
         .model(&op_model)
         .selected(op_index(condition.op))
         .width_request(150)
         .hexpand(false)
         .valign(gtk::Align::Center)
-        .tooltip_text("Operator")
+        .tooltip_text(tr!("Operator"))
         .build();
 
     let value_row = gtk::Entry::builder()
-        .placeholder_text("Value")
+        .placeholder_text(tr!("Value"))
         .hexpand(true)
         .width_request(240)
         .valign(gtk::Align::Center)
@@ -548,7 +564,7 @@ fn build_condition_row(
         .icon_name("list-remove-symbolic")
         .css_classes(["flat", "circular"])
         .valign(gtk::Align::Center)
-        .tooltip_text("Remove")
+        .tooltip_text(tr!("Remove"))
         .build();
 
     let row_box = gtk::Box::new(gtk::Orientation::Horizontal, 8);
@@ -612,13 +628,13 @@ fn sync_action_row_visibility(row: &ActionRow, folders: &[Folder]) {
     if needs_folder {
         let folder_id = *row.folder_id.borrow();
         let label = if folder_id.0 == 0 {
-            "Choose folder…".to_string()
+            tr!("Choose folder…")
         } else {
             folders
                 .iter()
                 .find(|f| f.id == folder_id)
                 .map(folder_display_name)
-                .unwrap_or_else(|| "Missing folder".to_string())
+                .unwrap_or_else(|| tr!("Missing folder"))
         };
         row.folder_btn.set_label(&label);
     }
@@ -633,14 +649,14 @@ fn build_action_row(
     action: RuleAction,
     update_save: Rc<dyn Fn()>,
 ) -> ActionRow {
-    let action_model = gtk::StringList::new(action_labels());
+    let action_model = gtk::StringList::new(&action_labels());
     let action_combo = gtk::DropDown::builder()
         .model(&action_model)
         .selected(action_kind_index(&action))
         .width_request(180)
         .hexpand(false)
         .valign(gtk::Align::Center)
-        .tooltip_text("Action")
+        .tooltip_text(tr!("Action"))
         .build();
 
     let folder_id = Rc::new(RefCell::new(match &action {
@@ -649,12 +665,12 @@ fn build_action_row(
     }));
 
     let folder_btn = gtk::Button::builder()
-        .label("Choose folder…")
+        .label(tr!("Choose folder…"))
         .css_classes(["alcedo-rule-folder-btn"])
         .hexpand(true)
         .halign(gtk::Align::Fill)
         .valign(gtk::Align::Center)
-        .tooltip_text("Folder")
+        .tooltip_text(tr!("Folder"))
         .build();
 
     let value_slot = gtk::Box::new(gtk::Orientation::Horizontal, 0);
@@ -666,7 +682,7 @@ fn build_action_row(
         .icon_name("list-remove-symbolic")
         .css_classes(["flat", "circular"])
         .valign(gtk::Align::Center)
-        .tooltip_text("Remove")
+        .tooltip_text(tr!("Remove"))
         .build();
 
     let row_box = gtk::Box::new(gtk::Orientation::Horizontal, 8);
@@ -723,7 +739,7 @@ fn build_action_row(
                 .iter()
                 .find(|f| f.id == chosen)
                 .map(folder_display_name)
-                .unwrap_or_else(|| "Missing folder".to_string());
+                .unwrap_or_else(|| tr!("Missing folder"));
             folder_btn_pick.set_label(&label);
             update_save_pick();
         });

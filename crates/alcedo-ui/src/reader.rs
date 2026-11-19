@@ -1,5 +1,6 @@
 //! Message reader with sandboxed WebKit body (P8).
 
+use alcedo_i18n::{ntr, tr, trc, trf, trs};
 use std::cell::{Cell, RefCell};
 use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
@@ -134,15 +135,34 @@ pub enum ReaderPlaceholder {
     OpeningDraft,
 }
 
+/// Spoken name of a quick-reaction emoji, for tooltips and screen readers.
+fn reaction_name(emoji: &str) -> Option<&'static str> {
+    Some(match emoji {
+        "👍" => trs!("Thumbs up"),
+        "❤️" => trs!("Heart"),
+        "😂" => trs!("Laugh"),
+        "🎉" => trs!("Celebrate"),
+        "😮" => trs!("Surprised"),
+        "😢" => trs!("Sad"),
+        _ => return None,
+    })
+}
+
 pub fn multi_placeholder_title(count: u32) -> String {
-    format!("{count} messages selected")
+    ntr!("{n} message selected", "{n} messages selected", count)
 }
 
 fn show_pending_attachment_chip(box_: &adw::WrapBox) {
     clear_attachment_chips(box_);
     box_.set_visible(true);
-    let card = build_attachment_card("mail-attachment-symbolic", "Attachment", "…", false, false);
-    card.set_tooltip_text(Some("Attachments are still loading"));
+    let card = build_attachment_card(
+        "mail-attachment-symbolic",
+        &tr!("Attachment"),
+        "…",
+        false,
+        false,
+    );
+    card.set_tooltip_text(Some(&tr!("Attachments are still loading")));
     box_.append(&card);
 }
 
@@ -169,10 +189,10 @@ pub fn show_reader_placeholder(widgets: &ReaderWidgets, kind: ReaderPlaceholder)
     match kind {
         ReaderPlaceholder::Empty => {
             widgets.empty_page.set_icon_name(Some("mail-read-symbolic"));
-            widgets.empty_page.set_title("Select a message");
+            widgets.empty_page.set_title(&tr!("Select a message"));
             widgets
                 .empty_page
-                .set_description(Some("Choose a message from the list to read it."));
+                .set_description(Some(&tr!("Choose a message from the list to read it.")));
         }
         ReaderPlaceholder::Multi { count } => {
             let icon = if gtk::IconTheme::default().has_icon("checkbox-checked-symbolic") {
@@ -186,16 +206,16 @@ pub fn show_reader_placeholder(widgets: &ReaderWidgets, kind: ReaderPlaceholder)
                 .set_title(&multi_placeholder_title(count));
             widgets
                 .empty_page
-                .set_description(Some("Archive, star, or delete from the toolbar."));
+                .set_description(Some(&tr!("Archive, star, or delete from the toolbar.")));
         }
         ReaderPlaceholder::OpeningDraft => {
             widgets
                 .empty_page
                 .set_icon_name(Some("document-edit-symbolic"));
-            widgets.empty_page.set_title("Opening draft…");
+            widgets.empty_page.set_title(&tr!("Opening draft…"));
             widgets
                 .empty_page
-                .set_description(Some("Fetching this draft from the server."));
+                .set_description(Some(&tr!("Fetching this draft from the server.")));
         }
     }
     widgets.subject.set_label("");
@@ -263,7 +283,7 @@ pub fn build_reader_page(
 
     let remote_menu = gtk::gio::Menu::new();
     remote_menu.append(
-        Some("Always load images from this sender"),
+        Some(&tr!("Always load images from this sender")),
         Some("reader.load-remote-sender"),
     );
 
@@ -272,8 +292,8 @@ pub fn build_reader_page(
     remote_actions.add_action(&always_from_sender_action);
 
     let load_remote_btn = adw::SplitButton::builder()
-        .label("Load images")
-        .tooltip_text("Show images from the web in this message")
+        .label(tr!("Load images"))
+        .tooltip_text(tr!("Show images from the web in this message"))
         .css_classes(["pill", "alcedo-reader-remote"])
         .halign(gtk::Align::End)
         .valign(gtk::Align::Center)
@@ -286,7 +306,7 @@ pub fn build_reader_page(
     remote_icon.set_valign(gtk::Align::Center);
 
     let remote_label = gtk::Label::builder()
-        .label("Remote images blocked")
+        .label(tr!("Remote images blocked"))
         .xalign(0.0)
         .hexpand(true)
         .ellipsize(gtk::pango::EllipsizeMode::End)
@@ -300,17 +320,19 @@ pub fn build_reader_page(
         .visible(false)
         .accessible_role(gtk::AccessibleRole::Group)
         .build();
-    remote_banner.update_property(&[gtk::accessible::Property::Label("Remote images blocked")]);
+    remote_banner.update_property(&[gtk::accessible::Property::Label(&tr!(
+        "Remote images blocked"
+    ))]);
     remote_banner.append(&remote_icon);
     remote_banner.append(&remote_label);
     remote_banner.append(&load_remote_btn);
 
-    let from = build_recipient_row(true, "From:");
+    let from = build_recipient_row(true, &tr!("From:"));
     from.row.add_css_class("alcedo-reader-recipients-first");
 
     let unsubscribe_btn = gtk::Button::builder()
-        .label("Unsubscribe")
-        .tooltip_text("Unsubscribe from this mailing list")
+        .label(tr!("Unsubscribe"))
+        .tooltip_text(tr!("Unsubscribe from this mailing list"))
         .css_classes(["flat", "alcedo-reader-unsubscribe"])
         .has_frame(false)
         .valign(gtk::Align::Start)
@@ -319,8 +341,8 @@ pub fn build_reader_page(
     unsubscribe_btn.connect_clicked(move |_| on_unsubscribe());
     from.row.append(&unsubscribe_btn);
 
-    let sender = build_recipient_row(false, "Sender:");
-    let reply_to = build_recipient_row(false, "Reply-To:");
+    let sender = build_recipient_row(false, &tr!("Sender:"));
+    let reply_to = build_recipient_row(false, &tr!("Reply-To:"));
 
     let date = gtk::Label::builder()
         .xalign(1.0)
@@ -330,18 +352,22 @@ pub fn build_reader_page(
         .css_classes(["dim-label", "alcedo-reader-meta", "alcedo-reader-date"])
         .build();
 
-    let to = build_recipient_row(true, "To:");
-    let cc = build_recipient_row(false, "Cc:");
+    let to = build_recipient_row(true, &tr!("To:"));
+    let cc = build_recipient_row(false, &tr!("Cc:"));
 
     let reply_menu = gtk::gio::Menu::new();
-    reply_menu.append(Some("Reply All"), Some("reader.reply-all"));
-    let reply_list_item = gtk::gio::MenuItem::new(Some("Reply to List"), Some("reader.reply-list"));
+    reply_menu.append(Some(&tr!("Reply All")), Some("reader.reply-all"));
+    let reply_list_item =
+        gtk::gio::MenuItem::new(Some(&tr!("Reply to List")), Some("reader.reply-list"));
     reply_list_item.set_attribute_value("hidden-when", Some(&"action-disabled".to_variant()));
     reply_menu.append_item(&reply_list_item);
     let reply_window_section = gtk::gio::Menu::new();
-    reply_window_section.append(Some("Reply in New Window"), Some("reader.reply-window"));
     reply_window_section.append(
-        Some("Reply All in New Window"),
+        Some(&tr!("Reply in New Window")),
+        Some("reader.reply-window"),
+    );
+    reply_window_section.append(
+        Some(&tr!("Reply All in New Window")),
         Some("reader.reply-all-window"),
     );
     reply_menu.append_section(None, &reply_window_section);
@@ -363,7 +389,7 @@ pub fn build_reader_page(
 
     let reply_btn = adw::SplitButton::builder()
         .icon_name("mail-reply-sender-symbolic")
-        .label("Reply")
+        .label(tr!("Reply"))
         .css_classes(["suggested-action", "alcedo-reader-reply"])
         .menu_model(&reply_menu)
         .valign(gtk::Align::Center)
@@ -373,12 +399,15 @@ pub fn build_reader_page(
     reply_btn.connect_clicked(move |_| on_reply());
     a11y::name_icon_control(
         &reply_btn,
-        "Reply",
-        &commands::command_tooltip(ACTION_REPLY, "Reply"),
+        &tr!("Reply"),
+        &commands::command_tooltip(ACTION_REPLY, &tr!("Reply")),
     );
 
     let forward_menu = gtk::gio::Menu::new();
-    forward_menu.append(Some("Forward in New Window"), Some("reader.forward-window"));
+    forward_menu.append(
+        Some(&tr!("Forward in New Window")),
+        Some("reader.forward-window"),
+    );
 
     let forward_actions = gtk::gio::SimpleActionGroup::new();
     let forward_window_action = gtk::gio::SimpleAction::new("forward-window", None);
@@ -387,7 +416,7 @@ pub fn build_reader_page(
 
     let forward_btn = adw::SplitButton::builder()
         .icon_name("mail-forward-symbolic")
-        .label("Forward")
+        .label(tr!("Forward"))
         .css_classes(["alcedo-reader-forward"])
         .menu_model(&forward_menu)
         .valign(gtk::Align::Center)
@@ -397,8 +426,8 @@ pub fn build_reader_page(
     forward_btn.connect_clicked(move |_| on_forward());
     a11y::name_icon_control(
         &forward_btn,
-        "Forward",
-        &commands::command_tooltip(ACTION_FORWARD, "Forward"),
+        &tr!("Forward"),
+        &commands::command_tooltip(ACTION_FORWARD, &tr!("Forward")),
     );
 
     let react_btn = gtk::Button::builder()
@@ -408,7 +437,7 @@ pub fn build_reader_page(
         .sensitive(false)
         .has_frame(false)
         .build();
-    a11y::label_icon_control(&react_btn, "Add reaction");
+    a11y::label_icon_control(&react_btn, &tr!("Add reaction"));
 
     let reaction_popover = gtk::Popover::new();
     reaction_popover.set_parent(&react_btn);
@@ -421,20 +450,13 @@ pub fn build_reader_page(
         .margin_top(8)
         .margin_bottom(8)
         .build();
-    let quick_specs = [
-        ("👍", "Thumbs up"),
-        ("❤️", "Heart"),
-        ("😂", "Laugh"),
-        ("🎉", "Celebrate"),
-        ("😮", "Surprised"),
-        ("😢", "Sad"),
-    ];
+    let quick_emojis = ["👍", "❤️", "😂", "🎉", "😮", "😢"];
     let mut reaction_quick = Vec::new();
     let on_react_emoji = Rc::new(on_react_emoji);
-    for (emoji, tooltip) in quick_specs {
+    for emoji in quick_emojis {
         let button = gtk::Button::builder()
             .label(emoji)
-            .tooltip_text(tooltip)
+            .tooltip_text(reaction_name(emoji).unwrap_or_default())
             .css_classes(["flat"])
             .build();
         let emoji = emoji.to_string();
@@ -452,7 +474,7 @@ pub fn build_reader_page(
         reaction_quick.push((button, emoji));
     }
     let more_reactions_btn = gtk::Button::builder()
-        .label("More reactions…")
+        .label(tr!("More reactions…"))
         .css_classes(["flat"])
         .build();
     let emoji_chooser = gtk::EmojiChooser::new();
@@ -488,8 +510,8 @@ pub fn build_reader_page(
         .build();
     a11y::name_icon_control(
         &archive_btn,
-        "Archive",
-        &commands::command_tooltip(ACTION_ARCHIVE, "Archive"),
+        &tr!("Archive"),
+        &commands::command_tooltip(ACTION_ARCHIVE, &tr!("Archive")),
     );
     archive_btn.connect_clicked(move |_| on_archive());
 
@@ -502,8 +524,8 @@ pub fn build_reader_page(
         .build();
     a11y::name_icon_control(
         &star_btn,
-        "Star",
-        &commands::command_tooltip(ACTION_STAR, "Star"),
+        &tr!("Star"),
+        &commands::command_tooltip(ACTION_STAR, &tr!("Star")),
     );
     {
         let star_syncing = star_syncing.clone();
@@ -528,14 +550,14 @@ pub fn build_reader_page(
         .build();
     a11y::name_icon_control(
         &delete_btn,
-        "Delete",
-        &commands::command_tooltip(ACTION_DELETE, "Delete"),
+        &tr!("Delete"),
+        &commands::command_tooltip(ACTION_DELETE, &tr!("Delete")),
     );
     delete_btn.connect_clicked(move |_| on_delete());
 
     let back_btn = gtk::Button::builder()
-        .label("Back to Messages")
-        .tooltip_text("Back to Messages")
+        .label(tr!("Back to Messages"))
+        .tooltip_text(tr!("Back to Messages"))
         .visible(false)
         .build();
 
@@ -596,7 +618,9 @@ pub fn build_reader_page(
     web_view.set_size_request(1, 1);
     wire_reader_link_tooltip(&web_view);
 
-    let loading_page = adw::StatusPage::builder().title("Loading message…").build();
+    let loading_page = adw::StatusPage::builder()
+        .title(tr!("Loading message…"))
+        .build();
     let loading_paintable = adw::SpinnerPaintable::new(Some(&loading_page));
     loading_page.set_paintable(Some(&loading_paintable));
     let body_stack = gtk::Stack::new();
@@ -619,8 +643,8 @@ pub fn build_reader_page(
 
     let empty_page = adw::StatusPage::builder()
         .icon_name("mail-read-symbolic")
-        .title("Select a message")
-        .description("Choose a message from the list to read it.")
+        .title(tr!("Select a message"))
+        .description(tr!("Choose a message from the list to read it."))
         .build();
 
     let content_stack = gtk::Stack::new();
@@ -699,10 +723,10 @@ pub fn build_reader_page(
     header_zone.append(&reactions);
 
     let source_menu = gtk::gio::Menu::new();
-    source_menu.append(Some("View Source"), Some("reader.view-source"));
-    source_menu.append(Some("Save to File…"), Some("reader.save-to-file"));
+    source_menu.append(Some(&tr!("View Source")), Some("reader.view-source"));
+    source_menu.append(Some(&tr!("Save to File…")), Some("reader.save-to-file"));
     source_menu.append(
-        Some("Show Original Colors"),
+        Some(&tr!("Show Original Colors")),
         Some("reader.original-colours"),
     );
 
@@ -749,7 +773,11 @@ pub fn build_reader_page(
         .menu_model(&source_menu)
         .css_classes(["flat"])
         .build();
-    a11y::name_icon_control(&overflow_btn, "Message Options", "Message Options");
+    a11y::name_icon_control(
+        &overflow_btn,
+        &tr!("Message Options"),
+        &tr!("Message Options"),
+    );
     header_bar.pack_end(&overflow_btn);
 
     let context_menu = gtk::PopoverMenu::from_model(Some(&source_menu));
@@ -958,18 +986,10 @@ pub fn prepare_reaction_popover(widgets: &ReaderWidgets, sent_emojis: &[String])
         let already = sent_emojis.iter().any(|sent| sent == emoji);
         button.set_sensitive(!already);
         if already {
-            let tooltip = format!("You already reacted with {emoji}");
+            let tooltip = trf!("You already reacted with {emoji}", emoji = emoji);
             button.set_tooltip_text(Some(&tooltip));
         } else {
-            button.set_tooltip_text(match emoji.as_str() {
-                "👍" => Some("Thumbs up"),
-                "❤️" => Some("Heart"),
-                "😂" => Some("Laugh"),
-                "🎉" => Some("Celebrate"),
-                "😮" => Some("Surprised"),
-                "😢" => Some("Sad"),
-                _ => None,
-            });
+            button.set_tooltip_text(reaction_name(emoji));
         }
     }
 }
@@ -1013,12 +1033,12 @@ pub fn sync_reader_star(widgets: &ReaderWidgets, flagged: bool) {
     } else {
         "non-starred-symbolic"
     });
-    let label = if flagged { "Unstar" } else { "Star" };
+    let label = if flagged { tr!("Unstar") } else { tr!("Star") };
     let action = if flagged { ACTION_UNSTAR } else { ACTION_STAR };
     a11y::name_icon_control(
         &widgets.star_btn,
-        label,
-        &commands::command_tooltip(action, label),
+        &label,
+        &commands::command_tooltip(action, &label),
     );
     widgets.star_syncing.set(false);
 }
@@ -1029,8 +1049,8 @@ pub fn set_reader_reply_icon_only(widgets: &ReaderWidgets, icon_only: bool) {
         widgets.reply_btn.set_label("");
         widgets.forward_btn.set_label("");
     } else {
-        widgets.reply_btn.set_label("Reply");
-        widgets.forward_btn.set_label("Forward");
+        widgets.reply_btn.set_label(&tr!("Reply"));
+        widgets.forward_btn.set_label(&tr!("Forward"));
     }
 }
 
@@ -1038,23 +1058,23 @@ pub fn set_reader_reply_icon_only(widgets: &ReaderWidgets, icon_only: bool) {
 pub fn refresh_reader_shortcut_tooltips(widgets: &ReaderWidgets) {
     a11y::name_icon_control(
         &widgets.reply_btn,
-        "Reply",
-        &commands::command_tooltip(ACTION_REPLY, "Reply"),
+        &tr!("Reply"),
+        &commands::command_tooltip(ACTION_REPLY, &tr!("Reply")),
     );
     a11y::name_icon_control(
         &widgets.forward_btn,
-        "Forward",
-        &commands::command_tooltip(ACTION_FORWARD, "Forward"),
+        &tr!("Forward"),
+        &commands::command_tooltip(ACTION_FORWARD, &tr!("Forward")),
     );
     a11y::name_icon_control(
         &widgets.archive_btn,
-        "Archive",
-        &commands::command_tooltip(ACTION_ARCHIVE, "Archive"),
+        &tr!("Archive"),
+        &commands::command_tooltip(ACTION_ARCHIVE, &tr!("Archive")),
     );
     a11y::name_icon_control(
         &widgets.delete_btn,
-        "Delete",
-        &commands::command_tooltip(ACTION_DELETE, "Delete"),
+        &tr!("Delete"),
+        &commands::command_tooltip(ACTION_DELETE, &tr!("Delete")),
     );
     sync_reader_star(widgets, widgets.star_btn.is_active());
 }
@@ -1390,18 +1410,18 @@ pub fn update_unsubscribe_button(
     let visible = action.is_some_and(ListUnsubscribe::has_action);
     widgets.unsubscribe_btn.set_visible(visible);
     if !visible {
-        widgets.unsubscribe_btn.set_label("Unsubscribe");
+        widgets.unsubscribe_btn.set_label(&tr!("Unsubscribe"));
         widgets.unsubscribe_btn.set_sensitive(true);
         return;
     }
     if done {
-        widgets.unsubscribe_btn.set_label("Unsubscribed");
+        widgets.unsubscribe_btn.set_label(&tr!("Unsubscribed"));
         widgets.unsubscribe_btn.set_sensitive(false);
     } else if pending {
-        widgets.unsubscribe_btn.set_label("Unsubscribe");
+        widgets.unsubscribe_btn.set_label(&tr!("Unsubscribe"));
         widgets.unsubscribe_btn.set_sensitive(false);
     } else {
-        widgets.unsubscribe_btn.set_label("Unsubscribe");
+        widgets.unsubscribe_btn.set_label(&tr!("Unsubscribe"));
         widgets.unsubscribe_btn.set_sensitive(true);
     }
 }
@@ -1522,7 +1542,7 @@ pub(crate) fn prepare_body(html: Option<&str>, text: &str) -> PreparedBody {
 
 fn attach_subject_copy_context_menu(subject: &gtk::Label, toast_host: &gtk::Widget) {
     let menu = gtk::gio::Menu::new();
-    menu.append(Some("Copy Subject"), Some("readersubject.copy"));
+    menu.append(Some(&tr!("Copy Subject")), Some("readersubject.copy"));
 
     let actions = gtk::gio::SimpleActionGroup::new();
     let copy_action = gtk::gio::SimpleAction::new("copy", None);
@@ -1537,7 +1557,7 @@ fn attach_subject_copy_context_menu(subject: &gtk::Label, toast_host: &gtk::Widg
             return;
         };
         copy_text_to_clipboard(&subject.label());
-        show_composer_toast(&toast_host, "Subject copied");
+        show_composer_toast(&toast_host, &tr!("Subject copied"));
     });
     actions.add_action(&copy_action);
     subject.insert_action_group("readersubject", Some(&actions));
@@ -1559,9 +1579,14 @@ fn attach_subject_copy_context_menu(subject: &gtk::Label, toast_host: &gtk::Widg
 }
 
 fn format_reader_date(date: &DateTime<Utc>) -> String {
-    date.with_timezone(&Local)
-        .format("%b %d, %Y, %I:%M %p")
-        .to_string()
+    crate::local_time::format_date_time(
+        date.with_timezone(&Local).naive_local(),
+        // TRANSLATORS: strftime pattern for a message date like "Sep 07, 2026, 09:05 AM".
+        &trc!(
+            "strftime pattern: short month, day, year, time",
+            "%b %d, %Y, %I:%M %p"
+        ),
+    )
 }
 
 fn recipient_expand_icon(expanded: bool) -> &'static str {
@@ -1574,11 +1599,11 @@ fn recipient_expand_icon(expanded: bool) -> &'static str {
 
 fn recipient_expand_tooltip(expanded: bool, count: usize) -> String {
     if expanded {
-        "Show fewer recipients".to_string()
+        tr!("Show fewer recipients")
     } else if count == 0 {
-        "Show all recipients".to_string()
+        tr!("Show all recipients")
     } else {
-        format!("Show all {count} recipients")
+        ntr!("Show {n} recipient", "Show all {n} recipients", count)
     }
 }
 
@@ -1931,18 +1956,6 @@ fn build_attachment_card(
     card
 }
 
-fn format_attachment_size(size: u64) -> String {
-    const KB: u64 = 1024;
-    const MB: u64 = KB * 1024;
-    if size >= MB {
-        format!("{:.1} MB", size as f64 / MB as f64)
-    } else if size >= KB {
-        format!("{:.0} KB", size as f64 / KB as f64)
-    } else {
-        format!("{size} B")
-    }
-}
-
 fn clear_attachment_chips(box_: &adw::WrapBox) {
     while let Some(child) = box_.first_child() {
         box_.remove(&child);
@@ -1971,16 +1984,26 @@ fn update_attachment_chips(
     box_.set_visible(true);
     if attachments.is_empty() {
         if attachments_pending {
-            let card =
-                build_attachment_card("mail-attachment-symbolic", "Attachment", "…", false, false);
-            card.set_tooltip_text(Some("Attachments are still loading"));
+            let card = build_attachment_card(
+                "mail-attachment-symbolic",
+                &tr!("Attachment"),
+                "…",
+                false,
+                false,
+            );
+            card.set_tooltip_text(Some(&tr!("Attachments are still loading")));
             box_.append(&card);
             return;
         }
         if attachments_failed {
-            let card =
-                build_attachment_card("mail-attachment-symbolic", "Attachment", "—", false, false);
-            card.set_tooltip_text(Some("Couldn't download the attachment"));
+            let card = build_attachment_card(
+                "mail-attachment-symbolic",
+                &tr!("Attachment"),
+                "—",
+                false,
+                false,
+            );
+            card.set_tooltip_text(Some(&tr!("Couldn't download the attachment")));
             box_.append(&card);
             return;
         }
@@ -2002,7 +2025,7 @@ fn update_attachment_chips(
     });
     for att in attachments {
         let icon_name = attachment_icon_name(&att.mime, &att.filename);
-        let size_text = format_attachment_size(att.size);
+        let size_text = crate::compose_attachments::format_part_size(att.size);
         let bytes_ready = cid_cache.borrow().contains_key(&att.sha256);
         let risky = lists.attachment_is_risky(&att.filename, &att.mime, None)
             && !risky_attachment_is_enabled(&att.sha256);
@@ -2058,7 +2081,7 @@ fn build_save_all_button(sensitive: bool, count: usize) -> gtk::Button {
     icon.set_valign(gtk::Align::Center);
 
     let label = gtk::Label::builder()
-        .label("Save all")
+        .label(tr!("Save all"))
         .css_classes(["alcedo-attachment-save-all-label"])
         .build();
 
@@ -2072,9 +2095,13 @@ fn build_save_all_button(sensitive: bool, count: usize) -> gtk::Button {
     content.append(&label);
 
     let tooltip = if sensitive {
-        format!("Save all {count} attachments to a folder")
+        ntr!(
+            "Save {n} attachment to a folder",
+            "Save all {n} attachments to a folder",
+            count
+        )
     } else {
-        "Attachments are still loading".to_string()
+        tr!("Attachments are still loading")
     };
     gtk::Button::builder()
         .child(&content)
@@ -2135,10 +2162,10 @@ fn wire_calendar_attachment_card(
     }
 
     let menu = gtk::gio::Menu::new();
-    menu.append(Some("Open"), Some("attachment.open"));
-    menu.append(Some("Save to File…"), Some("attachment.save"));
+    menu.append(Some(&tr!("Open")), Some("attachment.open"));
+    menu.append(Some(&tr!("Save to File…")), Some("attachment.save"));
     if on_save_all.is_some() {
-        menu.append(Some("Save All…"), Some("attachment.save-all"));
+        menu.append(Some(&tr!("Save All…")), Some("attachment.save-all"));
     }
 
     let actions = gtk::gio::SimpleActionGroup::new();
@@ -2211,10 +2238,10 @@ fn wire_attachment_card(
     }
 
     let menu = gtk::gio::Menu::new();
-    menu.append(Some("Open"), Some("attachment.open"));
-    menu.append(Some("Save to File…"), Some("attachment.save"));
+    menu.append(Some(&tr!("Open")), Some("attachment.open"));
+    menu.append(Some(&tr!("Save to File…")), Some("attachment.save"));
     if on_save_all.is_some() {
-        menu.append(Some("Save All…"), Some("attachment.save-all"));
+        menu.append(Some(&tr!("Save All…")), Some("attachment.save-all"));
     }
 
     let actions = gtk::gio::SimpleActionGroup::new();
@@ -2314,10 +2341,10 @@ fn confirm_risky_attachments_then(
 
     let (heading, body) = if risky.len() == 1 {
         (
-            "This attachment may be unsafe".to_string(),
-            format!(
-                "{} can run code or harm this computer. Enable it only if you trust the sender.",
-                risky[0].0
+            tr!("This attachment may be unsafe"),
+            trf!(
+                "{name} can run code or harm this computer. Enable it only if you trust the sender.",
+                name = risky[0].0
             ),
         )
     } else {
@@ -2327,9 +2354,10 @@ fn confirm_risky_attachments_then(
             .collect::<Vec<_>>()
             .join("\n");
         (
-            "Some attachments may be unsafe".to_string(),
-            format!(
-                "These files can run code or harm this computer. Enable them only if you trust the sender.\n\n{names}"
+            tr!("Some attachments may be unsafe"),
+            trf!(
+                "These files can run code or harm this computer. Enable them only if you trust the sender.\n\n{names}",
+                names = names
             ),
         )
     };
@@ -2337,8 +2365,8 @@ fn confirm_risky_attachments_then(
         .heading(&heading)
         .body(&body)
         .build();
-    dialog.add_response("cancel", "Cancel");
-    dialog.add_response("enable", "Enable");
+    dialog.add_response("cancel", &tr!("Cancel"));
+    dialog.add_response("enable", &tr!("Enable"));
     dialog.set_response_appearance("enable", adw::ResponseAppearance::Destructive);
     dialog.set_default_response(Some("cancel"));
     dialog.set_close_response("cancel");
@@ -2435,7 +2463,7 @@ fn save_all_attachments_from_cache(
 
 fn save_attachments_to_folder(parent: &impl IsA<gtk::Widget>, items: Vec<SaveItem>) {
     let dialog = gtk::FileDialog::new();
-    dialog.set_title("Save all attachments");
+    dialog.set_title(&tr!("Save all attachments"));
     let parent_window = parent
         .as_ref()
         .root()
@@ -2455,7 +2483,7 @@ fn save_attachments_to_folder(parent: &impl IsA<gtk::Widget>, items: Vec<SaveIte
                     let written =
                         crate::blocking_io::run(move || write_items_to_dir(&dir, &items)).await;
                     let message = written.map_or_else(
-                        || "Could not save attachments".to_string(),
+                        || tr!("Could not save attachments"),
                         |summary| summary.user_message(),
                     );
                     show_composer_toast(&parent_widget, &message);
@@ -2471,7 +2499,7 @@ fn save_attachments_to_folder(parent: &impl IsA<gtk::Widget>, items: Vec<SaveIte
 
 fn save_attachment_to_file(parent: &impl IsA<gtk::Widget>, item: SaveItem) {
     let dialog = gtk::FileDialog::new();
-    dialog.set_title("Save attachment");
+    dialog.set_title(&tr!("Save attachment"));
     let suggested = suggested_attachment_filename(&item.filename);
     dialog.set_initial_name(Some(&suggested));
     let parent_window = parent
@@ -2493,12 +2521,16 @@ fn save_attachment_to_file(parent: &impl IsA<gtk::Widget>, item: SaveItem) {
                         crate::blocking_io::run(move || write_file_atomic(&path, &item.bytes))
                             .await;
                     match written {
-                        Some(Ok(())) => show_composer_toast(&parent_widget, "Attachment saved"),
+                        Some(Ok(())) => {
+                            show_composer_toast(&parent_widget, &tr!("Attachment saved"))
+                        }
                         Some(Err(err)) => {
                             tracing::warn!(?err, "failed to save attachment");
-                            show_composer_toast(&parent_widget, "Could not save attachment");
+                            show_composer_toast(&parent_widget, &tr!("Could not save attachment"));
                         }
-                        None => show_composer_toast(&parent_widget, "Could not save attachment"),
+                        None => {
+                            show_composer_toast(&parent_widget, &tr!("Could not save attachment"))
+                        }
                     }
                 });
             }
@@ -2550,7 +2582,7 @@ fn launch_attachment_file(
         Err(err) => {
             tracing::warn!(sha256, ?err, "not opening attachment");
             let dialog = adw::AlertDialog::builder()
-                .heading("Can’t open attachment")
+                .heading(tr!("Can’t open attachment"))
                 .body(err.user_message())
                 .build();
             dialog.add_response("ok", "OK");

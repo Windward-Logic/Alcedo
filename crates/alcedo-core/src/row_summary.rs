@@ -1,6 +1,7 @@
 //! Accessible name for one message-list row.
 
 use crate::subject::NO_SUBJECT;
+use alcedo_i18n::{ntr, tr, trf, trm, trs};
 
 /// Fields a screen reader needs from a message row. The list only knows
 /// whether a row has attachments, not how many.
@@ -19,19 +20,24 @@ pub fn row_accessible_summary(row: &RowSummary<'_>) -> String {
     let mut parts = Vec::new();
     match row.unread_count {
         0 => {}
-        1 => parts.push("Unread".to_string()),
-        n => parts.push(format!("{n} unread")),
+        1 => parts.push(tr!("Unread")),
+        n => parts.push(ntr!("{n} unread", "{n} unread", n)),
     }
     if row.starred {
-        parts.push("starred".to_string());
+        parts.push(tr!("starred"));
     }
     let from = row.from.trim();
-    let from = if from.is_empty() { "Unknown" } else { from };
-    parts.push(format!("from {from}"));
+    let from = if from.is_empty() {
+        trs!("Unknown")
+    } else {
+        from
+    };
+    // TRANSLATORS: part of a spoken message-row summary, e.g. "from Ada Lovelace".
+    parts.push(trf!("from {sender}", sender = from));
 
     let subject = row.subject.trim();
     let subject = if subject.is_empty() {
-        NO_SUBJECT
+        trm!(NO_SUBJECT)
     } else {
         subject
     };
@@ -42,7 +48,7 @@ pub fn row_accessible_summary(row: &RowSummary<'_>) -> String {
         parts.push(when.to_string());
     }
     if row.has_attachments {
-        parts.push("has attachments".to_string());
+        parts.push(tr!("has attachments"));
     }
     parts.join(", ")
 }

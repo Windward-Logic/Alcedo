@@ -1,5 +1,6 @@
 //! Stacked account sections in the folder pane (Betterbird-style layout).
 
+use alcedo_i18n::{ntr, tr, trf, trs};
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 
@@ -118,19 +119,20 @@ pub(crate) fn is_account_pane_row(widget_name: &str) -> bool {
 }
 
 pub(crate) fn hidden_accounts_label(count: usize) -> String {
-    format!("Hidden Accounts ({count})")
+    ntr!("Hidden Accounts ({n})", "Hidden Accounts ({n})", count)
 }
 
 pub(crate) fn account_header_tooltip(email: &str, needs_sign_in: bool) -> String {
     if needs_sign_in {
-        format!("{email}\nSign-in required")
+        trf!("{email}\nSign-in required", email = email)
     } else {
         email.to_string()
     }
 }
 
 pub(crate) fn account_header_accessible_label(label: &str) -> String {
-    format!("{label} account")
+    // TRANSLATORS: screen-reader label; {label} is an account name.
+    trf!("{label} account", label = label)
 }
 
 /// Enter/Space toggle; Left only collapses; Right only expands.
@@ -226,9 +228,9 @@ fn hidden_accounts_row(hidden: &HiddenAccounts<'_>, on_toggle: Rc<dyn Fn()>) -> 
     row.set_can_focus(true);
     row.add_css_class(HIDDEN_ACCOUNTS_CLASS);
     row.set_tooltip_text(Some(if expanded {
-        "Collapse hidden accounts"
+        trs!("Collapse hidden accounts")
     } else {
-        "Show hidden accounts"
+        trs!("Show hidden accounts")
     }));
     row.update_property(&[gtk::accessible::Property::Label(&hidden_accounts_label(
         hidden.sections.len(),
@@ -332,9 +334,9 @@ fn account_header_row(
     expand_btn.set_has_frame(false);
     expand_btn.set_focus_on_click(false);
     expand_btn.set_tooltip_text(Some(if expanded {
-        "Collapse account"
+        trs!("Collapse account")
     } else {
-        "Expand account"
+        trs!("Expand account")
     }));
     let on_toggle_btn = actions.on_toggle.clone();
     expand_btn.connect_clicked(move |_| on_toggle_btn(id));
@@ -367,7 +369,7 @@ fn account_header_row(
     if needs_sign_in {
         let warning = gtk::Image::from_icon_name("dialog-warning-symbolic");
         warning.add_css_class("warning");
-        warning.set_tooltip_text(Some("Sign-in required"));
+        warning.set_tooltip_text(Some(&tr!("Sign-in required")));
         row_box.append(&warning);
     }
 
@@ -480,13 +482,13 @@ fn add_account_row(on_add: Rc<dyn Fn()>) -> gtk::ListBoxRow {
     row.set_selectable(false);
     row.set_can_focus(true);
     row.add_css_class(ADD_ACCOUNT_CLASS);
-    row.set_tooltip_text(Some("Add another email account"));
-    row.update_property(&[gtk::accessible::Property::Label("Add Account")]);
+    row.set_tooltip_text(Some(&tr!("Add another email account")));
+    row.update_property(&[gtk::accessible::Property::Label(&tr!("Add Account"))]);
 
     let icon = icons::sidebar_image("list-add-symbolic");
     icon.add_css_class("alcedo-folder-icon");
 
-    let label = gtk::Label::new(Some("Add Account"));
+    let label = gtk::Label::new(Some(&tr!("Add Account")));
     label.set_halign(gtk::Align::Start);
     label.set_hexpand(true);
 

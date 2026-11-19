@@ -12,7 +12,11 @@ use relm4::adw::prelude::*;
 use relm4::gtk::glib;
 use std::rc::Rc;
 
+use alcedo_i18n::{tr, trf};
 use alcedo_ui::extension::UiExtension;
+
+/// gettext domain of the public app's text, read by the `alcedo_i18n` macros.
+const I18N_DOMAIN: &str = "alcedo";
 
 /// Feature extensions registered with the app at startup.
 ///
@@ -28,6 +32,8 @@ pub struct Extensions {
 
 /// Start the app with `extensions` and block until it quits.
 pub fn run(extensions: Extensions) {
+    // First, while the process has one thread: it calls setlocale.
+    let i18n = alcedo_i18n::init(I18N_DOMAIN);
     init_gsettings_schema_dir();
 
     // Both aws-lc-rs and ring can end up in the tree via transitive deps; rustls
@@ -39,6 +45,9 @@ pub fn run(extensions: Extensions) {
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .init();
+    if let Err(err) = i18n {
+        tracing::warn!(%err, "Alcedo's text stays in English");
+    }
 
     let mock = std::env::var_os("ALCEDO_MOCK").is_some();
     let mailto_from_args = mailto_from_command_line();
@@ -115,10 +124,9 @@ pub fn run(extensions: Extensions) {
 
 /// Show a store-open failure in a dialog instead of panicking, then exit.
 fn show_startup_error(details: &str) {
-    let body = format!(
-        "Alcedo could not open its mail database, so it cannot start.\n\n{details}\n\n\
-         Check that the data folder (~/.local/share/alcedo, or $ALCEDO_DB) is \
-         writable and not used by another Alcedo instance."
+    let body = trf!(
+        "Alcedo could not open its mail database, so it cannot start.\n\n{details}\n\nCheck that the data folder (~/.local/share/alcedo, or $ALCEDO_DB) is writable and not used by another Alcedo instance.",
+        details = details
     );
     let app = adw::Application::builder()
         .application_id("dev.alcedo.Mail")
@@ -132,10 +140,10 @@ fn show_startup_error(details: &str) {
             .build();
         window.present();
         let dialog = adw::AlertDialog::builder()
-            .heading("Could not open mail database")
+            .heading(tr!("Could not open mail database"))
             .body(&body)
             .build();
-        dialog.add_response("quit", "Quit");
+        dialog.add_response("quit", &tr!("Quit"));
         dialog.set_default_response(Some("quit"));
         dialog.set_close_response("quit");
         let parent = window.clone();

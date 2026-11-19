@@ -1,5 +1,6 @@
 //! Adaptive mail chrome: overlay folders, single pane, and title buttons.
 
+use alcedo_i18n::{tr, trs};
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -62,8 +63,8 @@ pub(super) fn build_folder_chrome() -> (adw::HeaderBar, gtk::Box, gtk::Button, g
     icons::set_button_icon(&compose, icons::COMPOSE_SYMBOLIC, icons::TOOLBAR_PIXEL_SIZE);
     a11y::name_icon_control(
         &compose,
-        "New Message",
-        &commands::command_tooltip(ACTION_COMPOSE, "New Message"),
+        &tr!("New Message"),
+        &commands::command_tooltip(ACTION_COMPOSE, &tr!("New Message")),
     );
     let start = gtk::Box::new(gtk::Orientation::Horizontal, 0);
     start.append(&menu);
@@ -100,9 +101,9 @@ impl MailModel {
         a11y::label_icon_control(
             &self.layout.folder_toggle,
             if visible {
-                "Hide Folders"
+                trs!("Hide Folders")
             } else {
-                "Show Folders"
+                trs!("Show Folders")
             },
         );
         if self.layout.overlay_mode {
@@ -165,18 +166,18 @@ impl MailModel {
     pub(super) fn refresh_shortcut_tooltips(&self) {
         a11y::name_icon_control(
             &self.sync_btn,
-            "Sync Folder",
-            &commands::command_tooltip(crate::menu::ACTION_SYNC_FOLDER, "Sync Folder"),
+            &tr!("Sync Folder"),
+            &commands::command_tooltip(crate::menu::ACTION_SYNC_FOLDER, &tr!("Sync Folder")),
         );
         a11y::name_icon_control(
             &self.layout.list_compose,
-            "New Message",
-            &commands::command_tooltip(ACTION_COMPOSE, "New Message"),
+            &tr!("New Message"),
+            &commands::command_tooltip(ACTION_COMPOSE, &tr!("New Message")),
         );
         a11y::name_icon_control(
             &self.layout.folder_compose,
-            "New Message",
-            &commands::command_tooltip(ACTION_COMPOSE, "New Message"),
+            &tr!("New Message"),
+            &commands::command_tooltip(ACTION_COMPOSE, &tr!("New Message")),
         );
         refresh_reader_shortcut_tooltips(&self.reader);
         for window in self.message_windows.values() {

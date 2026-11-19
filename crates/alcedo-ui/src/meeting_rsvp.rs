@@ -1,5 +1,6 @@
 //! RSVP controls for meeting invites, and handing an invite to "Add to calendar".
 
+use alcedo_i18n::tr;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -74,17 +75,17 @@ pub fn build_rsvp_buttons(on_choice: Rc<dyn Fn(ParticipationStatus)>) -> gtk::Bo
         .build();
 
     let accept = gtk::Button::builder()
-        .label("Accept")
+        .label(tr!("Accept"))
         .css_classes(["suggested-action"])
-        .tooltip_text("Accept this invitation")
+        .tooltip_text(tr!("Accept this invitation"))
         .build();
     let tentative = gtk::Button::builder()
-        .label("Tentative")
-        .tooltip_text("Reply that you might attend")
+        .label(tr!("Tentative"))
+        .tooltip_text(tr!("Reply that you might attend"))
         .build();
     let decline = gtk::Button::builder()
-        .label("Decline")
-        .tooltip_text("Decline this invitation")
+        .label(tr!("Decline"))
+        .tooltip_text(tr!("Decline this invitation"))
         .build();
 
     accept.connect_clicked({

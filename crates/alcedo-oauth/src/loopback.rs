@@ -1,5 +1,6 @@
 //! Loopback redirect server (P5).
 
+use alcedo_i18n::tr;
 use std::time::Duration;
 
 use oauth2::{AuthorizationCode, CsrfToken, RedirectUrl};
@@ -13,13 +14,16 @@ const LOOPBACK_TIMEOUT: Duration = Duration::from_secs(300);
 const REQUEST_READ_TIMEOUT: Duration = Duration::from_secs(10);
 const MAX_REQUEST_BYTES: usize = 16 * 1024;
 
-const SUCCESS_HTML: &str = concat!(
-    "HTTP/1.1 200 OK\r\n",
-    "Content-Type: text/html; charset=utf-8\r\n",
-    "Connection: close\r\n",
-    "\r\n",
-    "<html><body><p>Authorization successful. You can close this window.</p></body></html>"
-);
+/// The page the browser shows after sign-in, in the user's language.
+fn success_response() -> String {
+    let message = tr!("Authorization successful. You can close this window.")
+        .replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;");
+    format!(
+        "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nConnection: close\r\n\r\n<html><body><p>{message}</p></body></html>"
+    )
+}
 
 const IGNORED_HTML: &str = concat!(
     "HTTP/1.1 404 Not Found\r\n",
@@ -104,7 +108,7 @@ impl LoopbackRedirect {
 
             match outcome_for_request(&request, expected_state) {
                 CallbackOutcome::Code(code) => {
-                    let _ = stream.write_all(SUCCESS_HTML.as_bytes()).await;
+                    let _ = stream.write_all(success_response().as_bytes()).await;
                     let _ = stream.flush().await;
                     return Ok(code);
                 }

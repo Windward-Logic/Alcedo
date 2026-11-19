@@ -2,6 +2,7 @@
 
 use alcedo_core::QueuedSendId;
 use alcedo_core::compose_status::{DraftStatus, queued_send_recovery_text};
+use alcedo_i18n::{ntr, tr, trf};
 
 use super::*;
 
@@ -34,21 +35,25 @@ impl MailModel {
                 }
                 let (heading, body) = if drafts.len() == 1 {
                     (
-                        "Restore unsent message?".to_string(),
-                        "Alcedo saved a draft from your last session.".to_string(),
+                        tr!("Restore unsent message?"),
+                        tr!("Alcedo saved a draft from your last session."),
                     )
                 } else {
                     (
-                        format!("Restore {} unsent messages?", drafts.len()),
-                        "Alcedo saved drafts from your last session.".to_string(),
+                        ntr!(
+                            "Restore {n} unsent message?",
+                            "Restore {n} unsent messages?",
+                            drafts.len()
+                        ),
+                        tr!("Alcedo saved drafts from your last session."),
                     )
                 };
                 let dialog = adw::AlertDialog::builder()
                     .heading(heading)
                     .body(body)
                     .build();
-                dialog.add_response("discard", "Discard");
-                dialog.add_response("restore", "Restore");
+                dialog.add_response("discard", &tr!("Discard"));
+                dialog.add_response("restore", &tr!("Restore"));
                 dialog.set_response_appearance("restore", adw::ResponseAppearance::Suggested);
                 dialog.set_default_response(Some("restore"));
                 dialog.set_close_response(RECOVERY_DECIDE_LATER);
@@ -74,8 +79,8 @@ impl MailModel {
                     .heading(heading)
                     .body(body)
                     .build();
-                dialog.add_response("discard", "Discard");
-                dialog.add_response("restore", "Restore");
+                dialog.add_response("discard", &tr!("Discard"));
+                dialog.add_response("restore", &tr!("Restore"));
                 dialog.set_response_appearance("restore", adw::ResponseAppearance::Suggested);
                 dialog.set_default_response(Some("restore"));
                 dialog.set_close_response(RECOVERY_DECIDE_LATER);
@@ -116,7 +121,7 @@ impl MailModel {
                     self.restore_signature_inlines(&mut draft);
                     self.open_detached_composer(
                         draft,
-                        "Compose",
+                        &tr!("Compose"),
                         &sender,
                         DetachedComposerFocus::None,
                     );
@@ -141,7 +146,7 @@ impl MailModel {
                     if inline_used {
                         self.open_detached_composer(
                             draft,
-                            "Compose",
+                            &tr!("Compose"),
                             &sender,
                             DetachedComposerFocus::None,
                         );
@@ -158,7 +163,7 @@ impl MailModel {
                     present_main_window();
                 }
                 if !missing.is_empty() {
-                    let message = format!("Re-attach files: {}", missing.join(", "));
+                    let message = trf!("Re-attach files: {files}", files = missing.join(", "));
                     self.toasts.add_toast(crate::toast::plain(&message));
                 }
             }
@@ -366,7 +371,7 @@ impl MailModel {
     ) {
         if self.pending_popout_draft == Some(message_id) {
             self.pending_popout_draft = None;
-            self.open_detached_composer(draft, "Draft", sender, DetachedComposerFocus::Body);
+            self.open_detached_composer(draft, &tr!("Draft"), sender, DetachedComposerFocus::Body);
             return;
         }
         if should_skip_imap_draft_reapply(

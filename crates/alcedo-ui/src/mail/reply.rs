@@ -1,6 +1,7 @@
 //! Reply, reply-all, list reply and forward drafts.
 
 use super::*;
+use alcedo_i18n::tr;
 
 impl MailModel {
     pub(super) fn update_reply(&mut self, msg: MailMsg, sender: ComponentSender<MailModel>) {
@@ -100,7 +101,7 @@ impl MailModel {
             return;
         };
         self.cmd.emit(UiCommand::Compose(draft.clone()));
-        self.open_detached_composer(draft, "Reply", sender, DetachedComposerFocus::Body);
+        self.open_detached_composer(draft, &tr!("Reply"), sender, DetachedComposerFocus::Body);
     }
 
     pub(super) fn forward_message(&mut self, id: MessageId) {
@@ -124,7 +125,7 @@ impl MailModel {
             return;
         };
         self.cmd.emit(UiCommand::Compose(draft.clone()));
-        self.open_detached_composer(draft, "Forward", sender, DetachedComposerFocus::To);
+        self.open_detached_composer(draft, &tr!("Forward"), sender, DetachedComposerFocus::To);
     }
 
     pub(super) fn compose_source_for(&self, id: MessageId) -> Option<(&Envelope, &Account, &str)> {

@@ -1,5 +1,6 @@
 //! Preferences → Keyboard page.
 
+use alcedo_i18n::{tr, trf};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -20,7 +21,7 @@ use crate::settings::{self, keyboard_shortcut_overrides};
 pub fn build_keyboard_page() -> adw::PreferencesPage {
     let page = adw::PreferencesPage::builder()
         .name("keyboard")
-        .title("Keyboard")
+        .title(tr!("Keyboard"))
         .icon_name("input-keyboard-symbolic")
         .build();
 
@@ -36,7 +37,7 @@ pub fn build_keyboard_page() -> adw::PreferencesPage {
             .title(category.label())
             .build();
         if category == CommandCategory::Mail {
-            group.set_description(Some("Select a command to change its shortcut."));
+            group.set_description(Some(&tr!("Select a command to change its shortcut.")));
             help::attach_group_help(&group, TOPIC_KEYBOARD);
         }
         page.add(&group);
@@ -98,7 +99,7 @@ pub fn build_keyboard_page() -> adw::PreferencesPage {
 
     let restore_group = adw::PreferencesGroup::new();
     let restore_btn = adw::ButtonRow::builder()
-        .title("Restore Defaults")
+        .title(tr!("Restore Defaults"))
         .css_classes(["destructive-action"])
         .build();
     restore_group.add(&restore_btn);
@@ -113,11 +114,11 @@ pub fn build_keyboard_page() -> adw::PreferencesPage {
         let refresh_all = refresh_all.clone();
         move |btn| {
             let confirm = adw::AlertDialog::builder()
-                .heading("Restore default shortcuts?")
-                .body("This resets all custom keyboard shortcuts.")
+                .heading(tr!("Restore default shortcuts?"))
+                .body(tr!("This resets all custom keyboard shortcuts."))
                 .build();
-            confirm.add_response("cancel", "Cancel");
-            confirm.add_response("restore", "Restore");
+            confirm.add_response("cancel", &tr!("Cancel"));
+            confirm.add_response("restore", &tr!("Restore"));
             confirm.set_response_appearance("restore", adw::ResponseAppearance::Destructive);
             confirm.set_default_response(Some("cancel"));
             confirm.set_close_response("cancel");
@@ -148,14 +149,14 @@ fn open_set_shortcut_dialog(
     capture_box.append(&conflict_label);
 
     let dialog = adw::AlertDialog::builder()
-        .heading("Set shortcut")
-        .body(format!(
-            "Press a new shortcut for {}. Press Escape to cancel, or Backspace to restore the default.",
-            entry.label
+        .heading(tr!("Set shortcut"))
+        .body(trf!(
+            "Press a new shortcut for {command}. Press Escape to cancel, or Backspace to restore the default.",
+            command = entry.label
         ))
         .extra_child(&capture_box)
         .build();
-    dialog.add_response("cancel", "Cancel");
+    dialog.add_response("cancel", &tr!("Cancel"));
 
     let entry_id = entry.id.to_string();
     let key_controller = gtk::EventControllerKey::new();
@@ -184,9 +185,9 @@ fn open_set_shortcut_dialog(
                 return glib::Propagation::Proceed;
             }
             if let Some(other) = accel_in_use(&trigger_string, &entry_id) {
-                conflict_label.set_label(&format!(
-                    "That shortcut is already used by {}.",
-                    other.label
+                conflict_label.set_label(&trf!(
+                    "That shortcut is already used by {command}.",
+                    command = other.label
                 ));
                 conflict_label.set_visible(true);
                 return glib::Propagation::Stop;

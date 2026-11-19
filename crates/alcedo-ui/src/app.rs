@@ -1,5 +1,6 @@
 //! Main application window (P4) — thin shell routing Mail, Contacts and extension spaces.
 
+use alcedo_i18n::{tr, trs};
 use std::cell::{Cell, RefCell};
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
@@ -200,7 +201,7 @@ impl Component for AppModel {
                                     },
                                     gtk::Label {
                                         add_css_class: "alcedo-rail-label",
-                                        set_label: "Compose",
+                                        set_label: trs!("Compose"),
                                         set_xalign: 0.0,
                                         set_halign: gtk::Align::Start,
                                         set_hexpand: true,
@@ -213,7 +214,7 @@ impl Component for AppModel {
 
                             #[name = "mail_btn"]
                             gtk::Button {
-                                set_tooltip_text: Some("Mail"),
+                                set_tooltip_text: Some(trs!("Mail")),
                                 add_css_class: "flat",
                                 add_css_class: "alcedo-rail-btn",
                                 set_hexpand: true,
@@ -227,7 +228,7 @@ impl Component for AppModel {
                                     },
                                     gtk::Label {
                                         add_css_class: "alcedo-rail-label",
-                                        set_label: "Mail",
+                                        set_label: trs!("Mail"),
                                         set_xalign: 0.0,
                                         set_halign: gtk::Align::Start,
                                         set_hexpand: true,
@@ -240,7 +241,7 @@ impl Component for AppModel {
 
                             #[name = "contacts_btn"]
                             gtk::Button {
-                                set_tooltip_text: Some("Contacts"),
+                                set_tooltip_text: Some(trs!("Contacts")),
                                 add_css_class: "flat",
                                 add_css_class: "alcedo-rail-btn",
                                 set_hexpand: true,
@@ -254,7 +255,7 @@ impl Component for AppModel {
                                     },
                                     gtk::Label {
                                         add_css_class: "alcedo-rail-label",
-                                        set_label: "Contacts",
+                                        set_label: trs!("Contacts"),
                                         set_xalign: 0.0,
                                         set_halign: gtk::Align::Start,
                                         set_hexpand: true,
@@ -269,7 +270,7 @@ impl Component for AppModel {
 
                             #[name = "rail_hide_btn"]
                             gtk::Button {
-                                set_tooltip_text: Some("Hide app rail"),
+                                set_tooltip_text: Some(trs!("Hide app rail")),
                                 add_css_class: "flat",
                                 add_css_class: "alcedo-rail-btn",
                                 set_hexpand: true,
@@ -357,8 +358,8 @@ impl Component for AppModel {
         );
         crate::a11y::name_icon_control(
             &widgets.compose_btn,
-            "Compose",
-            &crate::commands::command_tooltip(ACTION_COMPOSE, "Compose"),
+            &tr!("Compose"),
+            &crate::commands::command_tooltip(ACTION_COMPOSE, &tr!("Compose")),
         );
 
         let status_bar = build_status_bar();
@@ -514,8 +515,8 @@ impl Component for AppModel {
                 install_accels(&relm4::main_application());
                 crate::a11y::name_icon_control(
                     &compose_btn,
-                    "Compose",
-                    &crate::commands::command_tooltip(ACTION_COMPOSE, "Compose"),
+                    &tr!("Compose"),
+                    &crate::commands::command_tooltip(ACTION_COMPOSE, &tr!("Compose")),
                 );
                 mail_sender.emit(MailMsg::RefreshShortcutTooltips);
             }

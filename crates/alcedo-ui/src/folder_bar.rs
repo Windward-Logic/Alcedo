@@ -1,5 +1,6 @@
 //! Folder bar (P4).
 
+use alcedo_i18n::{ntr, tr, trf, trs};
 use std::cell::Cell;
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
@@ -24,10 +25,10 @@ use crate::overflow_tooltip::install_overflow_tooltip;
 use crate::rail::set_badge_count;
 use crate::settings::LastFolder;
 
-/// Default folder title for the mock unified inbox.
-pub const UNIFIED_INBOX_TITLE: &str = "Everything";
-pub const EVERYTHING_TITLE: &str = "Everything";
-const UNIFIED_INBOX_TOOLTIP: &str = "Unified inbox across accounts";
+/// Title of the unified inbox ("Everything") in the sidebar, status bar and search.
+pub fn everything_title() -> String {
+    tr!("Everything")
+}
 
 const ROW_EXTENSION_PREFIX: &str = "alcedo-ext-";
 const ROW_UNIFIED: &str = "alcedo-unified";
@@ -859,9 +860,9 @@ fn folder_row(
         expand_btn.add_css_class("flat");
         expand_btn.add_css_class("alcedo-folder-expand");
         expand_btn.set_tooltip_text(Some(if entry.is_expanded {
-            "Collapse folder"
+            trs!("Collapse folder")
         } else {
-            "Expand folder"
+            trs!("Expand folder")
         }));
         expand_btn.set_has_frame(false);
         expand_btn.set_focus_on_click(false);
@@ -882,8 +883,8 @@ fn folder_row(
     if syncing {
         let spinner = adw::Spinner::new();
         spinner.add_css_class("alcedo-sync-spinner");
-        spinner.set_tooltip_text(Some("Syncing…"));
-        crate::a11y::set_label(&spinner, "Syncing");
+        spinner.set_tooltip_text(Some(&tr!("Syncing…")));
+        crate::a11y::set_label(&spinner, &tr!("Syncing"));
         row_box.append(&spinner);
     } else if let Some(badge) = folder_unread_badge(entry) {
         row_box.append(&badge);
@@ -954,8 +955,8 @@ fn virtual_mail_row(
     if syncing {
         let spinner = adw::Spinner::new();
         spinner.add_css_class("alcedo-sync-spinner");
-        spinner.set_tooltip_text(Some("Syncing…"));
-        crate::a11y::set_label(&spinner, "Syncing");
+        spinner.set_tooltip_text(Some(&tr!("Syncing…")));
+        crate::a11y::set_label(&spinner, &tr!("Syncing"));
         row_box.append(&spinner);
     } else if count > 0 {
         let unread = gtk::Label::new(Some(&count.to_string()));
@@ -983,10 +984,11 @@ fn section_header_row(
     row.set_can_focus(false);
     row.add_css_class("alcedo-folder-section");
 
+    // TRANSLATORS: {section} is a sidebar section name, such as "Folders".
     let tooltip = if expanded {
-        format!("Collapse {}", title.to_lowercase())
+        trf!("Collapse {section}", section = title)
     } else {
-        format!("Expand {}", title.to_lowercase())
+        trf!("Expand {section}", section = title)
     };
     let expand_icon = if expanded {
         "pan-down-symbolic"
@@ -1125,8 +1127,8 @@ fn unified_inbox_row(
 ) -> gtk::ListBoxRow {
     virtual_mail_row(
         ROW_UNIFIED,
-        EVERYTHING_TITLE,
-        UNIFIED_INBOX_TOOLTIP,
+        &everything_title(),
+        &tr!("Unified inbox across accounts"),
         icons::EVERYTHING_SIDEBAR,
         "alcedo-folder-icon-everything",
         unified_unread,
@@ -1155,8 +1157,8 @@ pub(crate) fn waiting_row() -> gtk::ListBoxRow {
     row.set_activatable(false);
     let spinner = adw::Spinner::new();
     spinner.add_css_class("alcedo-sync-spinner");
-    crate::a11y::set_label(&spinner, "Waiting for folders");
-    let label = gtk::Label::new(Some("Waiting for folders…"));
+    crate::a11y::set_label(&spinner, &tr!("Waiting for folders"));
+    let label = gtk::Label::new(Some(&tr!("Waiting for folders…")));
     label.add_css_class("dim-label");
     label.set_halign(gtk::Align::Start);
     let row_box = gtk::Box::new(gtk::Orientation::Horizontal, 8);
@@ -1432,7 +1434,7 @@ pub fn populate_folder_bar(
 }
 
 pub(crate) fn account_switcher_caption(account_count: usize) -> Option<String> {
-    (account_count >= 2).then(|| format!("{account_count} accounts"))
+    (account_count >= 2).then(|| ntr!("{n} account", "{n} accounts", account_count))
 }
 
 /// Second line on the account picker button.
@@ -1464,8 +1466,11 @@ pub(crate) fn account_switcher_status(
             text,
             needs_attention: false,
         }),
-        [only] if selected == Some(only.id) => Some(attention("Sign-in required".to_string())),
-        [only] => Some(attention(format!("{} needs sign-in", only.label()))),
+        [only] if selected == Some(only.id) => Some(attention(tr!("Sign-in required"))),
+        [only] => Some(attention(trf!(
+            "{account} needs sign-in",
+            account = only.label()
+        ))),
         several => Some(attention(format!(
             "{} accounts need sign-in",
             several.len()
@@ -1474,7 +1479,7 @@ pub(crate) fn account_switcher_status(
 }
 
 pub(crate) fn account_added_toast_title(email: &str) -> String {
-    format!("{email} added")
+    trf!("{email} added", email = email)
 }
 
 #[cfg(test)]
@@ -1560,14 +1565,14 @@ pub fn build_account_switcher() -> AccountSwitcher {
     let button = gtk::MenuButton::builder()
         .child(&content)
         .popover(&popover)
-        .tooltip_text("Switch account")
+        .tooltip_text(tr!("Switch account"))
         .always_show_arrow(true)
         .halign(gtk::Align::Fill)
         .hexpand(true)
         .build();
     button.add_css_class("flat");
     button.add_css_class("alcedo-account-switcher");
-    button.update_property(&[gtk::accessible::Property::Label("Switch account")]);
+    button.update_property(&[gtk::accessible::Property::Label(&tr!("Switch account"))]);
 
     AccountSwitcher {
         button,
@@ -1627,7 +1632,7 @@ pub fn refresh_account_switcher(
         row_text.append(&row_email);
         if needs_sign_in {
             let row_status = gtk::Label::builder()
-                .label("Sign-in required")
+                .label(tr!("Sign-in required"))
                 .xalign(0.0)
                 .halign(gtk::Align::Start)
                 .css_classes(["caption", "warning"])
@@ -1681,7 +1686,7 @@ pub fn refresh_account_switcher(
     }
 
     let add_icon = gtk::Image::from_icon_name("list-add-symbolic");
-    let add_label = gtk::Label::new(Some("Add Account"));
+    let add_label = gtk::Label::new(Some(&tr!("Add Account")));
     let add_box = gtk::Box::builder()
         .orientation(gtk::Orientation::Horizontal)
         .spacing(8)
@@ -1718,8 +1723,10 @@ pub fn refresh_account_switcher(
         }
         None => {
             switcher.chip.set_visible(false);
-            switcher.email.set_label("Select account");
-            switcher.button.set_tooltip_text(Some("Switch account"));
+            switcher.email.set_label(&tr!("Select account"));
+            switcher
+                .button
+                .set_tooltip_text(Some(&tr!("Switch account")));
             set_badge_count(&switcher.button_badge, 0);
         }
     }

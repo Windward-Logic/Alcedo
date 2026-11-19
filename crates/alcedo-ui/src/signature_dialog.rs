@@ -1,5 +1,6 @@
 //! Visual HTML signature editor dialog.
 
+use alcedo_i18n::tr;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -66,9 +67,9 @@ pub fn open_signature_dialog(
     let save_discarded = Rc::new(Cell::new(false));
     let preview_source: Rc<Cell<Option<glib::SourceId>>> = Rc::new(Cell::new(None));
 
-    let cancel_btn = gtk::Button::builder().label("Cancel").build();
+    let cancel_btn = gtk::Button::builder().label(tr!("Cancel")).build();
     let save_btn = gtk::Button::builder()
-        .label("Save")
+        .label(tr!("Save"))
         .css_classes(["suggested-action"])
         .build();
     let header = adw::HeaderBar::new();
@@ -84,7 +85,7 @@ pub fn open_signature_dialog(
         .build();
     format_bar
         .upcast_ref::<gtk::Widget>()
-        .update_property(&[gtk::accessible::Property::Label("Formatting toolbar")]);
+        .update_property(&[gtk::accessible::Property::Label(&tr!("Formatting toolbar"))]);
     let handles = Rc::new(build_html_format_handles());
     append_html_format_handles(&format_bar, &handles, true);
 
@@ -92,7 +93,7 @@ pub fn open_signature_dialog(
     let html_editor = Rc::new(ComposeHtmlEditor::new(&body_view));
 
     let plain_label = gtk::Label::builder()
-        .label("Plain text mail")
+        .label(tr!("Plain text mail"))
         .xalign(0.0)
         .build();
     let plain_preview = gtk::TextView::builder()
@@ -100,7 +101,9 @@ pub fn open_signature_dialog(
         .cursor_visible(false)
         .wrap_mode(gtk::WrapMode::Word)
         .build();
-    plain_preview.update_property(&[gtk::accessible::Property::Label("Plain text mail preview")]);
+    plain_preview.update_property(&[gtk::accessible::Property::Label(&tr!(
+        "Plain text mail preview"
+    ))]);
     let plain_preview_scroll = gtk::ScrolledWindow::builder()
         .min_content_height(80)
         .vexpand(false)
@@ -231,7 +234,7 @@ pub fn open_signature_dialog(
                         };
                         if !insert_html_inline_at_cursor(&html_editor, &inline) {
                             parts.inlines.borrow_mut().remove(&inline.content_id);
-                            show_composer_toast(&toast_host, "Could not read file");
+                            show_composer_toast(&toast_host, &tr!("Could not read file"));
                             return;
                         }
                         if let Some(warning) = inline_image_client_warning(&inline.filename) {
@@ -287,7 +290,7 @@ pub fn open_signature_dialog(
     update_plain_preview();
 
     let dialog = adw::Dialog::builder()
-        .title("Signature")
+        .title(tr!("Signature"))
         .content_width(560)
         .content_height(720)
         .default_widget(&save_btn)

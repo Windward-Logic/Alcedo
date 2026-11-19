@@ -1,5 +1,6 @@
 //! Gmail-style search filter bar under the messages header.
 
+use alcedo_i18n::{tr, trs};
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -36,10 +37,10 @@ impl SearchFilterBar {
     ) -> Self {
         let syncing = Rc::new(Cell::new(false));
 
-        let scope_here = gtk::ToggleButton::with_label("This folder");
-        scope_here.set_tooltip_text(Some("Search this folder"));
-        let scope_all = gtk::ToggleButton::with_label("All mail");
-        scope_all.set_tooltip_text(Some("Search all folders"));
+        let scope_here = gtk::ToggleButton::with_label(&tr!("This folder"));
+        scope_here.set_tooltip_text(Some(&tr!("Search this folder")));
+        let scope_all = gtk::ToggleButton::with_label(&tr!("All mail"));
+        scope_all.set_tooltip_text(Some(&tr!("Search all folders")));
         scope_here.set_active(true);
         scope_here.add_css_class("flat");
         scope_all.add_css_class("flat");
@@ -49,9 +50,9 @@ impl SearchFilterBar {
         scope_box.append(&scope_here);
         scope_box.append(&scope_all);
 
-        let unread_btn = icon_toggle("mail-unread-symbolic", "Unread");
-        let star_btn = icon_toggle("non-starred-symbolic", "Starred");
-        let attachment_btn = icon_toggle("mail-attachment-symbolic", "Has attachment");
+        let unread_btn = icon_toggle("mail-unread-symbolic", &tr!("Unread"));
+        let star_btn = icon_toggle("non-starred-symbolic", &tr!("Starred"));
+        let attachment_btn = icon_toggle("mail-attachment-symbolic", &tr!("Has attachment"));
 
         let flags_box = gtk::Box::new(gtk::Orientation::Horizontal, 0);
         flags_box.add_css_class("linked");
@@ -76,8 +77,8 @@ impl SearchFilterBar {
         let save_actions = gio::SimpleActionGroup::new();
         let save_menu = gio::Menu::new();
         let save_btn = gtk::MenuButton::builder()
-            .label("Save")
-            .tooltip_text("Save search")
+            .label(tr!("Save"))
+            .tooltip_text(tr!("Save search"))
             .css_classes(["flat"])
             .menu_model(&save_menu)
             .sensitive(false)
@@ -162,9 +163,9 @@ impl SearchFilterBar {
     pub fn set_scope_locked(&self, on: bool) {
         if on {
             self.scope_here.set_sensitive(false);
-            self.scope_here.set_tooltip_text(Some(
-                "This view searches all mail unless the query has folder: or in:",
-            ));
+            self.scope_here.set_tooltip_text(Some(&tr!(
+                "This view searches all mail unless the query has folder: or in:"
+            )));
         }
     }
 
@@ -213,16 +214,17 @@ impl SearchFilterBar {
         self.scope_here.set_sensitive(!on);
         self.scope_all.set_sensitive(!on);
         let tooltip = if on {
-            "Folder is set in the search query"
+            trs!("Folder is set in the search query")
         } else {
-            "Search all folders"
+            trs!("Search all folders")
         };
         self.scope_all.set_tooltip_text(Some(tooltip));
         if on {
             self.scope_here
-                .set_tooltip_text(Some("Folder is set in the search query"));
+                .set_tooltip_text(Some(&tr!("Folder is set in the search query")));
         } else {
-            self.scope_here.set_tooltip_text(Some("Search this folder"));
+            self.scope_here
+                .set_tooltip_text(Some(&tr!("Search this folder")));
         }
     }
 

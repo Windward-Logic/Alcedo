@@ -8,6 +8,7 @@
 pub mod a11y;
 pub mod account_chip;
 pub mod account_settings;
+pub(crate) mod account_validation;
 pub mod activity_log;
 pub mod add_account;
 pub mod address_popover;
@@ -38,6 +39,7 @@ pub(crate) mod glib_source;
 pub mod help;
 pub mod icons;
 pub mod keyboard_prefs;
+pub mod local_time;
 pub mod mail;
 pub mod meeting_invite;
 pub mod meeting_rsvp;
@@ -75,3 +77,6 @@ pub mod test_support;
 mod widget_lifetime;
 
 pub use app::{AppInit, AppModel as App, present_main_window};
+
+/// gettext domain of the public app's text, read by the `alcedo_i18n` macros.
+pub(crate) const I18N_DOMAIN: &str = "alcedo";

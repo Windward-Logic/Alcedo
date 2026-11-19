@@ -1,6 +1,7 @@
 //! Pre-send checks for outgoing mail: empty subject and a body that mentions
 //! an attachment when none is attached. Pure so the heuristics are tested.
 
+use alcedo_i18n::trs;
 /// Something worth confirming before a message goes out.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PreSendWarning {
@@ -12,17 +13,17 @@ impl PreSendWarning {
     /// Dialog heading for this warning.
     pub fn heading(self) -> &'static str {
         match self {
-            Self::EmptySubject => "Send Without a Subject?",
-            Self::MissingAttachment => "Send Without an Attachment?",
+            Self::EmptySubject => trs!("Send Without a Subject?"),
+            Self::MissingAttachment => trs!("Send Without an Attachment?"),
         }
     }
 
     /// Dialog body for this warning.
     pub fn body(self) -> &'static str {
         match self {
-            Self::EmptySubject => "This message has no subject. Recipients may overlook it.",
+            Self::EmptySubject => trs!("This message has no subject. Recipients may overlook it."),
             Self::MissingAttachment => {
-                "The message mentions an attachment, but nothing is attached."
+                trs!("The message mentions an attachment, but nothing is attached.")
             }
         }
     }

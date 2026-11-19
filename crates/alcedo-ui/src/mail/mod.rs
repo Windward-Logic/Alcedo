@@ -53,8 +53,7 @@ use crate::add_account::build_add_account_dialog;
 use crate::address_popover::show_address_popover;
 use crate::app::present_main_window;
 use crate::auth_banner::{
-    MAIL_KEYRING_LIST_HINT, MAIL_SIGN_IN_LIST_HINT, SignInStep, offline_banner_title,
-    sign_in_button_label, unnamed_offline_banner_title,
+    SignInStep, offline_banner_title, sign_in_button_label, unnamed_offline_banner_title,
 };
 use crate::command_palette::{CommandPaletteSpec, PaletteActivation, open_command_palette};
 use crate::compose_draft_store::{
@@ -70,11 +69,11 @@ use crate::composer::{
     sync_composer_from_accounts,
 };
 use crate::folder_bar::{
-    FolderRestoreMatch, MailView, UNIFIED_INBOX_TITLE, account_added_toast_title, bind_folder_bar,
-    bind_folder_pane_empty_context, build_account_switcher, build_folder_tree, find_default_folder,
-    folder_display_name, folder_is_under, imap_ancestor_names, match_pending_folder_restore,
-    populate_folder_bar, refresh_account_switcher, resolve_startup_selection, set_switcher_unread,
-    should_abandon_pending_restore,
+    FolderRestoreMatch, MailView, account_added_toast_title, bind_folder_bar,
+    bind_folder_pane_empty_context, build_account_switcher, build_folder_tree, everything_title,
+    find_default_folder, folder_display_name, folder_is_under, imap_ancestor_names,
+    match_pending_folder_restore, populate_folder_bar, refresh_account_switcher,
+    resolve_startup_selection, set_switcher_unread, should_abandon_pending_restore,
 };
 use crate::folder_editor::{
     FolderEditorMode, FolderEditorSpec, FolderEditorSubmit, open_folder_editor,

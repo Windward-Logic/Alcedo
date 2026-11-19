@@ -1,6 +1,7 @@
 //! Messages pane chrome: selection bar, new-mail chip, empty state, view options, and pane assembly.
 
 use super::*;
+use alcedo_i18n::{ntr, tr, trs};
 
 pub(super) fn sync_empty_state(content_stack: &gtk::Stack, list_view: &gtk::ColumnView) {
     let empty = list_view
@@ -127,9 +128,9 @@ impl SelectionBar {
         let syncing = Rc::new(Cell::new(false));
         let read_mixed = Rc::new(Cell::new(false));
         let star_mixed = Rc::new(Cell::new(false));
-        let read_btn = action_icon_toggle("mail-unread-symbolic", "Mark as Read");
+        let read_btn = action_icon_toggle("mail-unread-symbolic", &tr!("Mark as Read"));
         read_btn.add_css_class("alcedo-sel-read");
-        let star_btn = action_icon_toggle("non-starred-symbolic", "Star");
+        let star_btn = action_icon_toggle("non-starred-symbolic", &tr!("Star"));
         star_btn.add_css_class("alcedo-sel-star");
         connect_state_toggle(
             &read_btn,
@@ -145,9 +146,15 @@ impl SelectionBar {
             "win.mail-star",
             "win.mail-unstar",
         );
-        let delete_btn = action_icon_button("user-trash-symbolic", "Delete", "win.mail-delete");
-        let archive_btn = action_icon_button(archive_icon_name(), "Archive", "win.mail-archive");
-        let select_all_btn = action_label_button("Select All", "Select All", "win.mail-select-all");
+        let delete_btn =
+            action_icon_button("user-trash-symbolic", &tr!("Delete"), "win.mail-delete");
+        let archive_btn =
+            action_icon_button(archive_icon_name(), &tr!("Archive"), "win.mail-archive");
+        let select_all_btn = action_label_button(
+            &tr!("Select All"),
+            &tr!("Select All"),
+            "win.mail-select-all",
+        );
 
         let action_bar = gtk::ActionBar::builder()
             .css_classes(["alcedo-selection-bar"])
@@ -189,11 +196,7 @@ impl SelectionBar {
         any_unstarred: bool,
         any_starred: bool,
     ) {
-        let label = if count == 1 {
-            "1 selected".to_string()
-        } else {
-            format!("{count} selected")
-        };
+        let label = ntr!("{n} selected", "{n} selected", count);
         self.count_label.set_label(&label);
         self.revealer.set_reveal_child(count > 1);
 
@@ -210,9 +213,9 @@ impl SelectionBar {
             read_mixed,
             "mail-read-symbolic",
             "mail-unread-symbolic",
-            "Mark as Unread",
-            "Mark as Read",
-            "Mixed read state — click to mark all read or unread",
+            &tr!("Mark as Unread"),
+            &tr!("Mark as Read"),
+            &tr!("Mixed read state — click to mark all read or unread"),
         );
         sync_tri_state_toggle(
             &self.star_btn,
@@ -220,9 +223,9 @@ impl SelectionBar {
             star_mixed,
             "starred-symbolic",
             "non-starred-symbolic",
-            "Unstar",
-            "Star",
-            "Mixed star state — click to star or unstar all",
+            &tr!("Unstar"),
+            &tr!("Star"),
+            &tr!("Mixed star state — click to star or unstar all"),
         );
         self.syncing.set(false);
 
@@ -458,9 +461,9 @@ pub fn build_messages_pane(
 ) -> MessagesPane {
     let list_view = &list.view;
     let search_entry = gtk::SearchEntry::builder()
-            .placeholder_text("Search this folder")
+            .placeholder_text(tr!("Search this folder"))
             .tooltip_text(
-                "Search this folder. Switch to All mail in the filter bar, or use operators: from: to: subject: folder: is: has:",
+                tr!("Search this folder. Switch to All mail in the filter bar, or use operators: from: to: subject: folder: is: has:"),
             )
         .hexpand(true)
         .build();
@@ -471,14 +474,14 @@ pub fn build_messages_pane(
         icons::FOLDER_PANE,
         icons::TOOLBAR_PIXEL_SIZE,
     );
-    a11y::label_icon_control(&folder_toggle, "Hide Folders");
+    a11y::label_icon_control(&folder_toggle, &tr!("Hide Folders"));
     folder_toggle.connect_clicked(move |btn| {
         a11y::label_icon_control(
             btn,
             if btn.is_active() {
-                "Hide Folders"
+                trs!("Hide Folders")
             } else {
-                "Show Folders"
+                trs!("Show Folders")
             },
         );
         on_toggle_folders(btn.is_active());
@@ -496,8 +499,8 @@ pub fn build_messages_pane(
     );
     a11y::name_icon_control(
         &compose_btn,
-        "New Message",
-        &commands::command_tooltip(crate::menu::ACTION_COMPOSE, "New Message"),
+        &tr!("New Message"),
+        &commands::command_tooltip(crate::menu::ACTION_COMPOSE, &tr!("New Message")),
     );
 
     let header = adw::HeaderBar::new();
@@ -506,10 +509,10 @@ pub fn build_messages_pane(
     header.set_show_back_button(false);
     let sync_btn = action_icon_button(
         "view-refresh-symbolic",
-        &commands::command_tooltip(crate::menu::ACTION_SYNC_FOLDER, "Sync Folder"),
+        &commands::command_tooltip(crate::menu::ACTION_SYNC_FOLDER, &tr!("Sync Folder")),
         "win.mail-sync-folder",
     );
-    a11y::set_label(&sync_btn, "Sync Folder");
+    a11y::set_label(&sync_btn, &tr!("Sync Folder"));
     sync_btn.add_css_class("alcedo-sync-btn");
 
     let view_toggle = gtk::ToggleButton::builder()
@@ -521,8 +524,8 @@ pub fn build_messages_pane(
     icons::set_button_icon(&view_toggle, icons::SERVER_SCAN, icons::TOOLBAR_PIXEL_SIZE);
     a11y::name_icon_control(
         &view_toggle,
-        "Scan server",
-        "Search the server for more messages",
+        &tr!("Scan server"),
+        &tr!("Search the server for more messages"),
     );
 
     let list_start = gtk::Box::new(gtk::Orientation::Horizontal, 0);
@@ -643,15 +646,15 @@ pub(super) fn build_view_options_menu() -> ViewOptionsMenu {
     let button = gtk::MenuButton::builder()
         .icon_name("view-more-symbolic")
         .build();
-    a11y::label_icon_control(&button, "View Options");
+    a11y::label_icon_control(&button, &tr!("View Options"));
 
     let pane = reading_pane();
     let right_pane = gtk::CheckButton::builder()
-        .label("Reading Pane on the Right")
+        .label(tr!("Reading Pane on the Right"))
         .active(pane == ReadingPane::Right)
         .build();
     let bottom_pane = gtk::CheckButton::builder()
-        .label("Reading Pane Below")
+        .label(tr!("Reading Pane Below"))
         .active(pane == ReadingPane::Bottom)
         .build();
     bottom_pane.set_group(Some(&right_pane));
@@ -675,7 +678,7 @@ pub(super) fn build_view_options_menu() -> ViewOptionsMenu {
     });
 
     let preview_check = gtk::CheckButton::builder()
-        .label("Show Message Previews")
+        .label(tr!("Show Message Previews"))
         .build();
     bind_show_message_preview(&preview_check);
 
@@ -684,13 +687,13 @@ pub(super) fn build_view_options_menu() -> ViewOptionsMenu {
     content.set_margin_bottom(12);
     content.set_margin_start(12);
     content.set_margin_end(12);
-    content.append(&view_options_heading("Reading Pane"));
+    content.append(&view_options_heading(&tr!("Reading Pane")));
     content.append(&right_pane);
     content.append(&bottom_pane);
     content.append(&gtk::Separator::new(gtk::Orientation::Horizontal));
     content.append(&preview_check);
     content.append(&gtk::Separator::new(gtk::Orientation::Horizontal));
-    content.append(&view_options_heading("Columns"));
+    content.append(&view_options_heading(&tr!("Columns")));
     let columns_box = gtk::Box::new(gtk::Orientation::Vertical, 6);
     content.append(&columns_box);
 

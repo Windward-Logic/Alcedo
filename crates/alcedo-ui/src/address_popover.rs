@@ -1,5 +1,6 @@
 //! Reader address chip popover (add / view / send / copy).
 
+use alcedo_i18n::{tr, trs};
 use std::rc::Rc;
 
 use alcedo_core::{Address, ContactDraft, ContactStatus};
@@ -20,9 +21,12 @@ pub fn attach_address_copy_context_menu(
     toast_host: &gtk::Widget,
 ) {
     let menu = gtk::gio::Menu::new();
-    menu.append(Some("Copy Name"), Some("addrchip.copy-name"));
-    menu.append(Some("Copy Name and Email"), Some("addrchip.copy-formatted"));
-    menu.append(Some("Copy Email"), Some("addrchip.copy-email"));
+    menu.append(Some(&tr!("Copy Name")), Some("addrchip.copy-name"));
+    menu.append(
+        Some(&tr!("Copy Name and Email")),
+        Some("addrchip.copy-formatted"),
+    );
+    menu.append(Some(&tr!("Copy Email")), Some("addrchip.copy-email"));
 
     let name = addr.display_name();
     let formatted = addr.formatted();
@@ -44,7 +48,7 @@ pub fn attach_address_copy_context_menu(
         let show_toast = show_toast.clone();
         move |_, _| {
             copy_text_to_clipboard(&name);
-            show_toast("Name copied");
+            show_toast(&tr!("Name copied"));
         }
     });
     actions.add_action(&copy_name);
@@ -55,7 +59,7 @@ pub fn attach_address_copy_context_menu(
         let show_toast = show_toast.clone();
         move |_, _| {
             copy_text_to_clipboard(&formatted);
-            show_toast("Name and email copied");
+            show_toast(&tr!("Name and email copied"));
         }
     });
     actions.add_action(&copy_formatted);
@@ -66,7 +70,7 @@ pub fn attach_address_copy_context_menu(
         let show_toast = show_toast.clone();
         move |_, _| {
             copy_text_to_clipboard(&email);
-            show_toast("Email copied");
+            show_toast(&tr!("Email copied"));
         }
     });
     actions.add_action(&copy_email);
@@ -121,7 +125,7 @@ pub fn show_address_popover(
     box_.append(&heading);
     append_copyable_email(&box_, &addr.email);
 
-    let send_btn = gtk::Button::with_label("Send message");
+    let send_btn = gtk::Button::with_label(&tr!("Send message"));
     send_btn.connect_clicked({
         let email = addr.email.clone();
         let sender = sender.clone();
@@ -134,9 +138,9 @@ pub fn show_address_popover(
     box_.append(&send_btn);
 
     let remote_label = if sender_allowed {
-        "Stop loading remote images"
+        trs!("Stop loading remote images")
     } else {
-        "Always load remote images"
+        trs!("Always load remote images")
     };
     let remote_btn = gtk::Button::with_label(remote_label);
     remote_btn.connect_clicked({
@@ -159,7 +163,7 @@ pub fn show_address_popover(
 
     match existing {
         Some(contact) if contact.status == ContactStatus::Approved => {
-            let view_btn = gtk::Button::with_label("View contact");
+            let view_btn = gtk::Button::with_label(&tr!("View contact"));
             view_btn.connect_clicked({
                 let id = contact.id;
                 let sender = sender.clone();
@@ -172,7 +176,7 @@ pub fn show_address_popover(
             box_.append(&view_btn);
         }
         _ => {
-            let add_btn = gtk::Button::with_label("Add to Contacts");
+            let add_btn = gtk::Button::with_label(&tr!("Add to Contacts"));
             add_btn.connect_clicked({
                 let addr = addr.clone();
                 let sender = sender.clone();
@@ -241,14 +245,14 @@ fn append_copyable_email(parent: &gtk::Box, email: &str) {
 
     let copy_btn = gtk::Button::builder()
         .icon_name("edit-copy-symbolic")
-        .tooltip_text("Copy email address")
+        .tooltip_text(tr!("Copy email address"))
         .valign(gtk::Align::Start)
         .css_classes(["flat", "circular", "alcedo-addr-copy"])
         .build();
     let email = email.to_string();
     copy_btn.connect_clicked(move |btn| {
         btn.clipboard().set_text(&email);
-        show_composer_toast(btn.upcast_ref(), "Email copied");
+        show_composer_toast(btn.upcast_ref(), &tr!("Email copied"));
     });
 
     row.append(&email_label);
@@ -257,14 +261,16 @@ fn append_copyable_email(parent: &gtk::Box, email: &str) {
 }
 
 fn prompt_add_contact(anchor: &impl IsA<gtk::Widget>, addr: &Address, sender: Sender<AppMsg>) {
-    let dialog = adw::AlertDialog::builder().heading("Add contact").build();
+    let dialog = adw::AlertDialog::builder()
+        .heading(tr!("Add contact"))
+        .build();
 
-    let name_row = adw::EntryRow::builder().title("Name").build();
+    let name_row = adw::EntryRow::builder().title(tr!("Name")).build();
     if let Some(name) = &addr.name {
         name_row.set_text(name);
     }
     let email_row = adw::EntryRow::builder()
-        .title("Email")
+        .title(tr!("Email"))
         .editable(false)
         .build();
     email_row.set_text(&addr.email);
@@ -274,8 +280,8 @@ fn prompt_add_contact(anchor: &impl IsA<gtk::Widget>, addr: &Address, sender: Se
     content.append(&email_row);
     dialog.set_extra_child(Some(&content));
 
-    dialog.add_response("cancel", "Cancel");
-    dialog.add_response("add", "Add");
+    dialog.add_response("cancel", &tr!("Cancel"));
+    dialog.add_response("add", &tr!("Add"));
     dialog.set_default_response(Some("add"));
     dialog.set_close_response("cancel");
 

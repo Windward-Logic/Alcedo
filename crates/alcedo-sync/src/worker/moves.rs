@@ -8,6 +8,7 @@ use super::mailbox_sync::{
     persist_folder_unread_and_total, sync_mailbox,
 };
 use super::*;
+use alcedo_i18n::{tr, trf, trs};
 
 #[derive(Debug)]
 pub(super) enum MovePlan {
@@ -17,10 +18,13 @@ pub(super) enum MovePlan {
 
 pub(super) fn missing_dest_message(dest: SpecialUse) -> String {
     match dest {
-        SpecialUse::Junk => "No Junk folder on this account".into(),
-        SpecialUse::Archive => "No Archive folder on this account".into(),
-        SpecialUse::Inbox => "No Inbox folder on this account".into(),
-        other => format!("No {other:?} folder on this account"),
+        SpecialUse::Junk => tr!("No Junk folder on this account"),
+        SpecialUse::Archive => tr!("No Archive folder on this account"),
+        SpecialUse::Inbox => tr!("No Inbox folder on this account"),
+        other => trf!(
+            "No {folder} folder on this account",
+            folder = format!("{other:?}")
+        ),
     }
 }
 
@@ -74,12 +78,12 @@ pub(super) fn plan_message_to_folder(
     let dest = folders
         .iter()
         .find(|f| f.id == dest_id)
-        .ok_or_else(|| Error::Other("Folder not found".into()))?;
+        .ok_or_else(|| Error::Other(tr!("Folder not found")))?;
     if dest.account_id != source.account_id {
         return Err(Error::Other(cross_account_msg.into()));
     }
     if !dest.selectable {
-        return Err(Error::Other("Folder cannot hold messages".into()));
+        return Err(Error::Other(tr!("Folder cannot hold messages")));
     }
     if dest.imap_name == source.imap_name {
         return Ok(MovePlan::AlreadyInDest);
@@ -98,7 +102,7 @@ pub(super) fn plan_message_move_to_folder(
         folders,
         source,
         dest_id,
-        "Cannot move to a folder on another account",
+        trs!("Cannot move to a folder on another account"),
     )
 }
 
@@ -111,7 +115,7 @@ pub(super) fn plan_message_copy_to_folder(
         folders,
         source,
         dest_id,
-        "Cannot copy to a folder on another account",
+        trs!("Cannot copy to a folder on another account"),
     )
 }
 
@@ -792,7 +796,10 @@ pub(super) async fn sync_destination_folder(
     emit_status(
         events,
         account,
-        format!("Syncing {}…", folder_display_name(&dest_folder)),
+        trf!(
+            "Syncing {folder}…",
+            folder = folder_display_name(&dest_folder)
+        ),
     );
     if let Err(err) = sync_mailbox(
         state,

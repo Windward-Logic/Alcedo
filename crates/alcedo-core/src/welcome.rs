@@ -2,16 +2,19 @@
 //! delivered every saved account (the runtime emits those first) and the
 //! list is still empty. Mock mode always keeps the mail layout.
 
+use alcedo_i18n::n_;
 /// Whether the welcome page replaces the mail layout.
 pub fn show_welcome_page(accounts_hydrated: bool, account_count: usize, mock: bool) -> bool {
     accounts_hydrated && account_count == 0 && !mock
 }
 
 /// Status-page title on the first-run welcome page.
-pub const WELCOME_TITLE: &str = "Welcome to Alcedo";
+/// Marked for translation; show it with `alcedo_i18n::trm!`.
+pub const WELCOME_TITLE: &str = n_!("Welcome to Alcedo");
 
 /// One-line description under the welcome title.
-pub const WELCOME_DESCRIPTION: &str = "Add an email account to read and send mail.";
+/// Marked for translation; show it with `alcedo_i18n::trm!`.
+pub const WELCOME_DESCRIPTION: &str = n_!("Add an email account to read and send mail.");
 
 #[cfg(test)]
 mod tests {

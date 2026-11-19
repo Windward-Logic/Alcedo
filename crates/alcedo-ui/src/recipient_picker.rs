@@ -1,5 +1,6 @@
 //! Multi-select recipient picker for compose To/Cc/Bcc fields.
 
+use alcedo_i18n::{ntr, tr, trf, trs};
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
@@ -235,16 +236,17 @@ pub fn present_recipient_picker(
     already: &[RecipientToken],
     on_add: impl Fn(Vec<RecipientToken>) + 'static,
 ) {
-    let dialog_title = format!("Add to {field_title}");
-    let cancel_btn = gtk::Button::with_label("Cancel");
+    // TRANSLATORS: {field} is "To", "Cc" or "Bcc".
+    let dialog_title = trf!("Add to {field}", field = field_title);
+    let cancel_btn = gtk::Button::with_label(&tr!("Cancel"));
     let add_btn = gtk::Button::builder()
-        .label("Add")
+        .label(tr!("Add"))
         .css_classes(["suggested-action"])
         .sensitive(false)
         .build();
 
     let search = gtk::SearchEntry::builder()
-        .placeholder_text("Search contacts and addresses")
+        .placeholder_text(tr!("Search contacts and addresses"))
         .hexpand(true)
         .build();
     search.set_activates_default(true);
@@ -252,20 +254,20 @@ pub fn present_recipient_picker(
     let kind_group = adw::ToggleGroup::builder().homogeneous(true).build();
     kind_group.add(
         adw::Toggle::builder()
-            .label("All")
-            .tooltip("All addresses")
+            .label(tr!("All"))
+            .tooltip(tr!("All addresses"))
             .build(),
     );
     kind_group.add(
         adw::Toggle::builder()
-            .label("Contacts")
-            .tooltip("Saved contacts and groups")
+            .label(tr!("Contacts"))
+            .tooltip(tr!("Saved contacts and groups"))
             .build(),
     );
     kind_group.add(
         adw::Toggle::builder()
-            .label("Sent")
-            .tooltip("Addresses from sent messages")
+            .label(tr!("Sent"))
+            .tooltip(tr!("Addresses from sent messages"))
             .build(),
     );
     kind_group.set_active(0);
@@ -356,10 +358,10 @@ pub fn present_recipient_picker(
                 &already_tokens,
             );
             if n == 0 {
-                add_btn.set_label("Add");
+                add_btn.set_label(&tr!("Add"));
                 add_btn.set_sensitive(false);
             } else {
-                add_btn.set_label(&format!("Add ({n})"));
+                add_btn.set_label(&ntr!("Add ({n})", "Add ({n})", n));
                 add_btn.set_sensitive(true);
             }
         })
@@ -388,11 +390,11 @@ pub fn present_recipient_picker(
 
             if items.is_empty() {
                 let message = if !query.trim().is_empty() {
-                    "No matching addresses"
+                    trs!("No matching addresses")
                 } else if picker_kind == PickerKind::Sent {
-                    "No addresses in Sent yet"
+                    trs!("No addresses in Sent yet")
                 } else {
-                    "No contacts yet. Add someone or send a message."
+                    trs!("No contacts yet. Add someone or send a message.")
                 };
                 empty_label.set_label(message);
                 content_stack.set_visible_child_name("empty");
@@ -401,11 +403,7 @@ pub fn present_recipient_picker(
                 for item in &items {
                     let (title, subtitle) = match item {
                         PickerItem::Group { name, members, .. } => {
-                            let subtitle = if *members == 1 {
-                                "1 member".to_string()
-                            } else {
-                                format!("{members} members")
-                            };
+                            let subtitle = ntr!("{n} member", "{n} members", *members);
                             (name.clone(), subtitle)
                         }
                         PickerItem::Person {
@@ -415,7 +413,8 @@ pub fn present_recipient_picker(
                             ..
                         } => {
                             let subtitle = if *from_sent && picker_kind == PickerKind::All {
-                                format!("{sub} · Sent")
+                                // TRANSLATORS: {details} describes an address; "Sent" means it came from sent mail.
+                                trf!("{details} · Sent", details = sub)
                             } else {
                                 sub.clone()
                             };

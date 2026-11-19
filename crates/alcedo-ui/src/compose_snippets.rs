@@ -1,5 +1,6 @@
 //! Snippet palette (compose toolbar) and Composing preferences list.
 
+use alcedo_i18n::{tr, trs};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -24,7 +25,7 @@ pub fn build_snippets_prefs_group(sender: Sender<MailMsg>) -> SnippetsPrefs {
     let list_host = gtk::Box::new(gtk::Orientation::Vertical, 0);
 
     let add_row = adw::ButtonRow::builder()
-        .title("Add Snippet")
+        .title(tr!("Add Snippet"))
         .start_icon_name("list-add-symbolic")
         .build();
     add_row.connect_activated({
@@ -35,10 +36,10 @@ pub fn build_snippets_prefs_group(sender: Sender<MailMsg>) -> SnippetsPrefs {
     });
 
     let group = adw::PreferencesGroup::builder()
-        .title("Snippets")
-        .description(
-            "Insert from the compose toolbar. Placeholders: {{first_name}}, {{full_name}}, {{email}}.",
-        )
+        .title(tr!("Snippets"))
+        .description(tr!(
+            "Insert from the compose toolbar. Placeholders: {{first_name}}, {{full_name}}, {{email}}."
+        ))
         .build();
     help::attach_group_help(&group, TOPIC_SNIPPETS);
     group.add(&list_host);
@@ -69,7 +70,7 @@ pub fn refresh_snippets_prefs(
             .build();
         let delete_btn = gtk::Button::builder()
             .icon_name("edit-delete-symbolic")
-            .tooltip_text("Delete")
+            .tooltip_text(tr!("Delete"))
             .css_classes(["flat"])
             .build();
         let snippet_id = snippet.id;
@@ -113,7 +114,7 @@ pub fn build_snippets_popover(
         .build();
 
     let search_entry = gtk::SearchEntry::builder()
-        .placeholder_text("Search snippets")
+        .placeholder_text(tr!("Search snippets"))
         .visible(snippets.len() > 5)
         .build();
 
@@ -121,7 +122,7 @@ pub fn build_snippets_popover(
         .selection_mode(gtk::SelectionMode::Single)
         .css_classes(["boxed-list"])
         .build();
-    listbox.update_property(&[gtk::accessible::Property::Label("Snippets")]);
+    listbox.update_property(&[gtk::accessible::Property::Label(&tr!("Snippets"))]);
 
     let scroll = gtk::ScrolledWindow::builder()
         .hscrollbar_policy(gtk::PolicyType::Never)
@@ -132,14 +133,14 @@ pub fn build_snippets_popover(
         .build();
 
     let empty_label = gtk::Label::builder()
-        .label("No snippets yet")
+        .label(tr!("No snippets yet"))
         .css_classes(["dim-label"])
         .margin_top(12)
         .margin_bottom(12)
         .build();
 
     let manage_row = gtk::Button::builder()
-        .label("Manage snippets…")
+        .label(tr!("Manage snippets…"))
         .halign(gtk::Align::Fill)
         .css_classes(["flat"])
         .build();
@@ -153,13 +154,13 @@ pub fn build_snippets_popover(
 
     let button = gtk::MenuButton::builder()
         .icon_name("document-new-symbolic")
-        .tooltip_text("Insert snippet")
+        .tooltip_text(tr!("Insert snippet"))
         .css_classes(["flat"])
         .can_focus(false)
         .focus_on_click(false)
         .popover(&popover)
         .build();
-    button.update_property(&[gtk::accessible::Property::Label("Insert snippet")]);
+    button.update_property(&[gtk::accessible::Property::Label(&tr!("Insert snippet"))]);
 
     // Weak: `search_entry` owns a handler holding `refresh`, so strong
     // widgets here would keep the popover (and its composer) alive.
@@ -239,19 +240,19 @@ pub fn open_snippet_editor(
 ) {
     let is_edit = existing.is_some();
     let title = if is_edit {
-        "Edit snippet"
+        trs!("Edit snippet")
     } else {
-        "New snippet"
+        trs!("New snippet")
     };
 
-    let name_row = adw::EntryRow::builder().title("Name").build();
+    let name_row = adw::EntryRow::builder().title(tr!("Name")).build();
     if let Some(snippet) = existing {
         name_row.set_text(&snippet.name);
     }
 
-    let format_model = gtk::StringList::new(&["Plain text", "HTML", "Markdown"]);
+    let format_model = gtk::StringList::new(&[trs!("Plain text"), "HTML", trs!("Markdown")]);
     let format_row = adw::ComboRow::builder()
-        .title("Format")
+        .title(tr!("Format"))
         .model(&format_model)
         .expression(gtk::PropertyExpression::new(
             gtk::StringObject::static_type(),
@@ -278,9 +279,9 @@ pub fn open_snippet_editor(
         .child(&body_view)
         .build();
 
-    let cancel_btn = gtk::Button::builder().label("Cancel").build();
+    let cancel_btn = gtk::Button::builder().label(tr!("Cancel")).build();
     let save_btn = gtk::Button::builder()
-        .label("Save")
+        .label(tr!("Save"))
         .css_classes(["suggested-action"])
         .build();
 

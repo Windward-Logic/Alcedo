@@ -1,6 +1,7 @@
 //! User-facing confirmation copy for mail actions (toasts after archive,
 //! move, spam). Pure so wording and pluralisation stay consistent and tested.
 
+use alcedo_i18n::ntr;
 /// What a completed move did, from the user's point of view.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MoveFeedback<'a> {
@@ -18,27 +19,38 @@ pub enum MoveFeedback<'a> {
 
 /// Toast title confirming a move of `count` messages.
 pub fn move_toast_title(feedback: MoveFeedback<'_>, count: usize) -> String {
-    let subject = if count == 1 {
-        "Message".to_string()
-    } else {
-        format!("{count} messages")
-    };
     match feedback {
-        MoveFeedback::Archived => format!("{subject} archived"),
-        MoveFeedback::MarkedSpam => format!("{subject} marked as spam"),
-        MoveFeedback::NotSpam => format!("{subject} moved to Inbox"),
-        MoveFeedback::MovedTo(folder) => format!("{subject} moved to {}", folder_label(folder)),
-        MoveFeedback::CopiedTo(folder) => format!("{subject} copied to {}", folder_label(folder)),
+        MoveFeedback::Archived => ntr!("Message archived", "{n} messages archived", count),
+        MoveFeedback::MarkedSpam => {
+            ntr!(
+                "Message marked as spam",
+                "{n} messages marked as spam",
+                count
+            )
+        }
+        MoveFeedback::NotSpam => ntr!(
+            "Message moved to Inbox",
+            "{n} messages moved to Inbox",
+            count
+        ),
+        MoveFeedback::MovedTo(folder) => ntr!(
+            "Message moved to {folder}",
+            "{n} messages moved to {folder}",
+            count,
+            folder = folder_label(folder)
+        ),
+        MoveFeedback::CopiedTo(folder) => ntr!(
+            "Message copied to {folder}",
+            "{n} messages copied to {folder}",
+            count,
+            folder = folder_label(folder)
+        ),
     }
 }
 
 /// Toast title after the user undoes a move.
 pub fn undo_move_toast_title(count: usize) -> String {
-    if count == 1 {
-        "Message moved back".to_string()
-    } else {
-        format!("{count} messages moved back")
-    }
+    ntr!("Message moved back", "{n} messages moved back", count)
 }
 
 fn folder_label(folder: &str) -> &str {

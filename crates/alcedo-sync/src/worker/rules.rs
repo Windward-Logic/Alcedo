@@ -5,6 +5,7 @@ use super::flags::set_flags_batch;
 use super::moves::{copy_message_to_folder, move_messages_batch, move_messages_to_folder_batch};
 use super::*;
 use crate::server_rules::ServerRulesBackend;
+use alcedo_i18n::ntr;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(super) enum RuleApplyOp {
@@ -394,7 +395,11 @@ pub(super) async fn run_message_rules(
     emit_status(
         events,
         account,
-        format!("Ran rules: {updated} messages updated."),
+        ntr!(
+            "Ran rules: {n} message updated.",
+            "Ran rules: {n} messages updated.",
+            updated
+        ),
     );
     Ok(())
 }

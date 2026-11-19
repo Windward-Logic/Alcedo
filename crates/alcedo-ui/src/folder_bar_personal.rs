@@ -1,5 +1,6 @@
 //! "Folders" group: one collapsible row holding an account's user-created IMAP folders.
 
+use alcedo_i18n::{n_, trm, trs};
 use std::collections::HashSet;
 use std::rc::Rc;
 
@@ -14,7 +15,7 @@ use crate::folder_bar::{
 use crate::icons;
 
 const ROW_PERSONAL_PREFIX: &str = "alcedo-personal-folders-";
-const GROUP_LABEL: &str = "Folders";
+const GROUP_LABEL: &str = n_!("Folders");
 
 /// An account's folder tree split into system rows and the user-created group.
 pub struct GroupedFolderTree {
@@ -130,9 +131,9 @@ fn personal_header_row(
     callbacks: &FolderRowCallbacks,
 ) -> gtk::ListBoxRow {
     let action = if expanded {
-        "Collapse folders"
+        trs!("Collapse folders")
     } else {
-        "Expand folders"
+        trs!("Expand folders")
     };
     let row = gtk::ListBoxRow::new();
     row.set_widget_name(&personal_header_widget_name(account_id));
@@ -140,7 +141,7 @@ fn personal_header_row(
     row.set_selectable(false);
     row.set_can_focus(false);
     row.set_tooltip_text(Some(action));
-    row.update_property(&[gtk::accessible::Property::Label(GROUP_LABEL)]);
+    row.update_property(&[gtk::accessible::Property::Label(trm!(GROUP_LABEL))]);
     row.update_state(&[gtk::accessible::State::Expanded(Some(expanded))]);
 
     let expand_btn = gtk::Button::from_icon_name(if expanded {
@@ -163,7 +164,7 @@ fn personal_header_row(
     icon.add_css_class(folder_icon_css_class(&SpecialUse::Other));
 
     let label = gtk::Label::builder()
-        .label(GROUP_LABEL)
+        .label(trm!(GROUP_LABEL))
         .xalign(0.0)
         .hexpand(true)
         .build();

@@ -1,5 +1,6 @@
 //! Meeting invitation banner: summary, RSVP and "Add to Calendar".
 
+use alcedo_i18n::{ntr, tr, trc, trf};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -45,30 +46,36 @@ pub fn format_invite_when_with_zones(
     viewer: chrono_tz::Tz,
 ) -> String {
     if all_day {
-        let day = start.naive_utc().date().format("%b %d").to_string();
-        return format!("{day} (all day)");
+        let day = crate::local_time::format_date(
+            start.naive_utc().date(),
+            &trc!("strftime pattern: short month, day", "%b %d"),
+        );
+        return trf!("{date} (all day)", date = day);
     }
 
     let start_v = start.with_timezone(&viewer);
     let end_v = end.with_timezone(&viewer);
     let abbr = zone_abbreviation(start, viewer.name()).unwrap_or_else(|| viewer.name().to_string());
+    let day_pattern = trc!("strftime pattern: short weekday, month, day", "%a, %b %d");
+    let start_day = crate::local_time::format_date(start_v.date_naive(), &day_pattern);
     if start_v.date_naive() == end_v.date_naive() {
-        let mut s = format!(
-            "{}, {} – {}",
-            start_v.format("%a, %b %d"),
-            format_time_of_day(&start_v),
-            format_time_of_day(&end_v)
+        // TRANSLATORS: a meeting on one day, e.g. "Mon, Sep 07, 9:00 AM – 10:00 AM · CEST".
+        return trf!(
+            "{date}, {start} – {end} · {zone}",
+            date = start_day,
+            start = format_time_of_day(&start_v),
+            end = format_time_of_day(&end_v),
+            zone = abbr
         );
-        s.push_str(" · ");
-        s.push_str(&abbr);
-        return s;
     }
-    format!(
-        "{}, {} – {}, {} · {abbr}",
-        start_v.format("%a, %b %d"),
-        format_time_of_day(&start_v),
-        end_v.format("%a, %b %d"),
-        format_time_of_day(&end_v),
+    // TRANSLATORS: a meeting across days, e.g. "Mon, Sep 07, 9:00 AM – Tue, Sep 08, 10:00 AM · CEST".
+    trf!(
+        "{start_date}, {start_time} – {end_date}, {end_time} · {zone}",
+        start_date = start_day,
+        start_time = format_time_of_day(&start_v),
+        end_date = crate::local_time::format_date(end_v.date_naive(), &day_pattern),
+        end_time = format_time_of_day(&end_v),
+        zone = abbr
     )
 }
 
@@ -129,9 +136,9 @@ pub fn build_meeting_banner() -> MeetingBanner {
         .build();
 
     let add_btn = gtk::Button::builder()
-        .label("Add to Calendar")
+        .label(tr!("Add to Calendar"))
         .css_classes(["suggested-action"])
-        .tooltip_text("Add this meeting to a calendar")
+        .tooltip_text(tr!("Add this meeting to a calendar"))
         .valign(gtk::Align::Center)
         .halign(gtk::Align::End)
         .build();
@@ -249,15 +256,15 @@ pub fn update_meeting_banner(
     };
 
     banner.root.set_visible(true);
-    banner.title.set_label("Calendar invitation");
-    banner.when.set_label("Loading calendar file…");
+    banner.title.set_label(&tr!("Calendar invitation"));
+    banner.when.set_label(&tr!("Loading calendar file…"));
     banner.where_label.set_label("");
     banner.where_label.set_visible(false);
     banner.add_btn.set_sensitive(false);
     banner.rsvp_box.set_visible(false);
     banner
         .add_btn
-        .set_tooltip_text(Some("Loading calendar file…"));
+        .set_tooltip_text(Some(&tr!("Loading calendar file…")));
     *banner.button_ready.borrow_mut() = false;
     *banner.state.borrow_mut() = Some(CalendarInvite {
         drafts: Vec::new(),
@@ -284,7 +291,12 @@ pub fn update_meeting_banner(
             let first = &drafts[0];
             let mut title = first.summary.clone();
             if extra > 0 {
-                title.push_str(&format!(" (+{extra} more)"));
+                title = ntr!(
+                    "{title} (+{n} more)",
+                    "{title} (+{n} more)",
+                    extra,
+                    title = title
+                );
             }
             banner.title.set_label(&title);
 
@@ -332,18 +344,18 @@ pub fn update_meeting_banner(
                 banner.rsvp_box.append(&row);
                 banner
                     .add_btn
-                    .set_tooltip_text(Some("Respond using the buttons"));
+                    .set_tooltip_text(Some(&tr!("Respond using the buttons")));
             } else {
                 banner.rsvp_box.set_visible(false);
                 banner.add_btn.set_visible(true);
                 if first.cancelled {
                     banner
                         .add_btn
-                        .set_tooltip_text(Some("Add this cancelled meeting to a calendar"));
+                        .set_tooltip_text(Some(&tr!("Add this cancelled meeting to a calendar")));
                 } else {
                     banner
                         .add_btn
-                        .set_tooltip_text(Some("Add this meeting to a calendar"));
+                        .set_tooltip_text(Some(&tr!("Add this meeting to a calendar")));
                 }
             }
 
@@ -372,7 +384,7 @@ pub fn update_meeting_banner(
             banner.add_btn.set_sensitive(false);
             banner
                 .add_btn
-                .set_tooltip_text(Some("Could not read this calendar invitation"));
+                .set_tooltip_text(Some(&tr!("Could not read this calendar invitation")));
             *banner.button_ready.borrow_mut() = false;
             *banner.state.borrow_mut() = None;
         }

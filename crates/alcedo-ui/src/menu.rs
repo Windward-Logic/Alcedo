@@ -24,6 +24,7 @@
 //! `rail-visible` GSettings key and header toggle stay in sync via
 //! [`AppMsg::SetRailVisible`].
 
+use alcedo_i18n::{tr, trf, trs};
 use relm4::gtk;
 use relm4::gtk::gio;
 use relm4::gtk::prelude::*;
@@ -173,17 +174,17 @@ pub struct FolderMenuSpec {
 fn folder_crud_section(spec: &FolderMenuSpec) -> Vec<(String, &'static str)> {
     match spec.kind {
         FolderMenuKind::Selectable if spec.special == SpecialUse::Other => vec![
-            ("_New Folder…".to_string(), ACTION_FOLDER_CTX_NEW),
+            (tr!("_New Folder…"), ACTION_FOLDER_CTX_NEW),
             ("_Rename…".to_string(), ACTION_FOLDER_CTX_RENAME),
             ("_Delete…".to_string(), ACTION_FOLDER_CTX_DELETE),
         ],
-        FolderMenuKind::Selectable => vec![("_New Folder…".to_string(), ACTION_FOLDER_CTX_NEW)],
+        FolderMenuKind::Selectable => vec![(tr!("_New Folder…"), ACTION_FOLDER_CTX_NEW)],
         FolderMenuKind::Unified
         | FolderMenuKind::Inert
         | FolderMenuKind::AccountRoot
         | FolderMenuKind::AccountHeader
         | FolderMenuKind::HiddenAccountHeader => {
-            vec![("_New Folder…".to_string(), ACTION_FOLDER_CTX_NEW)]
+            vec![(tr!("_New Folder…"), ACTION_FOLDER_CTX_NEW)]
         }
     }
 }
@@ -195,32 +196,24 @@ pub fn folder_menu_entries(spec: &FolderMenuSpec) -> Vec<Vec<(String, &'static s
 
     match spec.kind {
         FolderMenuKind::Unified => {
-            sections.push(vec![(
-                "_Sync Unified Inbox".to_string(),
-                ACTION_FOLDER_CTX_SYNC,
-            )]);
+            sections.push(vec![(tr!("_Sync Unified Inbox"), ACTION_FOLDER_CTX_SYNC)]);
             sections.push(vec![
-                ("Mark All as _Read".to_string(), ACTION_FOLDER_CTX_MARK_READ),
-                (
-                    "_Search Unified Inbox".to_string(),
-                    ACTION_FOLDER_CTX_SEARCH,
-                ),
+                (tr!("Mark All as _Read"), ACTION_FOLDER_CTX_MARK_READ),
+                (tr!("_Search Unified Inbox"), ACTION_FOLDER_CTX_SEARCH),
             ]);
         }
         FolderMenuKind::Selectable => {
-            sections.push(vec![(
-                "_Sync This Folder".to_string(),
-                ACTION_FOLDER_CTX_SYNC,
-            )]);
+            sections.push(vec![(tr!("_Sync This Folder"), ACTION_FOLDER_CTX_SYNC)]);
             sections.push(vec![
-                ("Mark All as _Read".to_string(), ACTION_FOLDER_CTX_MARK_READ),
-                ("_Search This Folder".to_string(), ACTION_FOLDER_CTX_SEARCH),
+                (tr!("Mark All as _Read"), ACTION_FOLDER_CTX_MARK_READ),
+                (tr!("_Search This Folder"), ACTION_FOLDER_CTX_SEARCH),
             ]);
-            let empty_label = format!("E_mpty {}", spec.display_name);
+            // TRANSLATORS: menu item; {folder} is a folder name such as "Trash". Keep one underscore for the mnemonic.
+            let empty_label = trf!("E_mpty {folder}", folder = spec.display_name);
             sections.push(vec![
                 (empty_label, ACTION_FOLDER_CTX_EMPTY),
                 (
-                    "_Delete All From Date…".to_string(),
+                    tr!("_Delete All From Date…"),
                     ACTION_FOLDER_CTX_DELETE_ON_OR_BEFORE,
                 ),
             ]);
@@ -245,21 +238,21 @@ pub fn folder_menu_entries(spec: &FolderMenuSpec) -> Vec<Vec<(String, &'static s
         }
         FolderMenuKind::AccountHeader => sections.push(vec![
             (
-                "Account _Settings…".to_string(),
+                tr!("Account _Settings…"),
                 ACTION_FOLDER_CTX_ACCOUNT_SETTINGS,
             ),
             (
-                "_Hide Account".to_string(),
+                tr!("_Hide Account"),
                 ACTION_FOLDER_CTX_TOGGLE_ACCOUNT_HIDDEN,
             ),
         ]),
         FolderMenuKind::HiddenAccountHeader => sections.push(vec![
             (
-                "Account _Settings…".to_string(),
+                tr!("Account _Settings…"),
                 ACTION_FOLDER_CTX_ACCOUNT_SETTINGS,
             ),
             (
-                "Un_hide Account".to_string(),
+                tr!("Un_hide Account"),
                 ACTION_FOLDER_CTX_TOGGLE_ACCOUNT_HIDDEN,
             ),
         ]),
@@ -288,12 +281,12 @@ fn append_extension_actions(menu: &gio::Menu) {
 
 fn message_menu() -> gio::Menu {
     let message = gio::Menu::new();
-    append_section(&message, &[("Select _All", ACTION_SELECT_ALL)]);
+    append_section(&message, &[(trs!("Select _All"), ACTION_SELECT_ALL)]);
     append_section(
         &message,
         &[
             ("_Reply", ACTION_REPLY),
-            ("Reply _All", ACTION_REPLY_ALL),
+            (trs!("Reply _All"), ACTION_REPLY_ALL),
             ("_Forward", ACTION_FORWARD),
         ],
     );
@@ -301,8 +294,8 @@ fn message_menu() -> gio::Menu {
     append_section(
         &message,
         &[
-            ("Mark as _Read", ACTION_MARK_READ),
-            ("Mark as _Unread", ACTION_MARK_UNREAD),
+            (trs!("Mark as _Read"), ACTION_MARK_READ),
+            (trs!("Mark as _Unread"), ACTION_MARK_UNREAD),
             ("_Star", ACTION_STAR),
             ("_Unstar", ACTION_UNSTAR),
         ],
@@ -310,16 +303,16 @@ fn message_menu() -> gio::Menu {
     append_section(
         &message,
         &[
-            ("Mark as _Spam", ACTION_MARK_SPAM),
-            ("Mark as _Not Spam", ACTION_MARK_NOT_SPAM),
+            (trs!("Mark as _Spam"), ACTION_MARK_SPAM),
+            (trs!("Mark as _Not Spam"), ACTION_MARK_NOT_SPAM),
         ],
     );
     append_section(
         &message,
         &[
-            ("_Move to Folder…", ACTION_CHOOSE_MOVE_FOLDER),
-            ("_Copy to Folder…", ACTION_CHOOSE_COPY_FOLDER),
-            ("_Create Rule…", ACTION_CREATE_RULE),
+            (trs!("_Move to Folder…"), ACTION_CHOOSE_MOVE_FOLDER),
+            (trs!("_Copy to Folder…"), ACTION_CHOOSE_COPY_FOLDER),
+            (trs!("_Create Rule…"), ACTION_CREATE_RULE),
         ],
     );
     append_section(
@@ -327,7 +320,7 @@ fn message_menu() -> gio::Menu {
         &[
             ("_Archive", ACTION_ARCHIVE),
             ("_Delete", ACTION_DELETE),
-            ("Delete _Permanently…", ACTION_DELETE_PERMANENTLY),
+            (trs!("Delete _Permanently…"), ACTION_DELETE_PERMANENTLY),
         ],
     );
     message
@@ -338,17 +331,17 @@ fn view_menu() -> gio::Menu {
     append_section(
         &view,
         &[
-            ("_Command Palette…", ACTION_COMMAND_PALETTE),
-            ("_Sync Folder", ACTION_SYNC_FOLDER),
-            ("Activity _Log", ACTION_ACTIVITY_LOG),
+            (trs!("_Command Palette…"), ACTION_COMMAND_PALETTE),
+            (trs!("_Sync Folder"), ACTION_SYNC_FOLDER),
+            (trs!("Activity _Log"), ACTION_ACTIVITY_LOG),
         ],
     );
     append_section(
         &view,
         &[
-            ("Show App _Rail", ACTION_TOGGLE_RAIL),
-            ("Show Message _Previews", ACTION_TOGGLE_PREVIEW),
-            ("Group by _Conversation", ACTION_MESSAGE_LIST_MODE),
+            (trs!("Show App _Rail"), ACTION_TOGGLE_RAIL),
+            (trs!("Show Message _Previews"), ACTION_TOGGLE_PREVIEW),
+            (trs!("Group by _Conversation"), ACTION_MESSAGE_LIST_MODE),
         ],
     );
     view
@@ -361,7 +354,7 @@ pub fn mail_selection_menu() -> gio::Menu {
         &menu,
         &[
             ("_Reply", ACTION_REPLY_WINDOW),
-            ("Reply _All", ACTION_REPLY_ALL_WINDOW),
+            (trs!("Reply _All"), ACTION_REPLY_ALL_WINDOW),
             ("_Forward", ACTION_FORWARD_WINDOW),
         ],
     );
@@ -369,8 +362,8 @@ pub fn mail_selection_menu() -> gio::Menu {
     append_section(
         &menu,
         &[
-            ("Mark as _Read", ACTION_MARK_READ),
-            ("Mark as _Unread", ACTION_MARK_UNREAD),
+            (trs!("Mark as _Read"), ACTION_MARK_READ),
+            (trs!("Mark as _Unread"), ACTION_MARK_UNREAD),
             ("_Star", ACTION_STAR),
             ("_Unstar", ACTION_UNSTAR),
         ],
@@ -378,16 +371,16 @@ pub fn mail_selection_menu() -> gio::Menu {
     append_section(
         &menu,
         &[
-            ("Mark as _Spam", ACTION_MARK_SPAM),
-            ("Mark as _Not Spam", ACTION_MARK_NOT_SPAM),
+            (trs!("Mark as _Spam"), ACTION_MARK_SPAM),
+            (trs!("Mark as _Not Spam"), ACTION_MARK_NOT_SPAM),
         ],
     );
     append_section(
         &menu,
         &[
-            ("_Move to Folder…", ACTION_CHOOSE_MOVE_FOLDER),
-            ("_Copy to Folder…", ACTION_CHOOSE_COPY_FOLDER),
-            ("_Create Rule…", ACTION_CREATE_RULE),
+            (trs!("_Move to Folder…"), ACTION_CHOOSE_MOVE_FOLDER),
+            (trs!("_Copy to Folder…"), ACTION_CHOOSE_COPY_FOLDER),
+            (trs!("_Create Rule…"), ACTION_CREATE_RULE),
         ],
     );
     append_section(
@@ -395,7 +388,7 @@ pub fn mail_selection_menu() -> gio::Menu {
         &[
             ("_Archive", ACTION_ARCHIVE),
             ("_Delete", ACTION_DELETE),
-            ("Delete _Permanently…", ACTION_DELETE_PERMANENTLY),
+            (trs!("Delete _Permanently…"), ACTION_DELETE_PERMANENTLY),
         ],
     );
     menu
@@ -422,32 +415,35 @@ pub fn primary_menu_model() -> gio::Menu {
     menu.append_section(None, &theme);
 
     let go = gio::Menu::new();
-    go.append(Some("Mail"), Some(ACTION_SHOW_MAIL));
+    go.append(Some(&tr!("Mail")), Some(ACTION_SHOW_MAIL));
     for space in crate::extension::space_entries() {
         go.append(Some(space.title), Some(space.action));
     }
-    go.append(Some("Contacts"), Some(ACTION_CONTACTS));
-    menu.append_section(Some("Go To"), &go);
+    go.append(Some(&tr!("Contacts")), Some(ACTION_CONTACTS));
+    menu.append_section(Some(&tr!("Go To")), &go);
 
-    menu.append_submenu(Some("Message"), &message_menu());
-    menu.append_submenu(Some("View"), &view_menu());
+    menu.append_submenu(Some(&tr!("Message")), &message_menu());
+    menu.append_submenu(Some(&tr!("View")), &view_menu());
 
     append_section(
         &menu,
         &[
-            ("New Folder…", ACTION_NEW_FOLDER),
-            ("Edit Folder…", ACTION_EDIT_FOLDER),
-            ("Add Account…", ACTION_ADD_ACCOUNT),
+            (trs!("New Folder…"), ACTION_NEW_FOLDER),
+            (trs!("Edit Folder…"), ACTION_EDIT_FOLDER),
+            (trs!("Add Account…"), ACTION_ADD_ACCOUNT),
         ],
     );
 
     let app = gio::Menu::new();
-    app.append(Some("Preferences"), Some(ACTION_PREFERENCES));
-    app.append(Some("Rules"), Some(ACTION_MESSAGE_RULES));
-    app.append(Some("Keyboard Shortcuts"), Some(ACTION_KEYBOARD_SHORTCUTS));
-    app.append(Some("Help"), Some(ACTION_HELP));
-    app.append(Some("About"), Some(ACTION_ABOUT));
-    app.append(Some("Quit"), Some(ACTION_QUIT));
+    app.append(Some(&tr!("Preferences")), Some(ACTION_PREFERENCES));
+    app.append(Some(&tr!("Rules")), Some(ACTION_MESSAGE_RULES));
+    app.append(
+        Some(&tr!("Keyboard Shortcuts")),
+        Some(ACTION_KEYBOARD_SHORTCUTS),
+    );
+    app.append(Some(&tr!("Help")), Some(ACTION_HELP));
+    app.append(Some(&tr!("About")), Some(ACTION_ABOUT));
+    app.append(Some(&tr!("Quit")), Some(ACTION_QUIT));
     menu.append_section(None, &app);
 
     menu
@@ -472,8 +468,8 @@ pub fn build_primary_menu_button() -> gtk::MenuButton {
     button.set_primary(true);
     crate::a11y::name_icon_control(
         &button,
-        "Main Menu",
-        &crate::commands::tooltip_with_shortcut("Main Menu", Some("F10")),
+        &tr!("Main Menu"),
+        &crate::commands::tooltip_with_shortcut(&tr!("Main Menu"), Some("F10")),
     );
     button
 }

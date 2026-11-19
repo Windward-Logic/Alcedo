@@ -1,5 +1,6 @@
 //! Friendly names for the Add Account provider list.
 
+use alcedo_i18n::trs;
 /// Providers shown in Add Account, in combo order.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MailProviderKind {
@@ -19,7 +20,7 @@ pub fn mail_provider_label(kind: MailProviderKind) -> &'static str {
         MailProviderKind::Google => "Google",
         MailProviderKind::Microsoft365 => "Microsoft 365 / Outlook",
         MailProviderKind::Yahoo => "Yahoo",
-        MailProviderKind::Other => "Other email",
+        MailProviderKind::Other => trs!("Other email"),
     }
 }
 

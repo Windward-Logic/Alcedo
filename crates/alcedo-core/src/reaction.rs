@@ -1,5 +1,6 @@
 //! Gmail / RFC 9078 email reaction parsing and grouping.
 
+use alcedo_i18n::{tr, trs};
 use mail_parser::{HeaderValue, MessageParser, MimeHeaders};
 use serde::{Deserialize, Serialize};
 use unicode_segmentation::UnicodeSegmentation;
@@ -29,6 +30,11 @@ pub struct GroupedReaction {
 }
 
 /// Non-empty, 1–64 bytes, all codepoints >= 0x80, exactly one grapheme.
+/// How the person's own reaction is named in reaction chips ("You").
+pub fn you_label() -> String {
+    tr!("You")
+}
+
 pub fn is_single_reaction_emoji(s: &str) -> bool {
     let trimmed = s.trim();
     if trimmed.is_empty() || trimmed.len() > 64 {
@@ -269,7 +275,7 @@ pub fn group_reactions(people: &[ReactionPerson], self_emails: &[String]) -> Vec
             .iter()
             .any(|email| email.eq_ignore_ascii_case(&person.from_email))
         {
-            "You".to_string()
+            you_label()
         } else if !person.from_name.trim().is_empty() {
             person.from_name.clone()
         } else {
@@ -285,7 +291,8 @@ pub fn group_reactions(people: &[ReactionPerson], self_emails: &[String]) -> Vec
         .into_iter()
         .map(|(emoji, mut names)| {
             names.sort();
-            if let Some(you_idx) = names.iter().position(|name| name == "You") {
+            let you = you_label();
+            if let Some(you_idx) = names.iter().position(|name| *name == you) {
                 let you = names.remove(you_idx);
                 names.insert(0, you);
             }
@@ -309,7 +316,7 @@ pub fn group_reactions(people: &[ReactionPerson], self_emails: &[String]) -> Vec
 /// Why a reaction can't be sent because the target is encrypted. Reactions
 /// go out unencrypted, so they would leak that a reply happened in the clear.
 pub fn encrypted_reaction_block(is_encrypted: bool) -> Option<&'static str> {
-    is_encrypted.then_some("You can't react to an encrypted message")
+    is_encrypted.then_some(trs!("You can't react to an encrypted message"))
 }
 
 pub fn reaction_block_reason(
@@ -322,25 +329,25 @@ pub fn reaction_block_reason(
     own_reaction_count: usize,
 ) -> Option<&'static str> {
     if is_draft {
-        return Some("You can't react to a draft");
+        return Some(trs!("You can't react to a draft"));
     }
     if is_reaction {
-        return Some("You can't react to a reaction");
+        return Some(trs!("You can't react to a reaction"));
     }
     if !has_message_id {
-        return Some("This message can't be reacted to");
+        return Some(trs!("This message can't be reacted to"));
     }
     if list_has_action {
-        return Some("Reactions aren't available on mailing lists");
+        return Some(trs!("Reactions aren't available on mailing lists"));
     }
     if to_cc_count > 20 {
-        return Some("Too many recipients to react");
+        return Some(trs!("Too many recipients to react"));
     }
     if reply_all_recipient_count == 0 {
-        return Some("Nobody to send this reaction to");
+        return Some(trs!("Nobody to send this reaction to"));
     }
     if own_reaction_count >= 20 {
-        return Some("You've already sent 20 reactions to this message");
+        return Some(trs!("You've already sent 20 reactions to this message"));
     }
     None
 }

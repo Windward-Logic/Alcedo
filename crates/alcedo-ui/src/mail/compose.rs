@@ -4,6 +4,7 @@ use super::drafts::imap_draft_ref_matches_envelope;
 use super::list_actions::adjacent_after_removed;
 use super::send::send_from_mismatches_selected_account;
 use super::*;
+use alcedo_i18n::{tr, trf, trs};
 
 impl MailModel {
     pub(super) fn update_compose(&mut self, msg: MailMsg, sender: ComponentSender<MailModel>) {
@@ -170,7 +171,12 @@ impl MailModel {
             }
             MailMsg::PopOutComposerWithDraft(draft) => {
                 self.composer.clear_local_autosave();
-                self.open_detached_composer(draft, "Compose", &sender, DetachedComposerFocus::None);
+                self.open_detached_composer(
+                    draft,
+                    &tr!("Compose"),
+                    &sender,
+                    DetachedComposerFocus::None,
+                );
                 self.show_reader();
             }
             MailMsg::OpenSnippetEditor(existing) => {
@@ -322,15 +328,17 @@ impl MailModel {
             .selected_account
             .and_then(|id| self.accounts.iter().find(|account| account.id == id))
             .map(|account| account.email.as_str())
-            .unwrap_or("another account");
+            .unwrap_or_else(|| trs!("another account"));
         let dialog = adw::AlertDialog::builder()
-            .heading("Send from a different account?")
-            .body(format!(
-                "This will send from {from_email}. You're viewing {viewing}."
+            .heading(tr!("Send from a different account?"))
+            .body(trf!(
+                "This will send from {from_email}. You're viewing {viewing}.",
+                from_email = from_email,
+                viewing = viewing
             ))
             .build();
-        dialog.add_response("cancel", "Cancel");
-        dialog.add_response("send", "Send anyway");
+        dialog.add_response("cancel", &tr!("Cancel"));
+        dialog.add_response("send", &tr!("Send anyway"));
         dialog.set_response_appearance("send", adw::ResponseAppearance::Suggested);
         dialog.set_default_response(Some("cancel"));
         dialog.set_close_response("cancel");
@@ -477,7 +485,7 @@ impl MailModel {
         if dropped {
             crate::compose_attachments::show_composer_toast(
                 widgets.toolbar.root.upcast_ref(),
-                "Signature images were left out because this message already has 10 images.",
+                &tr!("Signature images were left out because this message already has 10 images."),
             );
         }
         widgets.toolbar.apply_body(

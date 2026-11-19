@@ -22,6 +22,7 @@
     "prepend-ld-library-path": "/usr/lib/sdk/llvm21/lib",
     "env": {
       "CARGO_HOME": "/run/build/alcedo/cargo",
+      "ALCEDO_INSTALL_LOCALEDIR": "/app/share/locale",
       "CARGO_NET_OFFLINE": "true",
       "LIBCLANG_PATH": "/usr/lib/sdk/llvm21/lib",
       "RUSTFLAGS": "--remap-path-prefix=/run/build/alcedo=/usr/src/alcedo"
@@ -32,7 +33,9 @@
       "name": "alcedo",
       "buildsystem": "simple",
       "build-commands": [
+        "python3 -I scripts/i18n.py check",
         "cargo build --release --locked -p alcedo",
+        "python3 -I scripts/i18n.py compile /app/share/locale",
         "install -Dm755 target/release/alcedo /app/bin/alcedo",
         "install -Dm644 data/dev.alcedo.Mail.desktop /app/share/applications/dev.alcedo.Mail.desktop",
         "ALCEDO_SCREENSHOT_REF=\"v$(. scripts/lib/deb-common.sh; cargo_section_version workspace.package Cargo.toml)\" bash scripts/render-metainfo.sh dev.alcedo.Mail.metainfo.xml",

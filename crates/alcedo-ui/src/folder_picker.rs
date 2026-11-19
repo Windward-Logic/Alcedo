@@ -1,5 +1,6 @@
 //! Folder picker dialog for move/copy operations.
 
+use alcedo_i18n::{tr, trs};
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
@@ -147,7 +148,7 @@ pub fn folder_picker_rows(
         })
         .collect();
     if !recent_rows.is_empty() {
-        push_header(&mut rows, "Recent");
+        push_header(&mut rows, &tr!("Recent"));
         for (folder_id, folder) in recent_rows {
             rows.push(dest_row(
                 folder_id,
@@ -173,9 +174,9 @@ pub fn folder_picker_rows(
 
 fn mode_labels(mode: FolderPickerMode) -> (&'static str, &'static str) {
     match mode {
-        FolderPickerMode::Move => ("Move to Folder", "Move"),
-        FolderPickerMode::Copy => ("Copy to Folder", "Copy"),
-        FolderPickerMode::Run => ("Run Rules", "Run"),
+        FolderPickerMode::Move => (trs!("Move to Folder"), trs!("Move")),
+        FolderPickerMode::Copy => (trs!("Copy to Folder"), trs!("Copy")),
+        FolderPickerMode::Run => (trs!("Run Rules"), trs!("Run")),
     }
 }
 
@@ -213,9 +214,9 @@ fn build_folder_picker_row(
         expand_btn.add_css_class("flat");
         expand_btn.add_css_class("alcedo-folder-expand");
         expand_btn.set_tooltip_text(Some(if row.is_expanded {
-            "Collapse folder"
+            trs!("Collapse folder")
         } else {
-            "Expand folder"
+            trs!("Expand folder")
         }));
         expand_btn.set_has_frame(false);
         expand_btn.set_focus_on_click(false);
@@ -265,7 +266,7 @@ pub fn open_folder_picker(
     let on_choose = Rc::new(on_choose);
 
     let search = gtk::SearchEntry::builder()
-        .placeholder_text("Filter folders")
+        .placeholder_text(tr!("Filter folders"))
         .hexpand(true)
         .build();
 
@@ -274,7 +275,7 @@ pub fn open_folder_picker(
         .activate_on_single_click(false)
         .build();
 
-    let empty_page = adw::StatusPage::builder().title("No folders").build();
+    let empty_page = adw::StatusPage::builder().title(tr!("No folders")).build();
     let content_stack = gtk::Stack::new();
     let scroller = gtk::ScrolledWindow::builder()
         .child(&listbox)
@@ -284,7 +285,7 @@ pub fn open_folder_picker(
     content_stack.add_named(&scroller, Some("list"));
     content_stack.add_named(&empty_page, Some("empty"));
 
-    let cancel_btn = gtk::Button::builder().label("Cancel").build();
+    let cancel_btn = gtk::Button::builder().label(tr!("Cancel")).build();
     let confirm_btn = gtk::Button::builder()
         .label(confirm_label)
         .css_classes(["suggested-action"])
@@ -349,11 +350,11 @@ pub fn open_folder_picker(
 
             if rows.is_empty() {
                 if query.trim().is_empty() {
-                    empty_page.set_title("No folders");
+                    empty_page.set_title(&tr!("No folders"));
                     empty_page.set_description(None);
                 } else {
-                    empty_page.set_title("No matching folders");
-                    empty_page.set_description(Some("Try a different folder name."));
+                    empty_page.set_title(&tr!("No matching folders"));
+                    empty_page.set_description(Some(&tr!("Try a different folder name.")));
                 }
                 content_stack.set_visible_child_name("empty");
                 return;

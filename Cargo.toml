@@ -66,6 +66,7 @@ alcedo-oauth = { path = "crates/alcedo-oauth" }
 alcedo-sync = { path = "crates/alcedo-sync", default-features = false }
 alcedo-html = { path = "crates/alcedo-html" }
 alcedo-widgets = { path = "crates/alcedo-widgets" }
+alcedo-i18n = { path = "crates/alcedo-i18n" }
 alcedo-ui = { path = "crates/alcedo-ui" }
 alcedo-pgp = { path = "crates/alcedo-pgp" }
 alcedo-pgp-api = { path = "crates/alcedo-pgp-api" }

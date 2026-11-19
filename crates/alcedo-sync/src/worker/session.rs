@@ -9,6 +9,7 @@ use super::rules::probe_and_maybe_upload;
 use super::send::smtp_send_compose;
 use super::watched::{poll_watched_folders, prime_watched_folders, watched_poll_delay};
 use super::*;
+use alcedo_i18n::{tr, trf};
 
 pub(super) fn is_recoverable_disconnect(err: &Error) -> bool {
     let message = match err {
@@ -178,7 +179,7 @@ pub(super) async fn account_worker_loop(
     let mut keyring_quiet = false;
 
     loop {
-        emit_status(&events, &account, "Syncing…".to_string());
+        emit_status(&events, &account, tr!("Syncing…"));
 
         let mut token_guard = token_cache.lock().await;
         let mut rules_guard = server_rules.lock().await;
@@ -257,7 +258,7 @@ pub(super) async fn account_worker_loop(
         if let Err(err) = prime_watched_folders(&mut state, &account, &store, &events, true).await {
             warn!(account = %account.email, %err, "startup watched folder sweep failed");
             if is_recoverable_disconnect(&err) {
-                emit_status(&events, &account, "Reconnecting…".to_string());
+                emit_status(&events, &account, tr!("Reconnecting…"));
                 tokio::time::sleep(RECONNECT_DELAY).await;
                 continue;
             }
@@ -389,7 +390,7 @@ pub(super) async fn account_worker_loop(
                         "IMAP still down after reconnect; retrying"
                     );
                     retry_cmd = retry;
-                    emit_status(&events, &account, "Reconnecting…".to_string());
+                    emit_status(&events, &account, tr!("Reconnecting…"));
                     auth_notified.store(auth_flag, Ordering::Relaxed);
                     drop(rules_guard);
                     tokio::time::sleep(RECONNECT_DELAY).await;
@@ -473,7 +474,7 @@ pub(super) async fn account_worker_loop(
                         "IMAP session dead; reconnecting"
                     );
                     retry_cmd = retry;
-                    emit_status(&events, &account, "Reconnecting…".to_string());
+                    emit_status(&events, &account, tr!("Reconnecting…"));
                     tokio::time::sleep(RECONNECT_DELAY).await;
                     break;
                 }
@@ -509,7 +510,7 @@ pub(super) async fn account_worker_loop(
                             %err,
                             "IMAP connection dropped; reconnecting"
                         );
-                        emit_status(&events, &account, "Reconnecting…".to_string());
+                        emit_status(&events, &account, tr!("Reconnecting…"));
                     } else {
                         emit_error(&events, Some(account.id), err.to_string());
                     }
@@ -678,9 +679,9 @@ pub(super) async fn connect_and_initial_sync(
     token_cache: &mut Option<String>,
     server_rules: &mut ServerRulesSession,
 ) -> Result<WorkerImapState> {
-    emit_status(events, account, "Connecting…".to_string());
+    emit_status(events, account, tr!("Connecting…"));
     let mut client = connect_imap(account, token_cache).await?;
-    emit_status(events, account, "Listing folders…".to_string());
+    emit_status(events, account, tr!("Listing folders…"));
     let inbox = sync_folders(&mut client, account, store, events).await?;
     let mut state = WorkerImapState {
         inbox: inbox.clone(),
@@ -701,7 +702,7 @@ pub(super) async fn connect_and_initial_sync(
     emit_status(
         events,
         account,
-        format!("Syncing {}…", folder_display_name(&inbox)),
+        trf!("Syncing {folder}…", folder = folder_display_name(&inbox)),
     );
     sync_inbox(
         &mut state,

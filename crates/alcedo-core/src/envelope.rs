@@ -1,3 +1,4 @@
+use alcedo_i18n::{ntr, tr};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
@@ -391,6 +392,10 @@ pub struct Envelope {
     pub account_avatar: String,
 }
 
+/// Snippet stored for encrypted mail. It is saved in the database, so it stays
+/// English there and [`Envelope::display_snippet`] translates it.
+pub const ENCRYPTED_SNIPPET: &str = "Encrypted message";
+
 impl Envelope {
     /// Subject with RFC 2047 encoded-words and escaped quotes decoded for display.
     pub fn display_subject(&self) -> String {
@@ -403,7 +408,11 @@ impl Envelope {
     }
 
     /// One-line body preview with CR/LF, HTML markup, and other controls stripped.
+    /// The stored placeholder for encrypted mail is shown in the user's language.
     pub fn display_snippet(&self) -> String {
+        if self.snippet == ENCRYPTED_SNIPPET {
+            return tr!("Encrypted message");
+        }
         truncate_preview_chars(&clean_preview_text(&self.snippet), PREVIEW_SNIPPET_MAX)
     }
 }
@@ -517,7 +526,7 @@ fn collect_participants(members: &[&Envelope]) -> Vec<Address> {
 /// Human-readable participant list for conversation rows (`max` visible names).
 pub fn participant_summary(participants: &[Address], max: usize) -> String {
     if participants.is_empty() {
-        return "Unknown".to_string();
+        return tr!("Unknown");
     }
     let names: Vec<String> = participants
         .iter()
@@ -528,7 +537,12 @@ pub fn participant_summary(participants: &[Address], max: usize) -> String {
         return names.join(", ");
     }
     let extra = participants.len() - max;
-    format!("{}, and {extra} more", names.join(", "))
+    ntr!(
+        "{names}, and {n} more",
+        "{names}, and {n} more",
+        extra,
+        names = names.join(", ")
+    )
 }
 
 /// Case-insensitive email-set equality. Display names, order, and duplicates are ignored.

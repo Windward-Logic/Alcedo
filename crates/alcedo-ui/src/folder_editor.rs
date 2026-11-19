@@ -1,5 +1,6 @@
 //! New / Edit Folder dialog.
 
+use alcedo_i18n::{tr, trf, trs};
 use std::cell::RefCell;
 use std::collections::HashSet;
 use std::rc::Rc;
@@ -113,7 +114,7 @@ pub fn location_rows(
 ) -> Vec<FolderEditorLocRow> {
     let mut rows = vec![FolderEditorLocRow {
         id: None,
-        label: "Account root".to_string(),
+        label: tr!("Account root"),
         depth: 0,
         imap_name: None,
     }];
@@ -300,7 +301,7 @@ pub fn validate_submit(
         FolderEditorMode::Create { .. } => None,
     };
     if imap_name_exists(folders, &imap_name) && own_imap != Some(imap_name.as_str()) {
-        return Err("A folder with this name already exists".to_string());
+        return Err(tr!("A folder with this name already exists"));
     }
 
     Ok(FolderEditorSubmit {
@@ -312,8 +313,8 @@ pub fn validate_submit(
 
 fn mode_labels(mode: &FolderEditorMode) -> (&'static str, &'static str) {
     match mode {
-        FolderEditorMode::Create { .. } => ("New Folder", "Create"),
-        FolderEditorMode::Edit { .. } => ("Edit Folder", "Save"),
+        FolderEditorMode::Create { .. } => (trs!("New Folder"), trs!("Create")),
+        FolderEditorMode::Edit { .. } => (trs!("Edit Folder"), trs!("Save")),
     }
 }
 
@@ -355,9 +356,9 @@ fn build_location_row_with_folder(
         expand_btn.add_css_class("flat");
         expand_btn.add_css_class("alcedo-folder-expand");
         expand_btn.set_tooltip_text(Some(if is_expanded {
-            "Collapse folder"
+            trs!("Collapse folder")
         } else {
-            "Expand folder"
+            trs!("Expand folder")
         }));
         expand_btn.set_has_frame(false);
         expand_btn.set_focus_on_click(false);
@@ -427,7 +428,7 @@ pub fn open_folder_editor(
     let (dialog_title, primary_label) = mode_labels(&mode);
     let on_submit = Rc::new(on_submit);
 
-    let name_row = adw::EntryRow::builder().title("Name").build();
+    let name_row = adw::EntryRow::builder().title(tr!("Name")).build();
     if let FolderEditorMode::Edit { folder_id } = &mode
         && let Some(folder) = folders.iter().find(|folder| folder.id == *folder_id)
     {
@@ -444,12 +445,16 @@ pub fn open_folder_editor(
     {
         let imap_row = adw::ActionRow::builder()
             .use_markup(false)
-            .title("IMAP path")
+            .title(tr!("IMAP path"))
             .subtitle(&folder.imap_name)
             .build();
         let messages_row = adw::ActionRow::builder()
-            .title("Messages")
-            .subtitle(format!("{} unread, {} total", folder.unread, folder.total))
+            .title(tr!("Messages"))
+            .subtitle(trf!(
+                "{unread} unread, {total} total",
+                unread = folder.unread,
+                total = folder.total
+            ))
             .build();
         info_group.add(&imap_row);
         info_group.add(&messages_row);
@@ -457,7 +462,7 @@ pub fn open_folder_editor(
     }
 
     let location_label = gtk::Label::builder()
-        .label("Location")
+        .label(tr!("Location"))
         .css_classes(["dim-label"])
         .halign(gtk::Align::Start)
         .build();
@@ -488,7 +493,7 @@ pub fn open_folder_editor(
     let toast_overlay = adw::ToastOverlay::new();
     toast_overlay.set_child(Some(&body));
 
-    let cancel_btn = gtk::Button::builder().label("Cancel").build();
+    let cancel_btn = gtk::Button::builder().label(tr!("Cancel")).build();
     let primary_btn = gtk::Button::builder()
         .label(primary_label)
         .css_classes(["suggested-action"])

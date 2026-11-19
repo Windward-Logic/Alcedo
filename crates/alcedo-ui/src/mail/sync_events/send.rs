@@ -3,6 +3,7 @@
 use super::super::send::sent_should_close_composer;
 use super::*;
 use crate::mail::drafts::imap_draft_ref_matches_envelope;
+use alcedo_i18n::{trf, trs};
 
 impl MailModel {
     pub(super) fn on_send_sync_event(
@@ -30,11 +31,11 @@ impl MailModel {
                                 .map(|account| account.email.as_str())
                                 .unwrap_or("");
                             let success_kind = if is_reaction {
-                                "Reaction sent"
+                                trs!("Reaction sent")
                             } else if invite_organizer_toast.is_some() {
-                                "Invite response sent"
+                                trs!("Invite response sent")
                             } else {
-                                "Message sent"
+                                trs!("Message sent")
                             };
                             self.push_activity(
                                 activity_log::KIND_MAIL,
@@ -52,8 +53,9 @@ impl MailModel {
                                 .as_ref()
                                 .and_then(|draft| draft.reaction_emoji.as_deref());
                             if let Some(emoji) = sent_emoji {
-                                self.toasts.add_toast(crate::toast::plain(&format!(
-                                    "Sent reaction {emoji}"
+                                self.toasts.add_toast(crate::toast::plain(&trf!(
+                                    "Sent reaction {emoji}",
+                                    emoji = emoji
                                 )));
                             }
                             if let Some(target_id) = self.pending_reaction_target.take() {
@@ -105,8 +107,9 @@ impl MailModel {
                                 message_id_hdr,
                             );
                             if let Some(label) = invite_organizer_toast {
-                                self.toasts.add_toast(crate::toast::plain(&format!(
-                                    "Response sent to {label}"
+                                self.toasts.add_toast(crate::toast::plain(&trf!(
+                                    "Response sent to {organizer}",
+                                    organizer = label
                                 )));
                             }
                         }
@@ -166,7 +169,7 @@ impl MailModel {
                             self.push_activity(
                                 activity_log::KIND_MAIL,
                                 ActivityOutcome::Failure,
-                                "Send failed",
+                                trs!("Send failed"),
                                 self.send_detail_from_draft(draft, Some(&msg)),
                                 from,
                                 debug,
@@ -179,8 +182,10 @@ impl MailModel {
                             self.pending_send_window.take();
                         }
                     }
-                    self.toasts
-                        .add_toast(crate::toast::plain(&format!("Send failed: {msg}")));
+                    self.toasts.add_toast(crate::toast::plain(&trf!(
+                        "Send failed: {reason}",
+                        reason = msg
+                    )));
                     self.send_in_flight.set(false);
                 }
             },
@@ -205,17 +210,18 @@ impl MailModel {
                 // The server copy now covers this composer; drop its local file.
                 self.clear_autosave_for_imap_draft(&draft);
                 if kept_newer {
-                    let message = "Kept the newer copy of this draft from the other mail program.";
+                    let message =
+                        trs!("Kept the newer copy of this draft from the other mail program.");
                     self.toasts.add_toast(crate::toast::plain(message));
                     self.record(activity_log::KIND_MAIL, ActivityOutcome::Info, message, "");
                 }
                 if replaced_newer {
-                    let message = "Replaced a newer copy of this draft on the server.";
+                    let message = trs!("Replaced a newer copy of this draft on the server.");
                     self.toasts.add_toast(crate::toast::plain(message));
                     self.record(activity_log::KIND_MAIL, ActivityOutcome::Info, message, "");
                 }
                 if removed_missing {
-                    let message = "Original draft was removed; saved a new copy.";
+                    let message = trs!("Original draft was removed; saved a new copy.");
                     self.toasts.add_toast(crate::toast::plain(message));
                     self.record(
                         activity_log::KIND_MAIL,
@@ -226,7 +232,7 @@ impl MailModel {
                 }
             }
             SyncEvent::ImapDraftSaveFailed { message } => {
-                let title = format!("Couldn't save to Drafts: {message}");
+                let title = trf!("Couldn't save to Drafts: {reason}", reason = message);
                 self.toasts.add_toast(crate::toast::plain(&title));
                 self.record(activity_log::KIND_MAIL, ActivityOutcome::Failure, title, "");
                 self.mark_drafts_server_save_failed();

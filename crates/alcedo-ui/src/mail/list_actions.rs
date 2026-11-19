@@ -4,6 +4,7 @@ use super::folders::add_unread;
 use super::send::composer_send_in_progress;
 use super::window_actions::can_drop_messages_on_folder_data;
 use alcedo_core::mail_feedback::{MoveFeedback, move_toast_title};
+use alcedo_i18n::{tr, trf, trs};
 
 use super::*;
 
@@ -154,8 +155,8 @@ impl MailModel {
                             Some(_) => Some(*id),
                             None => {
                                 missing_special = Some(match &dest {
-                                    SpecialUse::Junk => "Junk",
-                                    _ => "Archive",
+                                    SpecialUse::Junk => trs!("Junk"),
+                                    _ => trs!("Archive"),
                                 });
                                 None
                             }
@@ -174,8 +175,10 @@ impl MailModel {
             .collect();
 
         if let Some(name) = missing_special {
-            self.toasts.add_toast(crate::toast::plain(&format!(
-                "No {name} folder on this account"
+            // TRANSLATORS: {name} is a folder name, "Junk" or "Archive".
+            self.toasts.add_toast(crate::toast::plain(&trf!(
+                "No {name} folder on this account",
+                name = name
             )));
         }
         if ids_to_move.is_empty() {
@@ -418,12 +421,12 @@ impl MailModel {
 
         let Some(dest_folder) = self.folder_for_id(dest).cloned() else {
             self.toasts
-                .add_toast(crate::toast::plain("Folder not found"));
+                .add_toast(crate::toast::plain(&tr!("Folder not found")));
             return;
         };
         if !dest_folder.selectable {
             self.toasts
-                .add_toast(crate::toast::plain("Folder cannot hold messages"));
+                .add_toast(crate::toast::plain(&tr!("Folder cannot hold messages")));
             return;
         }
 
@@ -446,9 +449,9 @@ impl MailModel {
 
         if skipped_other_account {
             let message = if copy {
-                "Cannot copy messages to another account"
+                trs!("Cannot copy messages to another account")
             } else {
-                "Cannot move messages from another account"
+                trs!("Cannot move messages from another account")
             };
             self.toasts.add_toast(crate::toast::plain(message));
         }

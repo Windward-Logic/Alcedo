@@ -2,6 +2,7 @@
 //! are configured.
 
 use alcedo_core::welcome::{WELCOME_DESCRIPTION, WELCOME_TITLE, show_welcome_page};
+use alcedo_i18n::{tr, trm};
 
 use super::*;
 
@@ -17,7 +18,7 @@ pub(super) fn build_welcome_page(on_add_account: impl Fn() + 'static) -> adw::To
     header.pack_start(&crate::menu::build_primary_menu_button());
 
     let add_account = gtk::Button::builder()
-        .label("Add Account")
+        .label(tr!("Add Account"))
         .css_classes(["pill", "suggested-action"])
         .halign(gtk::Align::Center)
         .build();
@@ -25,8 +26,8 @@ pub(super) fn build_welcome_page(on_add_account: impl Fn() + 'static) -> adw::To
 
     let page = adw::StatusPage::builder()
         .icon_name("dev.alcedo.Mail")
-        .title(WELCOME_TITLE)
-        .description(WELCOME_DESCRIPTION)
+        .title(trm!(WELCOME_TITLE))
+        .description(trm!(WELCOME_DESCRIPTION))
         .child(&add_account)
         .vexpand(true)
         .hexpand(true)

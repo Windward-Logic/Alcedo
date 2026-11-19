@@ -434,7 +434,7 @@ pub(super) async fn open_message(
         } else if !text.is_empty() {
             envelope.snippet = preview_snippet(&text);
         } else if pgp_status.encrypted && !pgp_status.decrypted {
-            envelope.snippet = "Encrypted message".to_string();
+            envelope.snippet = alcedo_core::ENCRYPTED_SNIPPET.to_string();
         }
         refresh_subject_from_full(&mut envelope, &full);
         store_pgp_result(store, id, &envelope, &text, &html, &pgp_status, persist).await?;

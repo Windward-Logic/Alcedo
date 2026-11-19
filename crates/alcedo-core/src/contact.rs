@@ -1,5 +1,6 @@
 //! Local address book types (contacts and groups).
 
+use alcedo_i18n::trs;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
@@ -63,10 +64,10 @@ pub struct GroupDraft {
 impl GroupDraft {
     pub fn validate(&self) -> Result<(), &'static str> {
         if self.name.trim().is_empty() {
-            return Err("Group name is required");
+            return Err(trs!("Group name is required"));
         }
         if self.name.eq_ignore_ascii_case(UNAPPROVED_GROUP_NAME) {
-            return Err("Cannot use the name Unapproved");
+            return Err(trs!("Cannot use the name Unapproved"));
         }
         Ok(())
     }

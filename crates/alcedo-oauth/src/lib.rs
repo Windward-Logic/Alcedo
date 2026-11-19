@@ -1,5 +1,8 @@
 //! OAuth PKCE and keyring secrets (P5).
 
+/// gettext domain of the text shown to people, read by the `alcedo_i18n` macros.
+const I18N_DOMAIN: &str = "alcedo";
+
 pub mod flow;
 pub mod google;
 pub mod loopback;

@@ -1,5 +1,6 @@
 //! Modal command palette (`adw::Dialog`).
 
+use alcedo_i18n::{tr, trf};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -145,7 +146,7 @@ fn contact_rows(spec: &CommandPaletteSpec, query: &str) -> Vec<PaletteRow> {
             continue;
         }
         rows.push(PaletteRow {
-            label: format!("Compose to {display}"),
+            label: trf!("Compose to {recipient}", recipient = display),
             subtitle: email.clone(),
             icon: "avatar-default-symbolic",
             accel: None,
@@ -283,10 +284,10 @@ pub fn open_command_palette(
         });
 
     let search = gtk::SearchEntry::builder()
-        .placeholder_text("Type a command")
+        .placeholder_text(tr!("Type a command"))
         .hexpand(true)
         .build();
-    search.update_property(&[gtk::accessible::Property::Label("Filter commands")]);
+    search.update_property(&[gtk::accessible::Property::Label(&tr!("Filter commands"))]);
 
     let listbox = gtk::ListBox::builder()
         .selection_mode(gtk::SelectionMode::Single)
@@ -294,7 +295,7 @@ pub fn open_command_palette(
         .build();
 
     let empty_page = adw::StatusPage::builder()
-        .title("No matching commands")
+        .title(tr!("No matching commands"))
         .build();
     let content_stack = gtk::Stack::new();
     let scroller = gtk::ScrolledWindow::builder()
@@ -314,7 +315,7 @@ pub fn open_command_palette(
     body.append(&content_stack);
 
     let dialog = adw::Dialog::builder()
-        .title("Command palette")
+        .title(tr!("Command palette"))
         .content_width(520)
         .content_height(400)
         .focus_widget(&search)

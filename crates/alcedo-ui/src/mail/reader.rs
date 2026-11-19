@@ -1,6 +1,7 @@
 //! Reader pane and message windows: bodies, inline images, remote content, unsubscribe and raw source.
 
 use super::*;
+use alcedo_i18n::{tr, trf};
 
 impl MailModel {
     pub(super) fn update_reader(&mut self, msg: MailMsg, sender: ComponentSender<MailModel>) {
@@ -358,7 +359,7 @@ impl MailModel {
                 self.complete_raw_action(id, action, raw, root);
             } else {
                 self.toasts
-                    .add_toast(crate::toast::plain("Message not found"));
+                    .add_toast(crate::toast::plain(&tr!("Message not found")));
             }
             return;
         }
@@ -616,23 +617,26 @@ impl MailModel {
             .first()
             .map(|addr| addr.display_name())
             .filter(|name| !name.is_empty())
-            .unwrap_or_else(|| "this mailing list".to_string());
+            .unwrap_or_else(|| tr!("this mailing list"));
         let body = if list.one_click {
-            "Alcedo will send an unsubscribe request for you. You may still receive a few messages while it takes effect.".to_string()
+            tr!(
+                "Alcedo will send an unsubscribe request for you. You may still receive a few messages while it takes effect."
+            )
         } else if let Some(mailto) = &list.mailto {
-            format!(
-                "Alcedo will open a message to {}. Send it to finish unsubscribing.",
-                mailto.address
+            trf!(
+                "Alcedo will open a message to {address}. Send it to finish unsubscribing.",
+                address = mailto.address
             )
         } else {
-            "Alcedo will open the sender’s unsubscribe page in your browser.".to_string()
+            tr!("Alcedo will open the sender’s unsubscribe page in your browser.")
         };
         let confirm = adw::AlertDialog::builder()
-            .heading(format!("Unsubscribe from {sender_name}?"))
+            // TRANSLATORS: {sender} is a sender's name, or "this mailing list".
+            .heading(trf!("Unsubscribe from {sender}?", sender = sender_name))
             .body(&body)
             .build();
-        confirm.add_response("cancel", "Cancel");
-        confirm.add_response("unsubscribe", "Unsubscribe");
+        confirm.add_response("cancel", &tr!("Cancel"));
+        confirm.add_response("unsubscribe", &tr!("Unsubscribe"));
         confirm.set_default_response(Some("unsubscribe"));
         confirm.set_close_response("cancel");
         let parent = self.dialog_parent_for_message(id, &self.window);

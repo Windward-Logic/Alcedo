@@ -1,0 +1,13 @@
+[package]
+name = "alcedo-i18n"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "Translated UI text for Alcedo through the system gettext"
+
+[dependencies]
+thiserror = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

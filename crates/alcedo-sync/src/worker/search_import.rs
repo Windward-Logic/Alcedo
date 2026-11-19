@@ -3,6 +3,7 @@
 use super::backfill::{persist_fetched_message_ids, persist_fetched_sizes};
 use super::mailbox_sync::{ensure_selected, fetched_to_envelope, partition_imap_deleted};
 use super::*;
+use alcedo_i18n::{tr, trf};
 
 async fn import_folder_search(
     state: &mut WorkerImapState,
@@ -69,7 +70,7 @@ pub(super) async fn import_server_search(
         state.search_import_generation.load(Ordering::Relaxed) != generation
     };
     if state.client.is_none() {
-        emit_error(events, None, "This account isn't connected".to_string());
+        emit_error(events, None, tr!("This account isn't connected"));
         progress.0.finished().await;
         return Ok(());
     }
@@ -91,7 +92,11 @@ pub(super) async fn import_server_search(
             emit_error(
                 events,
                 None,
-                format!("Couldn't search {}: {err}", folder_display_name(&folder)),
+                trf!(
+                    "Couldn't search {folder}: {reason}",
+                    folder = folder_display_name(&folder),
+                    reason = err
+                ),
             );
         }
         if cancelled(state) {

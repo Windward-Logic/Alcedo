@@ -1,5 +1,6 @@
 //! Operator and value autocomplete for the mail search field.
 
+use alcedo_i18n::{n_, tr, trf, trm, trs};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -72,9 +73,9 @@ pub fn attach_search_autocomplete(
         .can_focus(true)
         .css_classes(["alcedo-autocomplete"])
         .build();
-    listbox.update_property(&[gtk::accessible::Property::Label(
-        "Search operator suggestions",
-    )]);
+    listbox.update_property(&[gtk::accessible::Property::Label(&tr!(
+        "Search operator suggestions"
+    ))]);
 
     let popover = gtk::Popover::builder()
         .autohide(false)
@@ -439,7 +440,7 @@ fn folder_suggestions(key: &str, value: &str, ctx: &SuggestionContext<'_>) -> Ve
         items.push(Suggestion {
             insert: format!("{key}:{keyword}"),
             label: format!("{key}:{keyword}"),
-            subtitle: Some((*meaning).to_string()),
+            subtitle: Some(trm!(meaning).to_string()),
             icon: "folder-symbolic",
         });
     }
@@ -479,18 +480,22 @@ fn folder_matches(display: &str, imap: &str, needle: &str) -> bool {
     display.to_ascii_lowercase().contains(needle) || imap.to_ascii_lowercase().contains(needle)
 }
 
+// (operator value, meaning shown under it); meanings are translated on display.
 const IS_VALUES: &[(&str, &str)] = &[
-    ("unread", "Unread"),
-    ("read", "Read"),
-    ("starred", "Starred"),
-    ("unstarred", "Not starred"),
+    ("unread", n_!("Unread")),
+    ("read", n_!("Read")),
+    ("starred", n_!("Starred")),
+    ("unstarred", n_!("Not starred")),
 ];
 
-const HAS_VALUES: &[(&str, &str)] = &[("attachment", "Has a file attached")];
+const HAS_VALUES: &[(&str, &str)] = &[("attachment", n_!("Has a file attached"))];
 
-const FOLDER_KEYWORDS: &[(&str, &str)] = &[("anywhere", "All folders"), ("all", "All folders")];
+const FOLDER_KEYWORDS: &[(&str, &str)] = &[
+    ("anywhere", n_!("All folders")),
+    ("all", n_!("All folders")),
+];
 
-fn flag_suggestions(key: &str, value: &str, values: &[(&str, &str)]) -> Vec<Suggestion> {
+fn flag_suggestions(key: &str, value: &str, values: &[(&str, &'static str)]) -> Vec<Suggestion> {
     let needle = value.to_ascii_lowercase();
     values
         .iter()
@@ -498,56 +503,57 @@ fn flag_suggestions(key: &str, value: &str, values: &[(&str, &str)]) -> Vec<Sugg
         .map(|(flag, meaning)| Suggestion {
             insert: format!("{key}:{flag}"),
             label: format!("{key}:{flag}"),
-            subtitle: Some((*meaning).to_string()),
+            subtitle: Some(trm!(meaning).to_string()),
             icon: "edit-find-symbolic",
         })
         .take(MAX_SUGGESTIONS)
         .collect()
 }
 
+// (operator value, size shown to the person); sizes are translated on display.
 const SIZE_PRESETS: &[(&str, &str)] = &[
-    ("1M", "1 MB"),
-    ("5M", "5 MB"),
-    ("10M", "10 MB"),
-    ("25M", "25 MB"),
-    ("50M", "50 MB"),
-    ("100M", "100 MB"),
+    ("1M", n_!("1 MB")),
+    ("5M", n_!("5 MB")),
+    ("10M", n_!("10 MB")),
+    ("25M", n_!("25 MB")),
+    ("50M", n_!("50 MB")),
+    ("100M", n_!("100 MB")),
 ];
 
 fn size_suggestions(key: &str, value: &str) -> Vec<Suggestion> {
     let needle = value.trim().to_ascii_lowercase();
-    let kind = if key == "smaller" {
-        "Smaller than"
-    } else {
-        "Larger than"
-    };
     let mut items: Vec<Suggestion> = SIZE_PRESETS
         .iter()
         .filter(|(token, _)| needle.is_empty() || token.to_ascii_lowercase().starts_with(&needle))
-        .map(|(token, label)| size_item(key, token, kind, label))
+        .map(|(token, label)| size_item(key, token, trm!(label)))
         .collect();
     if items.is_empty()
         && !needle.is_empty()
         && needle.chars().all(|ch| ch.is_ascii_digit() || ch == '.')
     {
-        for (unit, name) in [("K", "KB"), ("M", "MB"), ("G", "GB")] {
-            items.push(size_item(
-                key,
-                &format!("{needle}{unit}"),
-                kind,
-                &format!("{needle} {name}"),
-            ));
+        let typed = [
+            ("K", trf!("{size} KB", size = needle)),
+            ("M", trf!("{size} MB", size = needle)),
+            ("G", trf!("{size} GB", size = needle)),
+        ];
+        for (unit, size) in typed {
+            items.push(size_item(key, &format!("{needle}{unit}"), &size));
         }
     }
     items.truncate(MAX_SUGGESTIONS);
     items
 }
 
-fn size_item(key: &str, token: &str, kind: &str, label: &str) -> Suggestion {
+fn size_item(key: &str, token: &str, size: &str) -> Suggestion {
+    let subtitle = if key == "smaller" {
+        trf!("Smaller than {size}", size = size)
+    } else {
+        trf!("Larger than {size}", size = size)
+    };
     Suggestion {
         insert: format!("{key}:{token}"),
         label: format!("{key}:{token}"),
-        subtitle: Some(format!("{kind} {label}")),
+        subtitle: Some(subtitle),
         icon: "drive-harddisk-symbolic",
     }
 }
@@ -563,27 +569,27 @@ fn date_suggestions(key: &str, value: &str, today: &str) -> Vec<Suggestion> {
     vec![Suggestion {
         insert: format!("{key}:{today}"),
         label: format!("{key}:{today}"),
-        subtitle: Some("Today".to_string()),
+        subtitle: Some(tr!("Today")),
         icon: "x-office-calendar-symbolic",
     }]
 }
 
 fn operator_meaning(token: &str) -> Option<&'static str> {
     Some(match token {
-        "from:" => "Sender",
-        "to:" => "Recipient",
-        "subject:" => "Subject text",
-        "folder:" | "in:" => "Folder",
-        "in:anywhere" => "All folders",
-        "after:" => "After date",
-        "before:" => "Before date",
-        "larger:" => "Larger than a size",
-        "smaller:" => "Smaller than a size",
-        "is:unread" => "Unread",
-        "is:read" => "Read",
-        "is:starred" => "Starred",
-        "is:unstarred" => "Not starred",
-        "has:attachment" => "Has a file attached",
+        "from:" => trs!("Sender"),
+        "to:" => trs!("Recipient"),
+        "subject:" => trs!("Subject text"),
+        "folder:" | "in:" => trs!("Folder"),
+        "in:anywhere" => trs!("All folders"),
+        "after:" => trs!("After date"),
+        "before:" => trs!("Before date"),
+        "larger:" => trs!("Larger than a size"),
+        "smaller:" => trs!("Smaller than a size"),
+        "is:unread" => trs!("Unread"),
+        "is:read" => trs!("Read"),
+        "is:starred" => trs!("Starred"),
+        "is:unstarred" => trs!("Not starred"),
+        "has:attachment" => trs!("Has a file attached"),
         _ => return None,
     })
 }

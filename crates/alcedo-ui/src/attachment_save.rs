@@ -5,6 +5,7 @@
 //! write through a temporary file plus rename so a failed or interrupted
 //! write never leaves a partial file under the user's chosen name.
 
+use alcedo_i18n::{ntr, tr, trf};
 use std::fmt;
 use std::fs::{self, File, OpenOptions};
 use std::io::{self, Write};
@@ -59,10 +60,12 @@ impl SaveError {
     /// Toast text for the reader.
     pub(crate) fn user_message(&self) -> String {
         match self {
-            Self::NotLoaded { filename } => format!("“{filename}” is still downloading"),
-            Self::Corrupt { filename, .. } => format!(
-                "“{filename}” didn’t download completely, so it wasn’t saved. \
-                 Reopen the message to download it again."
+            Self::NotLoaded { filename } => {
+                trf!("“{filename}” is still downloading", filename = filename)
+            }
+            Self::Corrupt { filename, .. } => trf!(
+                "“{filename}” didn’t download completely, so it wasn’t saved. Reopen the message to download it again.",
+                filename = filename
             ),
         }
     }
@@ -203,14 +206,19 @@ impl SaveSummary {
     pub(crate) fn user_message(&self) -> String {
         if self.saved == self.total {
             if self.saved == 1 {
-                "Attachment saved".to_string()
+                tr!("Attachment saved")
             } else {
-                format!("{} attachments saved", self.saved)
+                ntr!("{n} attachment saved", "{n} attachments saved", self.saved)
             }
         } else if self.saved == 0 {
-            "Could not save attachments".to_string()
+            tr!("Could not save attachments")
         } else {
-            format!("Saved {} of {} attachments", self.saved, self.total)
+            ntr!(
+                "Saved {saved} of {n} attachment",
+                "Saved {saved} of {n} attachments",
+                self.total,
+                saved = self.saved
+            )
         }
     }
 }

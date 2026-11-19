@@ -4,6 +4,7 @@ use super::list_actions::adjacent_after_removed;
 use super::message_lookup::MessageLookup;
 use super::send::composer_send_in_progress;
 use super::*;
+use alcedo_i18n::{ntr, tr};
 
 impl MailModel {
     pub(super) fn update_delete(&mut self, msg: MailMsg, sender: ComponentSender<MailModel>) {
@@ -117,7 +118,7 @@ impl MailModel {
         let toast = crate::toast::plain(&title);
         toast.set_timeout(0);
         if !undoable.is_empty() {
-            toast.set_button_label(Some("Undo"));
+            toast.set_button_label(Some(&tr!("Undo")));
             let sender = sender.clone();
             toast.connect_button_clicked(move |_| {
                 sender.input(MailMsg::UndoDelete);
@@ -146,7 +147,7 @@ impl MailModel {
         let toast = crate::toast::plain(&title);
         toast.set_timeout(8);
         if !undoable.is_empty() {
-            toast.set_button_label(Some("Undo"));
+            toast.set_button_label(Some(&tr!("Undo")));
             let sender = sender.clone();
             toast.connect_button_clicked(move |_| {
                 sender.input(MailMsg::UndoDelete);
@@ -442,7 +443,7 @@ impl MailModel {
             .heading(heading)
             .body(body)
             .build();
-        confirm.add_response("cancel", "Cancel");
+        confirm.add_response("cancel", &tr!("Cancel"));
         confirm.add_response("delete", &confirm_label);
         confirm.set_response_appearance("delete", adw::ResponseAppearance::Destructive);
         confirm.set_close_response("cancel");
@@ -547,11 +548,13 @@ impl MailModel {
             .cloned()
             .or_else(|| self.notified_otp.get(&id).map(|(_, env)| env.clone()))
         else {
-            self.toasts.add_toast(crate::toast::plain("Code copied"));
+            self.toasts
+                .add_toast(crate::toast::plain(&tr!("Code copied")));
             return;
         };
         if self.folder_is_trash(env.folder_id) || self.trash_folder_for(env.account_id).is_none() {
-            self.toasts.add_toast(crate::toast::plain("Code copied"));
+            self.toasts
+                .add_toast(crate::toast::plain(&tr!("Code copied")));
             return;
         }
         self.delete_message_ids(&[id], sender, DeleteToast::AfterVerificationCopy);
@@ -668,16 +671,20 @@ pub(super) fn delete_disposition(in_trash: bool, account_has_trash: bool) -> Del
 pub(super) fn permanent_delete_dialog_copy(count: usize) -> (String, String, String) {
     let (heading, body) = if count == 1 {
         (
-            "Delete this message permanently?".to_string(),
-            "This cannot be undone. The message is erased from the mail server.".to_string(),
+            tr!("Delete this message permanently?"),
+            tr!("This cannot be undone. The message is erased from the mail server."),
         )
     } else {
         (
-            format!("Delete {count} messages permanently?"),
-            "This cannot be undone. These messages are erased from the mail server.".to_string(),
+            ntr!(
+                "Delete {n} message permanently?",
+                "Delete {n} messages permanently?",
+                count
+            ),
+            tr!("This cannot be undone. These messages are erased from the mail server."),
         )
     };
-    (heading, body, "Delete Permanently".to_string())
+    (heading, body, tr!("Delete Permanently"))
 }
 
 pub(super) fn delete_pending_title(
@@ -687,29 +694,45 @@ pub(super) fn delete_pending_title(
 ) -> String {
     if toast_kind == DeleteToast::Permanent {
         return if permanent == 1 {
-            "Deleting permanently…".to_string()
+            tr!("Deleting permanently…")
         } else {
-            format!("Deleting {permanent} messages permanently…")
+            ntr!(
+                "Deleting {n} message permanently…",
+                "Deleting {n} messages permanently…",
+                permanent
+            )
         };
     }
     if toast_kind == DeleteToast::AfterVerificationCopy && moved >= 1 && permanent == 0 {
-        return "Moving to Trash…".to_string();
+        return tr!("Moving to Trash…");
     }
     if moved > 0 && permanent == 0 {
         return if moved == 1 {
-            "Moving to Trash…".to_string()
+            tr!("Moving to Trash…")
         } else {
-            format!("Moving {moved} messages to Trash…")
+            ntr!(
+                "Moving {n} message to Trash…",
+                "Moving {n} messages to Trash…",
+                moved
+            )
         };
     }
     if permanent > 0 && moved == 0 {
         return if permanent == 1 {
-            "Deleting permanently…".to_string()
+            tr!("Deleting permanently…")
         } else {
-            format!("Deleting {permanent} messages permanently…")
+            ntr!(
+                "Deleting {n} message permanently…",
+                "Deleting {n} messages permanently…",
+                permanent
+            )
         };
     }
-    format!("Deleting {} messages…", moved + permanent)
+    ntr!(
+        "Deleting {n} message…",
+        "Deleting {n} messages…",
+        moved + permanent
+    )
 }
 
 pub(super) fn delete_success_title(
@@ -718,21 +741,33 @@ pub(super) fn delete_success_title(
     permanent: usize,
 ) -> String {
     if toast_kind == DeleteToast::AfterVerificationCopy && moved >= 1 && permanent == 0 {
-        "Code copied. Moved to Trash.".to_string()
+        tr!("Code copied. Moved to Trash.")
     } else if moved > 0 && permanent == 0 {
         if moved == 1 {
-            "Moved to Trash.".to_string()
+            tr!("Moved to Trash.")
         } else {
-            format!("Moved {moved} messages to Trash.")
+            ntr!(
+                "Moved {n} message to Trash.",
+                "Moved {n} messages to Trash.",
+                moved
+            )
         }
     } else if permanent > 0 && moved == 0 {
         if permanent == 1 {
-            "Permanently deleted.".to_string()
+            tr!("Permanently deleted.")
         } else {
-            format!("Permanently deleted {permanent} messages.")
+            ntr!(
+                "Permanently deleted {n} message.",
+                "Permanently deleted {n} messages.",
+                permanent
+            )
         }
     } else {
-        format!("Deleted {} messages.", moved + permanent)
+        ntr!(
+            "Deleted {n} message.",
+            "Deleted {n} messages.",
+            moved + permanent
+        )
     }
 }
 
@@ -740,29 +775,29 @@ pub(super) fn delete_failure_title(toast_kind: DeleteToast, moved: usize, reason
     let network = looks_like_network_failure(reason);
     if toast_kind == DeleteToast::Permanent {
         return if network {
-            "Couldn't permanently delete — connection lost".to_string()
+            tr!("Couldn't permanently delete — connection lost")
         } else {
-            "Couldn't permanently delete.".to_string()
+            tr!("Couldn't permanently delete.")
         };
     }
     if toast_kind == DeleteToast::AfterVerificationCopy {
         return if network {
-            "Code copied. Couldn't move to Trash — connection lost".to_string()
+            tr!("Code copied. Couldn't move to Trash — connection lost")
         } else {
-            "Code copied. Couldn't move to Trash.".to_string()
+            tr!("Code copied. Couldn't move to Trash.")
         };
     }
     if moved > 0 {
         return if network {
-            "Couldn't move to Trash — connection lost".to_string()
+            tr!("Couldn't move to Trash — connection lost")
         } else {
-            "Couldn't move to Trash.".to_string()
+            tr!("Couldn't move to Trash.")
         };
     }
     if network {
-        "Couldn't delete message — connection lost".to_string()
+        tr!("Couldn't delete message — connection lost")
     } else {
-        "Couldn't delete message.".to_string()
+        tr!("Couldn't delete message.")
     }
 }
 

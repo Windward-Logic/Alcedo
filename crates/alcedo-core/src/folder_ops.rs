@@ -3,6 +3,7 @@
 use crate::account::{Folder, SpecialUse};
 use crate::ids::FolderId;
 use crate::mailbox_utf7::{decode_mailbox_name, encode_mailbox_name};
+use alcedo_i18n::{tr, trf};
 
 pub fn folder_is_mutable(folder: &Folder) -> bool {
     folder.selectable && folder.special == SpecialUse::Other
@@ -11,15 +12,16 @@ pub fn folder_is_mutable(folder: &Folder) -> bool {
 /// Human-readable folder label (special-use title case, else last IMAP path segment).
 pub fn folder_display_name(folder: &Folder) -> String {
     match folder.special {
-        SpecialUse::Inbox => "Inbox".to_string(),
-        SpecialUse::Sent => "Sent".to_string(),
-        SpecialUse::Drafts => "Drafts".to_string(),
-        SpecialUse::Trash => "Trash".to_string(),
-        SpecialUse::Junk => "Junk".to_string(),
-        SpecialUse::Archive => "Archive".to_string(),
-        SpecialUse::Snoozed => "Snoozed".to_string(),
-        SpecialUse::Outbox => "Outbox".to_string(),
-        SpecialUse::All => "All".to_string(),
+        SpecialUse::Inbox => tr!("Inbox"),
+        SpecialUse::Sent => tr!("Sent"),
+        SpecialUse::Drafts => tr!("Drafts"),
+        SpecialUse::Trash => tr!("Trash"),
+        SpecialUse::Junk => tr!("Junk"),
+        SpecialUse::Archive => tr!("Archive"),
+        SpecialUse::Snoozed => tr!("Snoozed"),
+        SpecialUse::Outbox => tr!("Outbox"),
+        // TRANSLATORS: the special folder holding all mail (Gmail's "All Mail").
+        SpecialUse::All => tr!("All"),
         SpecialUse::Other => {
             let leaf = if folder.delimiter.is_empty() {
                 folder.imap_name.as_str()
@@ -65,10 +67,13 @@ pub fn folder_delimiter_for_parent(folders: &[Folder], parent: Option<FolderId>)
 pub fn validate_folder_leaf(leaf: &str, delimiter: &str) -> Result<(), String> {
     let trimmed = leaf.trim();
     if trimmed.is_empty() {
-        return Err("Enter a folder name".to_string());
+        return Err(tr!("Enter a folder name"));
     }
     if !delimiter.is_empty() && trimmed.contains(delimiter) {
-        return Err(format!("Folder name cannot contain “{delimiter}”"));
+        return Err(trf!(
+            "Folder name cannot contain “{delimiter}”",
+            delimiter = delimiter
+        ));
     }
     Ok(())
 }

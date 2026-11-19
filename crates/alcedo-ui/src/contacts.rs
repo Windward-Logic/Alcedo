@@ -1,5 +1,6 @@
 //! Contacts canvas and preferences helpers.
 
+use alcedo_i18n::{ntr, tr, trf, trs};
 use std::cell::{Cell, RefCell};
 use std::collections::HashSet;
 use std::rc::Rc;
@@ -166,7 +167,7 @@ pub fn build_contacts_canvas(
     sender: Sender<ContactsMsg>,
 ) -> ContactsCanvas {
     let title = gtk::Label::builder()
-        .label("Contacts")
+        .label(tr!("Contacts"))
         .css_classes(["title"])
         .build();
     let header = adw::HeaderBar::builder().title_widget(&title).build();
@@ -174,7 +175,7 @@ pub fn build_contacts_canvas(
 
     let back_btn = gtk::Button::builder()
         .icon_name("go-previous-symbolic")
-        .tooltip_text("Back")
+        .tooltip_text(tr!("Back"))
         .build();
     back_btn.connect_clicked(move |_| on_back());
     header.pack_start(&back_btn);
@@ -183,21 +184,26 @@ pub fn build_contacts_canvas(
     let selected = Rc::new(RefCell::new(HashSet::new()));
 
     let select_btn = gtk::Button::builder()
-        .label("Select")
-        .tooltip_text("Select contacts")
+        .label(tr!("Select"))
+        .tooltip_text(tr!("Select contacts"))
         .css_classes(["flat"])
         .build();
     header.pack_end(&select_btn);
     header.pack_end(&help::help_button(TOPIC_CONTACTS));
 
     let search = gtk::SearchEntry::builder()
-        .placeholder_text("Search contacts")
+        .placeholder_text(tr!("Search contacts"))
         .hexpand(true)
         .build();
 
-    let filter_model = gtk::StringList::new(&["All", "Approved", "Unapproved", "Blocked"]);
+    let filter_model = gtk::StringList::new(&[
+        tr!("All").as_str(),
+        tr!("Approved").as_str(),
+        tr!("Unapproved").as_str(),
+        tr!("Blocked").as_str(),
+    ]);
     let filter = adw::ComboRow::builder()
-        .title("Show")
+        .title(tr!("Show"))
         .model(&filter_model)
         .build();
 
@@ -205,14 +211,16 @@ pub fn build_contacts_canvas(
     filter_group.add(&filter);
 
     let list_group = adw::PreferencesGroup::builder()
-        .title("Contacts")
-        .description("No contacts yet. Add someone or send a message.")
+        .title(tr!("Contacts"))
+        .description(tr!("No contacts yet. Add someone or send a message."))
         .build();
 
-    let groups_group = adw::PreferencesGroup::builder().title("Groups").build();
+    let groups_group = adw::PreferencesGroup::builder()
+        .title(tr!("Groups"))
+        .build();
 
     let add_contact = adw::ActionRow::builder()
-        .title("Add contact")
+        .title(tr!("Add contact"))
         .activatable(true)
         .build();
     add_contact.add_prefix(&gtk::Image::from_icon_name("list-add-symbolic"));
@@ -229,7 +237,7 @@ pub fn build_contacts_canvas(
     });
 
     let add_group = adw::ActionRow::builder()
-        .title("Add group")
+        .title(tr!("Add group"))
         .activatable(true)
         .build();
     add_group.add_prefix(&gtk::Image::from_icon_name("list-add-symbolic"));
@@ -240,7 +248,7 @@ pub fn build_contacts_canvas(
         }
     });
 
-    let add_group_prefs = adw::PreferencesGroup::builder().title("Add").build();
+    let add_group_prefs = adw::PreferencesGroup::builder().title(tr!("Add")).build();
     add_group_prefs.add(&add_contact);
     add_group_prefs.add(&add_group);
 
@@ -262,13 +270,13 @@ pub fn build_contacts_canvas(
 
     let delete_selected_btn = gtk::Button::builder()
         .icon_name("user-trash-symbolic")
-        .tooltip_text("Delete")
+        .tooltip_text(tr!("Delete"))
         .css_classes(["flat"])
         .focus_on_click(false)
         .build();
     let select_all_btn = gtk::Button::builder()
-        .label("Select All")
-        .tooltip_text("Select All")
+        .label(tr!("Select All"))
+        .tooltip_text(tr!("Select All"))
         .css_classes(["flat"])
         .focus_on_click(false)
         .build();
@@ -292,7 +300,7 @@ pub fn build_contacts_canvas(
     list_page.append(&selection_revealer);
 
     let list_root_page = adw::NavigationPage::builder()
-        .title("Contacts")
+        .title(tr!("Contacts"))
         .tag("list")
         .child(&list_page)
         .build();
@@ -416,8 +424,8 @@ pub fn build_contacts_canvas(
 /// Slim Contacts preferences page (open canvas + outgoing switch).
 pub fn build_contacts_prefs_page(sender: Sender<crate::app::AppMsg>) -> adw::PreferencesPage {
     let open_row = adw::ActionRow::builder()
-        .title("Open Contacts")
-        .subtitle("Search, add, and edit people in the Contacts view.")
+        .title(tr!("Open Contacts"))
+        .subtitle(tr!("Search, add, and edit people in the Contacts view."))
         .activatable(true)
         .build();
     open_row.add_prefix(&gtk::Image::from_icon_name(
@@ -432,21 +440,23 @@ pub fn build_contacts_prefs_page(sender: Sender<crate::app::AppMsg>) -> adw::Pre
     });
 
     let collect_row = adw::SwitchRow::builder()
-        .title("Add outgoing addresses to Unapproved")
-        .subtitle("Addresses you send to are saved as unapproved contacts until you keep them.")
+        .title(tr!("Add outgoing addresses to Unapproved"))
+        .subtitle(tr!(
+            "Addresses you send to are saved as unapproved contacts until you keep them."
+        ))
         .active(collect_outgoing_contacts())
         .build();
     bind_collect_outgoing_contacts(&collect_row);
 
     let contacts_group = adw::PreferencesGroup::builder()
-        .title("Address book")
+        .title(tr!("Address book"))
         .build();
     help::attach_group_help(&contacts_group, TOPIC_CONTACTS);
     contacts_group.add(&open_row);
     contacts_group.add(&collect_row);
 
     let page = adw::PreferencesPage::builder()
-        .title("Contacts")
+        .title(tr!("Contacts"))
         .icon_name("x-office-address-book-symbolic")
         .build();
     page.add(&contacts_group);
@@ -493,9 +503,9 @@ pub fn refresh_contact_rows(
 
     if contacts.is_empty() {
         canvas.list_group.set_description(Some(if query.is_empty() {
-            "No contacts yet. Add someone or send a message."
+            trs!("No contacts yet. Add someone or send a message.")
         } else {
-            "No matching contacts"
+            trs!("No matching contacts")
         }));
     } else {
         canvas.list_group.set_description(None::<&str>);
@@ -675,9 +685,9 @@ fn contact_list_row(
         subtitle.push_str(&group_names.join(", "));
     }
     if contact.status == ContactStatus::Suggested {
-        subtitle = format!("Unapproved, {subtitle}");
+        subtitle = trf!("Unapproved, {details}", details = subtitle);
     } else if contact.status == ContactStatus::Blocked {
-        subtitle = format!("Blocked, {subtitle}");
+        subtitle = trf!("Blocked, {details}", details = subtitle);
     }
     let row = adw::ActionRow::builder()
         .use_markup(false)
@@ -706,7 +716,7 @@ fn contact_list_row(
     if !selecting {
         let btn = gtk::Button::builder()
             .icon_name("user-trash-symbolic")
-            .tooltip_text("Delete contact")
+            .tooltip_text(tr!("Delete contact"))
             .css_classes(["flat"])
             .valign(gtk::Align::Center)
             .focus_on_click(false)
@@ -719,19 +729,19 @@ fn contact_list_row(
 
 fn delete_contacts_heading(n: usize) -> String {
     if n == 1 {
-        "Delete contact?".to_string()
+        tr!("Delete contact?")
     } else {
-        format!("Delete {n} contacts?")
+        ntr!("Delete {n} contact?", "Delete {n} contacts?", n)
     }
 }
 
 fn confirm_delete_contacts(parent: &gtk::Widget, n: usize, on_ok: impl FnOnce() + 'static) {
     let confirm = adw::AlertDialog::builder()
         .heading(delete_contacts_heading(n))
-        .body("This cannot be undone.")
+        .body(tr!("This cannot be undone."))
         .build();
-    confirm.add_response("cancel", "Cancel");
-    confirm.add_response("delete", "Delete");
+    confirm.add_response("cancel", &tr!("Cancel"));
+    confirm.add_response("delete", &tr!("Delete"));
     confirm.set_response_appearance("delete", adw::ResponseAppearance::Destructive);
     confirm.set_close_response("cancel");
     confirm.choose(
@@ -749,13 +759,17 @@ fn set_selection_mode(canvas: &ContactsCanvas, on: bool, sender: &Sender<Contact
     canvas.selecting.set(on);
     if !on {
         canvas.selected.borrow_mut().clear();
-        canvas.select_btn.set_label("Select");
-        canvas.select_btn.set_tooltip_text(Some("Select contacts"));
+        canvas.select_btn.set_label(&tr!("Select"));
+        canvas
+            .select_btn
+            .set_tooltip_text(Some(&tr!("Select contacts")));
         canvas.selection_revealer.set_reveal_child(false);
-        canvas.title.set_label("Contacts");
+        canvas.title.set_label(&tr!("Contacts"));
     } else {
-        canvas.select_btn.set_label("Cancel");
-        canvas.select_btn.set_tooltip_text(Some("Cancel selection"));
+        canvas.select_btn.set_label(&tr!("Cancel"));
+        canvas
+            .select_btn
+            .set_tooltip_text(Some(&tr!("Cancel selection")));
         canvas.selection_revealer.set_reveal_child(true);
         sync_selection_chrome(canvas, canvas.visible_ids.borrow().len());
     }
@@ -765,14 +779,10 @@ fn set_selection_mode(canvas: &ContactsCanvas, on: bool, sender: &Sender<Contact
 fn sync_selection_chrome(canvas: &ContactsCanvas, visible_count: usize) {
     if canvas.selecting.get() {
         let n = canvas.selected.borrow().len();
-        let title = if n == 1 {
-            "1 selected".to_string()
-        } else {
-            format!("{n} selected")
-        };
+        let title = ntr!("{n} selected", "{n} selected", n);
         canvas.title.set_label(&title);
     } else {
-        canvas.title.set_label("Contacts");
+        canvas.title.set_label(&tr!("Contacts"));
     }
     canvas
         .delete_selected_btn
@@ -792,11 +802,7 @@ fn sync_selection_chrome(canvas: &ContactsCanvas, visible_count: usize) {
 
 fn group_list_row(group: &ContactGroup) -> adw::ActionRow {
     let members = group.member_ids.len();
-    let subtitle = if members == 1 {
-        "1 member".to_string()
-    } else {
-        format!("{members} members")
-    };
+    let subtitle = ntr!("{n} member", "{n} members", members);
     adw::ActionRow::builder()
         .use_markup(false)
         .title(&group.name)
@@ -829,10 +835,10 @@ fn current_filter(filter: &adw::ComboRow, book: &ContactBook) -> ContactFilter {
 fn update_filter_model(filter: &adw::ComboRow, book: &ContactBook) {
     let selected = filter.selected();
     let mut labels = vec![
-        "All".to_string(),
-        "Approved".to_string(),
-        "Unapproved".to_string(),
-        "Blocked".to_string(),
+        tr!("All"),
+        tr!("Approved"),
+        tr!("Unapproved"),
+        tr!("Blocked"),
     ];
     for group in book.groups.iter().filter(|g| !g.is_system) {
         labels.push(group.name.clone());
@@ -887,23 +893,23 @@ fn push_contact_editor(
         group_ids: contact.map(|c| c.group_ids.clone()).unwrap_or_default(),
     }));
 
-    let name_row = adw::EntryRow::builder().title("Name").build();
+    let name_row = adw::EntryRow::builder().title(tr!("Name")).build();
     name_row.set_text(contact.map(|c| c.display_name.as_str()).unwrap_or(""));
-    let email_row = adw::EntryRow::builder().title("Email").build();
+    let email_row = adw::EntryRow::builder().title(tr!("Email")).build();
     email_row.set_text(contact.map(|c| c.email.as_str()).unwrap_or(""));
-    let nickname_row = adw::EntryRow::builder().title("Nickname").build();
+    let nickname_row = adw::EntryRow::builder().title(tr!("Nickname")).build();
     nickname_row.set_text(contact.map(|c| c.nickname.as_str()).unwrap_or(""));
-    let org_row = adw::EntryRow::builder().title("Organization").build();
+    let org_row = adw::EntryRow::builder().title(tr!("Organization")).build();
     org_row.set_text(contact.map(|c| c.organization.as_str()).unwrap_or(""));
-    let notes_row = adw::EntryRow::builder().title("Notes").build();
+    let notes_row = adw::EntryRow::builder().title(tr!("Notes")).build();
     notes_row.set_text(contact.map(|c| c.notes.as_str()).unwrap_or(""));
 
     let save_row = adw::ButtonRow::builder()
-        .title("Save")
+        .title(tr!("Save"))
         .sensitive(false)
         .build();
     let delete_row = adw::ButtonRow::builder()
-        .title("Delete contact")
+        .title(tr!("Delete contact"))
         .css_classes(["destructive-action"])
         .build();
 
@@ -921,8 +927,10 @@ fn push_contact_editor(
             .is_some_and(|email| remote_image_senders.contains(&email))
     });
     let remote_row = adw::SwitchRow::builder()
-        .title("Load remote images")
-        .subtitle("HTML mail from this address loads remote images automatically.")
+        .title(tr!("Load remote images"))
+        .subtitle(tr!(
+            "HTML mail from this address loads remote images automatically."
+        ))
         .active(sender_allowed)
         .build();
     let remote_group = adw::PreferencesGroup::new();
@@ -930,7 +938,9 @@ fn push_contact_editor(
     page.add(&remote_group);
 
     if contact.is_some_and(|c| c.status == ContactStatus::Suggested) {
-        let promote_row = adw::ButtonRow::builder().title("Save to contacts").build();
+        let promote_row = adw::ButtonRow::builder()
+            .title(tr!("Save to contacts"))
+            .build();
         let promote_group = adw::PreferencesGroup::new();
         promote_group.add(&promote_row);
         page.add(&promote_group);
@@ -1088,9 +1098,11 @@ fn push_group_editor(
         member_ids: group.map(|g| g.member_ids.clone()).unwrap_or_default(),
     }));
 
-    let name_row = adw::EntryRow::builder().title("Name").build();
+    let name_row = adw::EntryRow::builder().title(tr!("Name")).build();
     name_row.set_text(group.map(|g| g.name.as_str()).unwrap_or(""));
-    let members_group = adw::PreferencesGroup::builder().title("Members").build();
+    let members_group = adw::PreferencesGroup::builder()
+        .title(tr!("Members"))
+        .build();
     for member_id in group.map(|g| g.member_ids.as_slice()).unwrap_or(&[]) {
         if let Some(contact) = book.contacts.iter().find(|c| c.id == *member_id) {
             let title = if contact.display_name.is_empty() {
@@ -1103,11 +1115,11 @@ fn push_group_editor(
     }
 
     let save_row = adw::ButtonRow::builder()
-        .title("Save")
+        .title(tr!("Save"))
         .sensitive(group.is_some())
         .build();
     let delete_row = adw::ButtonRow::builder()
-        .title("Delete group")
+        .title(tr!("Delete group"))
         .css_classes(["destructive-action"])
         .build();
 
@@ -1166,11 +1178,11 @@ fn push_group_editor(
             move |_| {
                 let sender = sender.clone();
                 let confirm = adw::AlertDialog::builder()
-                    .heading("Delete group?")
-                    .body("Contacts are not deleted.")
+                    .heading(tr!("Delete group?"))
+                    .body(tr!("Contacts are not deleted."))
                     .build();
-                confirm.add_response("cancel", "Cancel");
-                confirm.add_response("delete", "Delete");
+                confirm.add_response("cancel", &tr!("Cancel"));
+                confirm.add_response("delete", &tr!("Delete"));
                 confirm.set_response_appearance("delete", adw::ResponseAppearance::Destructive);
                 confirm.set_close_response("cancel");
                 confirm.choose(Some(&parent), None::<&gtk::gio::Cancellable>, {
@@ -1344,11 +1356,12 @@ impl Component for ContactsModel {
                 if self.mock {
                     if self.mock_upsert_contact(draft) {
                         self.refresh_contacts_ui(&sender);
-                        self.toasts.add_toast(crate::toast::plain("Contact saved"));
+                        self.toasts
+                            .add_toast(crate::toast::plain(&tr!("Contact saved")));
                         self.activity.push(activity_log::entry(
                             activity_log::KIND_CONTACTS,
                             ActivityOutcome::Success,
-                            "Contact saved",
+                            tr!("Contact saved"),
                             "",
                         ));
                     }
@@ -1375,9 +1388,9 @@ impl Component for ContactsModel {
                 self.contacts_canvas.show_list();
                 self.refresh_contacts_ui(&sender);
                 let toast = if ids.len() == 1 {
-                    "Contact deleted".to_string()
+                    tr!("Contact deleted")
                 } else {
-                    format!("{} contacts deleted", ids.len())
+                    ntr!("{n} contact deleted", "{n} contacts deleted", ids.len())
                 };
                 self.toasts.add_toast(crate::toast::plain(&toast));
                 self.activity.push(activity_log::entry(
@@ -1394,11 +1407,12 @@ impl Component for ContactsModel {
                 if self.mock {
                     self.mock_upsert_group(draft);
                     self.refresh_contacts_ui(&sender);
-                    self.toasts.add_toast(crate::toast::plain("Group saved"));
+                    self.toasts
+                        .add_toast(crate::toast::plain(&tr!("Group saved")));
                     self.activity.push(activity_log::entry(
                         activity_log::KIND_CONTACTS,
                         ActivityOutcome::Success,
-                        "Group saved",
+                        tr!("Group saved"),
                         "",
                     ));
                 } else {
@@ -1413,11 +1427,12 @@ impl Component for ContactsModel {
                         contact.group_ids.retain(|gid| *gid != id);
                     }
                     self.refresh_contacts_ui(&sender);
-                    self.toasts.add_toast(crate::toast::plain("Group deleted"));
+                    self.toasts
+                        .add_toast(crate::toast::plain(&tr!("Group deleted")));
                     self.activity.push(activity_log::entry(
                         activity_log::KIND_CONTACTS,
                         ActivityOutcome::Success,
-                        "Group deleted",
+                        tr!("Group deleted"),
                         "",
                     ));
                 } else {
@@ -1434,11 +1449,12 @@ impl Component for ContactsModel {
                         promote_contact_in_memory(contacts, groups, id);
                     }
                     self.refresh_contacts_ui(&sender);
-                    self.toasts.add_toast(crate::toast::plain("Contact saved"));
+                    self.toasts
+                        .add_toast(crate::toast::plain(&tr!("Contact saved")));
                     self.activity.push(activity_log::entry(
                         activity_log::KIND_CONTACTS,
                         ActivityOutcome::Success,
-                        "Contact saved",
+                        tr!("Contact saved"),
                         "",
                     ));
                 } else {
@@ -1534,7 +1550,7 @@ impl ContactsModel {
         {
             drop(book);
             self.toasts
-                .add_toast(crate::toast::plain("Already in contacts"));
+                .add_toast(crate::toast::plain(&tr!("Already in contacts")));
             return false;
         }
         if let Some(id) = draft.id
@@ -1545,7 +1561,7 @@ impl ContactsModel {
         {
             drop(book);
             self.toasts
-                .add_toast(crate::toast::plain("Already in contacts"));
+                .add_toast(crate::toast::plain(&tr!("Already in contacts")));
             return false;
         }
         if let Some(existing) = book

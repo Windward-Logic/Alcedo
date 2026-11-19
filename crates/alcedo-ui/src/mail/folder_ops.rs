@@ -2,6 +2,7 @@
 
 use super::*;
 use crate::calendar_day_select::{calendar_naive_date, select_calendar_day};
+use alcedo_i18n::{ntr, tr, trc, trf, trs};
 
 impl MailModel {
     pub(super) fn update_folder_ops(&mut self, msg: MailMsg, sender: ComponentSender<MailModel>) {
@@ -28,26 +29,31 @@ impl MailModel {
                     .iter()
                     .find(|folder| folder.selectable && matches!(folder.special, SpecialUse::Trash))
                     .map(folder_display_name);
-                let heading = format!("Empty {}?", display);
-                let button = format!("Empty {}", display);
+                let heading = trf!("Empty {folder}?", folder = display);
+                // TRANSLATORS: button; {folder} is a folder name such as "Trash".
+                let button = trf!("Empty {folder}", folder = display);
                 let body = if matches!(folder.special, SpecialUse::Trash | SpecialUse::Junk) {
-                    format!(
-                        "All messages and folders in {} will be permanently deleted.",
-                        display
+                    trf!(
+                        "All messages and folders in {folder} will be permanently deleted.",
+                        folder = display
                     )
                 } else if let Some(trash_display) = trash_display {
-                    format!(
-                        "All messages in {} will be moved to {}, the same as deleting them in the list.",
-                        display, trash_display
+                    trf!(
+                        "All messages in {folder} will be moved to {trash}, the same as deleting them in the list.",
+                        folder = display,
+                        trash = trash_display
                     )
                 } else {
-                    format!("All messages in {} will be permanently deleted.", display)
+                    trf!(
+                        "All messages in {folder} will be permanently deleted.",
+                        folder = display
+                    )
                 };
                 let confirm = adw::AlertDialog::builder()
                     .heading(heading)
                     .body(body)
                     .build();
-                confirm.add_response("cancel", "Cancel");
+                confirm.add_response("cancel", &tr!("Cancel"));
                 confirm.add_response("empty", &button);
                 confirm.set_response_appearance("empty", adw::ResponseAppearance::Destructive);
                 confirm.set_close_response("cancel");
@@ -173,7 +179,7 @@ impl MailModel {
                     return;
                 }
                 let date_text = format_local_date(through);
-                let title = format!("Deleting messages on or before {date_text}…");
+                let title = trf!("Deleting messages on or before {date}…", date = date_text);
                 let toast = crate::toast::plain_with_timeout(&title, 0);
                 self.pending_delete_toast = Some(toast.clone());
                 self.toasts.add_toast(toast);
@@ -181,7 +187,7 @@ impl MailModel {
                 self.pending_delete_through = Some(through);
                 self.context_sync_target = Some(MailView::Folder(folder_id));
                 self.rebuild_folder_bar(&sender);
-                self.set_sync_activity(Some("Deleting older mail…"), &sender);
+                self.set_sync_activity(Some(trs!("Deleting older mail…")), &sender);
                 self.cmd.emit(UiCommand::DeleteFolderOnOrBefore {
                     folder: folder_id,
                     through,
@@ -377,11 +383,19 @@ impl MailModel {
     ) {
         let date_text = format_local_date(through);
         let title = if removed == 0 {
-            format!("No messages on or before {date_text}.")
+            trf!("No messages on or before {date}.", date = date_text)
         } else if moved_to_trash {
-            format!("Moved {removed} messages to Trash.")
+            ntr!(
+                "Moved {n} message to Trash.",
+                "Moved {n} messages to Trash.",
+                removed
+            )
         } else {
-            format!("Permanently deleted {removed} messages.")
+            ntr!(
+                "Permanently deleted {n} message.",
+                "Permanently deleted {n} messages.",
+                removed
+            )
         };
         let toast = crate::toast::plain(&title);
         toast.set_timeout(4);
@@ -583,16 +597,18 @@ impl MailModel {
             child.imap_name != folder.imap_name && child.imap_name.starts_with(&prefix)
         });
         let body = if has_children {
-            "This folder and its subfolders, including all messages, will be permanently deleted from the server."
+            tr!(
+                "This folder and its subfolders, including all messages, will be permanently deleted from the server."
+            )
         } else {
-            "All messages in this folder will be permanently deleted from the server."
+            tr!("All messages in this folder will be permanently deleted from the server.")
         };
         let confirm = adw::AlertDialog::builder()
-            .heading(format!("Delete “{display}”?"))
+            .heading(trf!("Delete “{folder}”?", folder = display))
             .body(body)
             .build();
-        confirm.add_response("cancel", "Cancel");
-        confirm.add_response("delete", "Delete");
+        confirm.add_response("cancel", &tr!("Cancel"));
+        confirm.add_response("delete", &tr!("Delete"));
         confirm.set_response_appearance("delete", adw::ResponseAppearance::Destructive);
         confirm.set_close_response("cancel");
         let sender = sender.clone();
@@ -743,7 +759,14 @@ impl MailModel {
 }
 
 pub(super) fn format_local_date(date: NaiveDate) -> String {
-    date.format("%A %-d %B %Y").to_string()
+    crate::local_time::format_date(
+        date,
+        // TRANSLATORS: strftime pattern for a date like "Monday 7 September 2026".
+        &trc!(
+            "strftime pattern: weekday, day, month, year",
+            "%A %-d %B %Y"
+        ),
+    )
 }
 
 pub(super) fn prompt_delete_folder_on_or_before(
@@ -762,30 +785,32 @@ pub(super) fn prompt_delete_folder_on_or_before(
         .show_day_names(true)
         .show_week_numbers(false)
         .build();
-    calendar.update_property(&[gtk::accessible::Property::Label("Delete through date")]);
+    calendar.update_property(&[gtk::accessible::Property::Label(&tr!(
+        "Delete through date"
+    ))]);
     select_calendar_day(&calendar, Local::now().date_naive());
 
     let extra = gtk::Box::new(gtk::Orientation::Vertical, 12);
     extra.append(&calendar);
 
     let body = if folder.special == SpecialUse::Trash {
-        "Messages on or before the selected date will be permanently deleted.".to_string()
+        tr!("Messages on or before the selected date will be permanently deleted.")
     } else if let Some(trash_display) = trash_display {
-        format!(
-            "Messages on or before the selected date will be moved to {}, the same as deleting them in the list.",
-            trash_display
+        trf!(
+            "Messages on or before the selected date will be moved to {trash}, the same as deleting them in the list.",
+            trash = trash_display
         )
     } else {
-        "Messages on or before the selected date will be permanently deleted.".to_string()
+        tr!("Messages on or before the selected date will be permanently deleted.")
     };
 
     let dialog = adw::AlertDialog::builder()
-        .heading("Delete messages through this date?")
+        .heading(tr!("Delete messages through this date?"))
         .body(body)
         .extra_child(&extra)
         .build();
-    dialog.add_response("cancel", "Cancel");
-    dialog.add_response("delete", "Delete");
+    dialog.add_response("cancel", &tr!("Cancel"));
+    dialog.add_response("delete", &tr!("Delete"));
     dialog.set_response_appearance("delete", adw::ResponseAppearance::Destructive);
     dialog.set_close_response("cancel");
 

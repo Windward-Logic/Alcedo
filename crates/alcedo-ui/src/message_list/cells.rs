@@ -1,6 +1,7 @@
 //! Row cell factories (`RelmColumn` impls) and the per-row visual updates they share.
 
 use super::*;
+use alcedo_i18n::{ntr, tr, trc, trs};
 
 /// Ellipsized labels otherwise report their full text as min width, so
 /// ColumnView rows cannot be measured at the viewport while resizing.
@@ -99,7 +100,7 @@ pub(super) fn apply_unread_visuals(pip: &gtk::Box, count_label: &gtk::Label, row
     } else {
         count_label.set_visible(true);
         count_label.set_label(&row.unread_count.to_string());
-        let unread_label = format!("{} unread", row.unread_count);
+        let unread_label = ntr!("{n} unread", "{n} unread", row.unread_count);
         count_label.update_property(&[gtk::accessible::Property::Label(unread_label.as_str())]);
     }
 }
@@ -132,7 +133,7 @@ pub(super) fn apply_folder_visuals(icon: &gtk::Image, label: &gtk::Label, envelo
         slot.borrow()
             .get(&envelope.folder_id)
             .map(|folder| (folder.name.clone(), folder.special.clone()))
-            .unwrap_or_else(|| ("Unknown".to_string(), SpecialUse::Other))
+            .unwrap_or_else(|| (tr!("Unknown"), SpecialUse::Other))
     });
     label.set_label(&name);
     icon.set_icon_name(Some(folder_icon_name(&special)));
@@ -224,9 +225,9 @@ pub(super) fn apply_subject_visuals(
         };
         expand_btn.set_icon_name(icon);
         expand_btn.set_tooltip_text(Some(if row.thread_expanded {
-            "Collapse thread"
+            trs!("Collapse thread")
         } else {
-            "Expand thread"
+            trs!("Expand thread")
         }));
     } else {
         expand_btn.set_visible(false);
@@ -345,7 +346,7 @@ pub(super) fn schedule_drag_column_cell_class(from: &gtk::Widget) {
 pub(super) fn apply_attachments_visuals(attachment: &gtk::Image, row: &MessageRow) {
     attachment.set_visible(row.any_attachments);
     attachment.set_tooltip_text(if row.any_attachments {
-        Some("Has attachments")
+        Some(trs!("Has attachments"))
     } else {
         None
     });
@@ -359,9 +360,9 @@ pub(super) fn apply_star_visuals(star: &gtk::Image, flagged_cell: &Cell<bool>, r
         "non-starred-symbolic"
     }));
     star.set_tooltip_text(Some(if row.any_flagged {
-        "Starred"
+        trs!("Starred")
     } else {
-        "Not starred"
+        trs!("Not starred")
     }));
 }
 
@@ -435,9 +436,9 @@ pub(super) fn apply_size_visuals(label: &gtk::Label, row: &MessageRow) {
     let bytes = row_display_size(row);
     label.set_label(&format_message_size(bytes));
     let tip = if bytes <= 0 {
-        "Size unknown".to_string()
+        tr!("Size unknown")
     } else {
-        format!("{bytes} bytes")
+        ntr!("{n} byte", "{n} bytes", bytes)
     };
     label.set_tooltip_text(Some(&tip));
 }
@@ -591,7 +592,7 @@ impl RelmColumn for DragHandleColumn {
             .margin_end(4)
             .build();
         handle.add_css_class("alcedo-msg-drag-handle");
-        handle.update_property(&[gtk::accessible::Property::Label("Drag to a folder")]);
+        handle.update_property(&[gtk::accessible::Property::Label(&tr!("Drag to a folder"))]);
         // Clicks go to the filling cell so the whole drag column is a hit target.
         handle.set_can_target(false);
 
@@ -609,7 +610,7 @@ impl RelmColumn for DragHandleColumn {
         root.set_halign(gtk::Align::Fill);
         root.set_valign(gtk::Align::Fill);
         root.set_can_target(true);
-        root.set_tooltip_text(Some("Drag to a folder"));
+        root.set_tooltip_text(Some(&tr!("Drag to a folder")));
         root.set_cursor_from_name(Some("grab"));
         root.append(&spacer);
         root.append(&handle);
@@ -640,7 +641,7 @@ impl RelmColumn for UnreadColumn {
     // Fixed pip width — not user-resizable.
 
     fn header_title() -> String {
-        "Unread".to_string()
+        tr!("Unread")
     }
 
     fn setup(_item: &gtk::ListItem) -> (Self::Root, Self::Widgets) {
@@ -692,7 +693,7 @@ impl RelmColumn for FromColumn {
     const ENABLE_RESIZE: bool = true;
 
     fn header_title() -> String {
-        "From".to_string()
+        tr!("From")
     }
 
     fn setup(_item: &gtk::ListItem) -> (Self::Root, Self::Widgets) {
@@ -735,7 +736,7 @@ impl RelmColumn for FolderColumn {
     const ENABLE_RESIZE: bool = true;
 
     fn header_title() -> String {
-        "Folder".to_string()
+        tr!("Folder")
     }
 
     fn setup(_item: &gtk::ListItem) -> (Self::Root, Self::Widgets) {
@@ -810,7 +811,7 @@ impl RelmColumn for AccountColumn {
     const ENABLE_RESIZE: bool = true;
 
     fn header_title() -> String {
-        "Account".to_string()
+        tr!("Account")
     }
 
     fn setup(_item: &gtk::ListItem) -> (Self::Root, Self::Widgets) {
@@ -865,7 +866,7 @@ impl RelmColumn for AccountChipColumn {
     const COLUMN_NAME: &'static str = "account-chip";
 
     fn header_title() -> String {
-        "Chip".to_string()
+        tr!("Chip")
     }
 
     fn setup(_item: &gtk::ListItem) -> (Self::Root, Self::Widgets) {
@@ -921,7 +922,7 @@ impl RelmColumn for SubjectColumn {
     const ENABLE_EXPAND: bool = true;
 
     fn header_title() -> String {
-        "Subject".to_string()
+        tr!("Subject")
     }
 
     fn setup(_item: &gtk::ListItem) -> (Self::Root, Self::Widgets) {
@@ -1041,7 +1042,7 @@ impl RelmColumn for AttachmentsColumn {
     // Paperclip is a fixed-size icon — not user-resizable.
 
     fn header_title() -> String {
-        "Attachments".to_string()
+        tr!("Attachments")
     }
 
     fn setup(_item: &gtk::ListItem) -> (Self::Root, Self::Widgets) {
@@ -1093,7 +1094,7 @@ impl RelmColumn for StarColumn {
     // Star is a fixed-size icon — not user-resizable.
 
     fn header_title() -> String {
-        "Starred".to_string()
+        tr!("Starred")
     }
 
     fn setup(_item: &gtk::ListItem) -> (Self::Root, Self::Widgets) {
@@ -1168,7 +1169,7 @@ impl RelmColumn for SizeColumn {
     const ENABLE_RESIZE: bool = true;
 
     fn header_title() -> String {
-        "Size".to_string()
+        tr!("Size")
     }
 
     fn setup(_item: &gtk::ListItem) -> (Self::Root, Self::Widgets) {
@@ -1212,7 +1213,7 @@ impl RelmColumn for DateColumn {
     const ENABLE_RESIZE: bool = true;
 
     fn header_title() -> String {
-        "Date".to_string()
+        tr!("Date")
     }
 
     fn setup(_item: &gtk::ListItem) -> (Self::Root, Self::Widgets) {
@@ -1256,7 +1257,7 @@ impl RelmColumn for DeletedColumn {
     const ENABLE_RESIZE: bool = true;
 
     fn header_title() -> String {
-        "Deleted".to_string()
+        tr!("Deleted")
     }
 
     fn setup(_item: &gtk::ListItem) -> (Self::Root, Self::Widgets) {
@@ -1318,13 +1319,21 @@ pub(super) fn apply_preview_visibility(root: &impl IsA<gtk::Widget>) {
 pub(super) fn format_relative_time(date: DateTime<Utc>) -> String {
     let local = date.with_timezone(&Local);
     let now = Local::now();
-    let time = local.format("%-I:%M %p").to_string();
+    let time = crate::calendar_clock::format_time_of_day(&local);
     if local.date_naive() == now.date_naive() {
         time
     } else if local.year() == now.year() {
-        format!("{} · {time}", local.format("%b %-d"))
+        let date = crate::local_time::format_date(
+            local.date_naive(),
+            &trc!("strftime pattern: short month, day", "%b %-d"),
+        );
+        format!("{date} · {time}")
     } else {
-        format!("{} · {time}", local.format("%b %-d, %Y"))
+        let date = crate::local_time::format_date(
+            local.date_naive(),
+            &trc!("strftime pattern: short month, day, year", "%b %-d, %Y"),
+        );
+        format!("{date} · {time}")
     }
 }
 

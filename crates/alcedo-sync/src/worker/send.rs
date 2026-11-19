@@ -6,6 +6,7 @@ use super::drafts::{delete_imap_draft, drafts_folder, imap_draft_has_server_uid}
 use super::pgp::send_pgp_compose;
 use super::sent_copy::{file_sent_copy, publish_local_sent_copy};
 use super::*;
+use alcedo_i18n::tr;
 
 pub(super) fn validate_compose_draft(draft: &mut ComposeDraft) -> Result<()> {
     use alcedo_core::{MAX_COMPOSE_INLINES, content_id_is_safe, filename_is_safe};
@@ -14,7 +15,7 @@ pub(super) fn validate_compose_draft(draft: &mut ComposeDraft) -> Result<()> {
     // No size cap here: the composer warns, and the SMTP server rejects
     // anything over its own limit with a clear error.
     if draft.inlines.len() > MAX_COMPOSE_INLINES {
-        return Err(Error::Other("Too many inline images (max 10)".to_string()));
+        return Err(Error::Other(tr!("Too many inline images (max 10)")));
     }
 
     for attachment in &mut draft.attachments {

@@ -1,6 +1,7 @@
 //! Account add, edit, removal, re-auth, PGP and identity glue.
 
 use super::*;
+use alcedo_i18n::{tr, trs};
 
 impl MailModel {
     pub(super) fn update_accounts(&mut self, msg: MailMsg, sender: ComponentSender<MailModel>) {
@@ -68,11 +69,11 @@ impl MailModel {
                     self.rebuild_folder_bar(&sender);
                     self.preferences_ui()
                         .dialog
-                        .add_toast(crate::toast::plain("Account saved"));
+                        .add_toast(crate::toast::plain(&tr!("Account saved")));
                     self.push_activity(
                         activity_log::KIND_ACCOUNT,
                         ActivityOutcome::Success,
-                        "Account saved",
+                        tr!("Account saved"),
                         "",
                         &saved.email,
                         "",
@@ -107,7 +108,7 @@ impl MailModel {
                         self.oauth_reauth_in_flight = true;
                         self.refresh_auth_chrome(&sender);
                         self.toasts
-                            .add_toast(crate::toast::plain("Opening browser for sign-in…"));
+                            .add_toast(crate::toast::plain(&tr!("Opening browser for sign-in…")));
                         let input = sender.input_sender().clone();
                         let account = account.clone();
                         let runtime = self.runtime.clone();
@@ -118,9 +119,9 @@ impl MailModel {
                         });
                         glib::spawn_future_local(async move {
                             match rx.await.unwrap_or_else(|_| {
-                                Err(alcedo_core::Error::Auth(
-                                    "OAuth sign-in was interrupted".to_string(),
-                                ))
+                                Err(alcedo_core::Error::Auth(tr!(
+                                    "OAuth sign-in was interrupted"
+                                )))
                             }) {
                                 Ok(tokens) => {
                                     let update = AccountSettingsUpdate {
@@ -175,15 +176,15 @@ impl MailModel {
                     if self.preferences_ui().dialog.is_mapped() {
                         self.preferences_ui()
                             .dialog
-                            .add_toast(crate::toast::plain("Account removed"));
+                            .add_toast(crate::toast::plain(&tr!("Account removed")));
                     } else {
                         self.toasts
-                            .add_toast(crate::toast::plain("Account removed"));
+                            .add_toast(crate::toast::plain(&tr!("Account removed")));
                     }
                     self.push_activity(
                         activity_log::KIND_ACCOUNT,
                         ActivityOutcome::Success,
-                        "Account removed",
+                        tr!("Account removed"),
                         "",
                         email,
                         "",
@@ -328,7 +329,7 @@ impl MailModel {
         );
         let toast = crate::toast::plain(&title);
         toast.set_timeout(8);
-        toast.set_button_label(Some("Open inbox"));
+        toast.set_button_label(Some(&tr!("Open inbox")));
         let sender = sender.clone();
         toast.connect_button_clicked(move |_| {
             sender.input(MailMsg::SelectAccount(account_id));
@@ -464,7 +465,9 @@ impl MailModel {
         }
 
         let account = self.accounts.iter().find(|acct| acct.id == account_id);
-        let account_label = account.map(|acct| acct.email.as_str()).unwrap_or("Account");
+        let account_label = account
+            .map(|acct| acct.email.as_str())
+            .unwrap_or_else(|| trs!("Account"));
         let title = crate::status_bar::format_sync_status(Some(raw));
         let outcome = if raw.eq_ignore_ascii_case("IDLE") || raw.eq_ignore_ascii_case("Polling") {
             ActivityOutcome::Success
@@ -586,12 +589,7 @@ impl MailModel {
         if names.is_empty() {
             return unnamed_offline_banner_title(self.auth_required.len(), keyring_locked);
         }
-        let list_hint = if keyring_locked {
-            MAIL_KEYRING_LIST_HINT
-        } else {
-            MAIL_SIGN_IN_LIST_HINT
-        };
-        offline_banner_title(&names, "account", keyring_locked, list_hint)
+        offline_banner_title(&names, keyring_locked)
     }
 
     /// Banner button text for the account it will act on, or `None` when
@@ -604,7 +602,7 @@ impl MailModel {
             .primary_broken_account_id()
             .and_then(|id| self.accounts.iter().find(|account| account.id == id))?;
         if self.oauth_reauth_in_flight {
-            return Some("Waiting for browser…".to_string());
+            return Some(tr!("Waiting for browser…"));
         }
         let step = match account.auth {
             AuthMethod::OAuth2 { .. } => SignInStep::Browser,

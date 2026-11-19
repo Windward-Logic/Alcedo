@@ -17,3 +17,4 @@ data/gschemas.compiled
 
 # Debian package output (scripts/build-deb.sh)
 /dist
+__pycache__/

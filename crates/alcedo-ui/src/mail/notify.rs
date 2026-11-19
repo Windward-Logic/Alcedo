@@ -1,6 +1,7 @@
 //! Desktop-notification follow-ups: open, mark read, delete and copy code.
 
 use super::*;
+use alcedo_i18n::tr;
 
 impl MailModel {
     pub(super) fn update_notify(&mut self, msg: MailMsg, sender: ComponentSender<MailModel>) {
@@ -34,7 +35,8 @@ impl MailModel {
                 if cleanup_verification_codes() {
                     self.cleanup_verification_message(id, &sender);
                 } else {
-                    self.toasts.add_toast(crate::toast::plain("Code copied"));
+                    self.toasts
+                        .add_toast(crate::toast::plain(&tr!("Code copied")));
                 }
                 self.notified_otp.remove(&id);
             }

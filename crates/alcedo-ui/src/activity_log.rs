@@ -1,5 +1,6 @@
 //! Session activity log: ring buffer, formatters, and Activity dialog.
 
+use alcedo_i18n::{tr, trs};
 use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::rc::Rc;
@@ -352,27 +353,27 @@ pub fn present_activity_dialog(parent: &impl IsA<gtk::Widget>, log: &Rc<Activity
     }
 
     let close_btn = gtk::Button::builder()
-        .label("Close")
+        .label(tr!("Close"))
         .css_classes(["suggested-action"])
         .build();
     let clear_btn = gtk::Button::builder()
-        .label("Clear")
-        .tooltip_text("Clear activity log")
+        .label(tr!("Clear"))
+        .tooltip_text(tr!("Clear activity log"))
         .build();
     let copy_btn = gtk::Button::builder()
-        .label("Copy")
-        .tooltip_text("Copy activity log")
+        .label(tr!("Copy"))
+        .tooltip_text(tr!("Copy activity log"))
         .build();
     let save_btn = gtk::Button::builder()
-        .label("Save…")
-        .tooltip_text("Save activity log to a file")
+        .label(tr!("Save…"))
+        .tooltip_text(tr!("Save activity log to a file"))
         .build();
 
     let header = adw::HeaderBar::new();
     header.set_show_start_title_buttons(false);
     header.set_show_end_title_buttons(false);
     let title_label = gtk::Label::builder()
-        .label("Activity")
+        .label(tr!("Activity"))
         .css_classes(["title"])
         .build();
     header.set_title_widget(Some(&title_label));
@@ -389,14 +390,14 @@ pub fn present_activity_dialog(parent: &impl IsA<gtk::Widget>, log: &Rc<Activity
         .margin_start(12)
         .margin_end(12)
         .build();
-    filter_box.update_property(&[gtk::accessible::Property::Label("Activity filters")]);
+    filter_box.update_property(&[gtk::accessible::Property::Label(&tr!("Activity filters"))]);
 
     let filter_specs: [(&str, u32); 5] = [
-        ("Mail", KIND_MAIL),
-        ("Sync", KIND_SYNC),
-        ("Accounts", KIND_ACCOUNT),
-        ("Contacts", KIND_CONTACTS),
-        ("Failures", KIND_FAILURE),
+        (trs!("Mail"), KIND_MAIL),
+        (trs!("Sync"), KIND_SYNC),
+        (trs!("Accounts"), KIND_ACCOUNT),
+        (trs!("Contacts"), KIND_CONTACTS),
+        (trs!("Failures"), KIND_FAILURE),
     ];
     let mut filter_buttons = Vec::new();
     for (label, bit) in filter_specs {
@@ -410,7 +411,7 @@ pub fn present_activity_dialog(parent: &impl IsA<gtk::Widget>, log: &Rc<Activity
         .css_classes(["boxed-list"])
         .activate_on_single_click(false)
         .build();
-    listbox.update_property(&[gtk::accessible::Property::Label("Activity entries")]);
+    listbox.update_property(&[gtk::accessible::Property::Label(&tr!("Activity entries"))]);
 
     let list_scroll = gtk::ScrolledWindow::builder()
         .hscrollbar_policy(gtk::PolicyType::Never)
@@ -421,12 +422,12 @@ pub fn present_activity_dialog(parent: &impl IsA<gtk::Widget>, log: &Rc<Activity
         .build();
 
     let empty_page = adw::StatusPage::builder()
-        .title("No activity yet")
-        .description("Actions you take in Alcedo show up here.")
+        .title(tr!("No activity yet"))
+        .description(tr!("Actions you take in Alcedo show up here."))
         .build();
     let filtered_empty_page = adw::StatusPage::builder()
-        .title("No matching activity")
-        .description("Turn on a filter to see those entries.")
+        .title(tr!("No matching activity"))
+        .description(tr!("Turn on a filter to see those entries."))
         .build();
 
     let stack = gtk::Stack::new();
@@ -446,7 +447,7 @@ pub fn present_activity_dialog(parent: &impl IsA<gtk::Widget>, log: &Rc<Activity
     toolbar.set_content(Some(&toast_overlay));
 
     let dialog = adw::Dialog::builder()
-        .title("Activity")
+        .title(tr!("Activity"))
         .content_width(720)
         .content_height(520)
         .default_widget(&close_btn)
@@ -478,7 +479,7 @@ pub fn present_activity_dialog(parent: &impl IsA<gtk::Widget>, log: &Rc<Activity
     copy_btn.connect_clicked(move |_| {
         let text = format_activity_export(&log_for_copy.snapshot(), Local::now());
         crate::notifications::copy_text_to_clipboard(&text);
-        toasts_for_copy.add_toast(crate::toast::plain("Activity log copied"));
+        toasts_for_copy.add_toast(crate::toast::plain(&tr!("Activity log copied")));
     });
 
     let log_for_save = log.clone();
@@ -490,10 +491,10 @@ pub fn present_activity_dialog(parent: &impl IsA<gtk::Widget>, log: &Rc<Activity
         let filename = suggested_activity_filename(exported_at);
 
         let file_dialog = gtk::FileDialog::new();
-        file_dialog.set_title("Save activity log");
+        file_dialog.set_title(&tr!("Save activity log"));
         file_dialog.set_initial_name(Some(&filename));
         let filter = gtk::FileFilter::new();
-        filter.set_name(Some("Text file"));
+        filter.set_name(Some(trs!("Text file")));
         filter.add_mime_type("text/plain");
         filter.add_pattern("*.txt");
         file_dialog.set_default_filter(Some(&filter));
@@ -506,22 +507,22 @@ pub fn present_activity_dialog(parent: &impl IsA<gtk::Widget>, log: &Rc<Activity
             move |result| match result {
                 Ok(file) => {
                     let Some(path) = file.path() else {
-                        toasts.add_toast(crate::toast::plain("Could not save activity log"));
+                        toasts.add_toast(crate::toast::plain(&tr!("Could not save activity log")));
                         return;
                     };
                     gtk::glib::spawn_future_local(async move {
                         let written =
                             crate::blocking_io::run(move || std::fs::write(&path, text.as_bytes()));
                         let message = match written.await {
-                            Some(Ok(())) => "Activity log saved",
-                            _ => "Could not save activity log",
+                            Some(Ok(())) => trs!("Activity log saved"),
+                            _ => trs!("Could not save activity log"),
                         };
                         toasts.add_toast(crate::toast::plain(message));
                     });
                 }
                 Err(err) if err.matches(gio::IOErrorEnum::Cancelled) => {}
                 Err(_) => {
-                    toasts.add_toast(crate::toast::plain("Could not save activity log"));
+                    toasts.add_toast(crate::toast::plain(&tr!("Could not save activity log")));
                 }
             },
         );
@@ -532,11 +533,13 @@ pub fn present_activity_dialog(parent: &impl IsA<gtk::Widget>, log: &Rc<Activity
     let dialog_for_clear = dialog.clone();
     clear_btn.connect_clicked(move |_| {
         let confirm = adw::AlertDialog::builder()
-            .heading("Clear activity log?")
-            .body("This removes all entries for this session. This cannot be undone.")
+            .heading(tr!("Clear activity log?"))
+            .body(tr!(
+                "This removes all entries for this session. This cannot be undone."
+            ))
             .build();
-        confirm.add_response("cancel", "Cancel");
-        confirm.add_response("clear", "Clear");
+        confirm.add_response("cancel", &tr!("Cancel"));
+        confirm.add_response("clear", &tr!("Clear"));
         confirm.set_response_appearance("clear", adw::ResponseAppearance::Destructive);
         confirm.set_default_response(Some("cancel"));
         confirm.set_close_response("cancel");

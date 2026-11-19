@@ -1,5 +1,6 @@
 //! Sent folder copies: APPEND, Message-ID dedupe and attachment structure for sent rows.
 
+use alcedo_i18n::tr;
 use std::time::Duration;
 
 use super::backfill::{persist_fetched_message_ids, persist_fetched_sizes};
@@ -820,7 +821,7 @@ pub(super) async fn file_sent_copy(
         return Ok(());
     };
 
-    emit_status(events, account, "Saving to Sent…".to_string());
+    emit_status(events, account, tr!("Saving to Sent…"));
     let provider_copy = provider_sent_copy(state, account, &sent, rfc822).await?;
     let resolved = match provider_copy {
         Some(uid) => Some(uid),

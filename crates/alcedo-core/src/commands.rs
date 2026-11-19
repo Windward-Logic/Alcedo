@@ -1,3 +1,4 @@
+use alcedo_i18n::trs;
 use serde::{Deserialize, Serialize};
 
 use crate::account::{AuthMethod, OAuthTokens, SpecialUse};
@@ -462,7 +463,7 @@ impl ComposeFormat {
 
     pub fn dropdown_label(self) -> &'static str {
         match self {
-            Self::Plain => "Plain text",
+            Self::Plain => trs!("Plain text"),
             Self::Html => "HTML",
             Self::Markdown => "Markdown",
         }

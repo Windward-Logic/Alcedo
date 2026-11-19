@@ -1,5 +1,6 @@
 //! RFC 8058 one-click list unsubscribe (HTTPS POST).
 
+use alcedo_i18n::{n_, tr, trf, trm};
 use std::net::SocketAddr;
 use std::time::Duration;
 
@@ -9,12 +10,12 @@ use alcedo_core::{
 use alcedo_store::StoreHandle;
 
 const POST_BODY: &str = "List-Unsubscribe=One-Click";
-const FAILURE_MESSAGE: &str = "Could not unsubscribe. Try the link in the message.";
+const FAILURE_MESSAGE: &str = n_!("Could not unsubscribe. Try the link in the message.");
 
 pub async fn one_click_unsubscribe(store: &StoreHandle, id: MessageId) -> (bool, String) {
     match one_click_unsubscribe_inner(store, id).await {
         Ok(message) => (true, message),
-        Err(_) => (false, FAILURE_MESSAGE.to_string()),
+        Err(_) => (false, trm!(FAILURE_MESSAGE).to_string()),
     }
 }
 
@@ -73,8 +74,8 @@ async fn one_click_unsubscribe_inner(store: &StoreHandle, id: MessageId) -> Resu
         .first()
         .map(|addr| addr.display_name())
         .filter(|name| !name.is_empty())
-        .unwrap_or_else(|| "this mailing list".to_string());
-    Ok(format!("Unsubscribed from {sender}."))
+        .unwrap_or_else(|| tr!("this mailing list"));
+    Ok(trf!("Unsubscribed from {sender}.", sender = sender))
 }
 
 async fn resolve_public_host(host: &str) -> Result<Vec<SocketAddr>> {

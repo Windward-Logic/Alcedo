@@ -1,5 +1,6 @@
 //! Message rules: matching, planning, and validation.
 
+use alcedo_i18n::{tr, trs};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
@@ -144,27 +145,27 @@ pub fn default_stop_processing(actions: &[RuleAction]) -> bool {
 
 pub fn validate_rule(rule: &MessageRule) -> Result<(), &'static str> {
     if rule.name.trim().is_empty() {
-        return Err("Enter a name.");
+        return Err(trs!("Enter a name."));
     }
     if rule.conditions.is_empty() {
-        return Err("Add a condition.");
+        return Err(trs!("Add a condition."));
     }
     if rule.actions.is_empty() {
-        return Err("Add an action.");
+        return Err(trs!("Add an action."));
     }
     for condition in &rule.conditions {
         if condition.field == RuleField::HasAttachment {
             continue;
         }
         if condition.value.trim().is_empty() {
-            return Err("Add a condition.");
+            return Err(trs!("Add a condition."));
         }
     }
     for action in &rule.actions {
         match action {
             RuleAction::MoveToFolder(id) | RuleAction::CopyToFolder(id) => {
                 if id.0 == 0 {
-                    return Err("Choose a folder.");
+                    return Err(trs!("Choose a folder."));
                 }
             }
             _ => {}
@@ -318,23 +319,23 @@ fn apply_actions(plan: &mut RulePlan, actions: &[RuleAction]) {
 
 fn field_label(field: RuleField) -> &'static str {
     match field {
-        RuleField::From => "From",
-        RuleField::To => "To",
-        RuleField::Cc => "Cc",
-        RuleField::Recipient => "Recipient",
-        RuleField::Subject => "Subject",
-        RuleField::HasAttachment => "Has attachment",
+        RuleField::From => trs!("From"),
+        RuleField::To => trs!("To"),
+        RuleField::Cc => trs!("Cc"),
+        RuleField::Recipient => trs!("Recipient"),
+        RuleField::Subject => trs!("Subject"),
+        RuleField::HasAttachment => trs!("Has attachment"),
     }
 }
 
 fn op_label(op: RuleOp) -> &'static str {
     match op {
-        RuleOp::Contains => "contains",
-        RuleOp::NotContains => "does not contain",
-        RuleOp::Is => "is",
-        RuleOp::IsNot => "is not",
-        RuleOp::StartsWith => "starts with",
-        RuleOp::EndsWith => "ends with",
+        RuleOp::Contains => trs!("contains"),
+        RuleOp::NotContains => trs!("does not contain"),
+        RuleOp::Is => trs!("is"),
+        RuleOp::IsNot => trs!("is not"),
+        RuleOp::StartsWith => trs!("starts with"),
+        RuleOp::EndsWith => trs!("ends with"),
     }
 }
 
@@ -343,11 +344,11 @@ fn action_label(action: &RuleAction, folders: &[Folder]) -> String {
         RuleAction::MoveToFolder(id) | RuleAction::CopyToFolder(id) => {
             folder_display_name(*id, folders)
         }
-        RuleAction::MarkRead => "Mark as read".to_string(),
-        RuleAction::MarkUnread => "Mark as unread".to_string(),
-        RuleAction::Star => "Star".to_string(),
-        RuleAction::Unstar => "Unstar".to_string(),
-        RuleAction::MoveToTrash => "Trash".to_string(),
+        RuleAction::MarkRead => tr!("Mark as read"),
+        RuleAction::MarkUnread => tr!("Mark as unread"),
+        RuleAction::Star => tr!("Star"),
+        RuleAction::Unstar => tr!("Unstar"),
+        RuleAction::MoveToTrash => tr!("Trash"),
     }
 }
 
@@ -376,13 +377,13 @@ fn server_action_label(action: &ServerRuleAction, folders: &[Folder]) -> String 
         ServerRuleAction::MoveToFolder { folder_id, .. }
         | ServerRuleAction::CopyToFolder { folder_id, .. } => match folder_id {
             Some(id) => folder_display_name(*id, folders),
-            None => "Missing folder".to_string(),
+            None => tr!("Missing folder"),
         },
-        ServerRuleAction::MarkRead => "Mark as read".to_string(),
-        ServerRuleAction::MarkUnread => "Mark as unread".to_string(),
-        ServerRuleAction::Star => "Star".to_string(),
-        ServerRuleAction::Unstar => "Unstar".to_string(),
-        ServerRuleAction::MoveToTrash => "Trash".to_string(),
+        ServerRuleAction::MarkRead => tr!("Mark as read"),
+        ServerRuleAction::MarkUnread => tr!("Mark as unread"),
+        ServerRuleAction::Star => tr!("Star"),
+        ServerRuleAction::Unstar => tr!("Unstar"),
+        ServerRuleAction::MoveToTrash => tr!("Trash"),
     }
 }
 

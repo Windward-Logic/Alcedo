@@ -1,12 +1,6 @@
 //! Copy for the sign-in banner above mail.
 
-/// Shown for four or more offline mail accounts, which the title cannot all name.
-pub(crate) const MAIL_SIGN_IN_LIST_HINT: &str =
-    "Open the account menu above the folder list to see the rest, then sign in again.";
-
-/// Shown for four or more mail accounts offline because the keyring is locked.
-pub(crate) const MAIL_KEYRING_LIST_HINT: &str =
-    "Open the account menu above the folder list to see the rest.";
+use alcedo_i18n::{ntr, tr, trf};
 
 /// What one offline account asks of the person before it can reconnect.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -30,23 +24,31 @@ pub(crate) fn sign_in_button_label(
 ) -> String {
     if offline_count <= 1 {
         return match step {
-            SignInStep::Browser => "Sign in".to_string(),
-            SignInStep::Password => "Update password".to_string(),
+            SignInStep::Browser => tr!("Sign in"),
+            SignInStep::Password => tr!("Update password"),
         };
     }
     let name = shorten(account_name);
     match step {
-        SignInStep::Browser => format!("Sign in to {name}"),
-        SignInStep::Password => format!("Fix {name}"),
+        SignInStep::Browser => trf!("Sign in to {account}", account = name),
+        SignInStep::Password => trf!("Fix {account}", account = name),
     }
 }
 
 /// Banner title when accounts are offline but none can be named.
 pub(crate) fn unnamed_offline_banner_title(count: usize, keyring_locked: bool) -> String {
     if keyring_locked {
-        format!("{count} accounts are offline because the keyring is locked.")
+        ntr!(
+            "{n} account is offline because the keyring is locked.",
+            "{n} accounts are offline because the keyring is locked.",
+            count
+        )
     } else {
-        format!("{count} accounts are offline. Sign in again to reconnect.")
+        ntr!(
+            "{n} account is offline. Sign in again to reconnect.",
+            "{n} accounts are offline. Sign in again to reconnect.",
+            count
+        )
     }
 }
 
@@ -58,44 +60,55 @@ fn shorten(name: &str) -> String {
     format!("{kept}…")
 }
 
-/// Banner title for accounts that cannot sign in.
+/// Banner title for mail accounts that cannot sign in.
 ///
-/// One to three names are listed. More than that names the first two and
-/// `list_hint` tells the person where to see the rest.
-pub fn offline_banner_title(
-    names: &[String],
-    noun: &str,
-    keyring_locked: bool,
-    list_hint: &str,
-) -> String {
+/// One to three names are listed. More than that names the first two and says
+/// where to see the rest. Each case is one whole sentence, so every language
+/// can phrase it.
+pub fn offline_banner_title(names: &[String], keyring_locked: bool) -> String {
     let count = names.len();
+    if count == 0 {
+        return String::new();
+    }
+    if count > 3 {
+        let (first, second) = first_two(names);
+        return if keyring_locked {
+            // TRANSLATORS: {n} is four or more; {first} and {second} are account names.
+            ntr!(
+                "{n} account is offline because the keyring is locked, including {first} and {second}. Open the account menu above the folder list to see the rest. Alcedo will reconnect after you unlock it.",
+                "{n} accounts are offline because the keyring is locked, including {first} and {second}. Open the account menu above the folder list to see the rest. Alcedo will reconnect after you unlock it.",
+                count,
+                first = first,
+                second = second
+            )
+        } else {
+            // TRANSLATORS: {n} is four or more; {first} and {second} are account names.
+            ntr!(
+                "{n} account is offline, including {first} and {second}. Open the account menu above the folder list to see the rest, then sign in again.",
+                "{n} accounts are offline, including {first} and {second}. Open the account menu above the folder list to see the rest, then sign in again.",
+                count,
+                first = first,
+                second = second
+            )
+        };
+    }
     let who = join_names(names);
     if keyring_locked {
-        match count {
-            0 => String::new(),
-            1 => format!(
-                "{who} is offline because the keyring is locked. Unlock it and Alcedo will reconnect."
-            ),
-            2 | 3 => format!(
-                "{who} are offline because the keyring is locked. Unlock it and Alcedo will reconnect."
-            ),
-            _ => {
-                let (first, second) = first_two(names);
-                format!(
-                    "{count} {noun}s are offline because the keyring is locked, including {first} and {second}. {list_hint} Alcedo will reconnect after you unlock it."
-                )
-            }
-        }
+        // TRANSLATORS: {names} is one to three account names, already joined.
+        ntr!(
+            "{names} is offline because the keyring is locked. Unlock it and Alcedo will reconnect.",
+            "{names} are offline because the keyring is locked. Unlock it and Alcedo will reconnect.",
+            count,
+            names = who
+        )
     } else {
-        match count {
-            0 => String::new(),
-            1 => format!("{who} is offline. Sign in again to reconnect."),
-            2 | 3 => format!("{who} are offline. Sign in again to reconnect."),
-            _ => {
-                let (first, second) = first_two(names);
-                format!("{count} {noun}s are offline, including {first} and {second}. {list_hint}")
-            }
-        }
+        // TRANSLATORS: {names} is one to three account names, already joined.
+        ntr!(
+            "{names} is offline. Sign in again to reconnect.",
+            "{names} are offline. Sign in again to reconnect.",
+            count,
+            names = who
+        )
     }
 }
 
@@ -103,11 +116,10 @@ fn join_names(names: &[String]) -> String {
     match names {
         [] => String::new(),
         [one] => one.clone(),
-        [first, second] => format!("{first} and {second}"),
-        _ => {
-            let (last, rest) = names.split_last().unwrap();
-            format!("{}, and {last}", rest.join(", "))
-        }
+        // TRANSLATORS: two account names in a list.
+        [first, second] => trf!("{first} and {second}", first = first, second = second),
+        // TRANSLATORS: {list} is two or more names separated by ", "; {last} is the final name.
+        [rest @ .., last] => trf!("{list}, and {last}", list = rest.join(", "), last = last),
     }
 }
 
@@ -125,8 +137,6 @@ mod tests {
     fn names(items: &[&str]) -> Vec<String> {
         items.iter().map(|item| (*item).to_string()).collect()
     }
-
-    const MAIL_HINT: &str = MAIL_SIGN_IN_LIST_HINT;
 
     #[test]
     fn single_offline_account_button_is_the_bare_verb() {
@@ -174,18 +184,13 @@ mod tests {
 
     #[test]
     fn one_account_is_named() {
-        let title = offline_banner_title(&names(&["Tesla"]), "account", false, MAIL_HINT);
+        let title = offline_banner_title(&names(&["Tesla"]), false);
         assert_eq!(title, "Tesla is offline. Sign in again to reconnect.");
     }
 
     #[test]
     fn two_accounts_are_both_named() {
-        let title = offline_banner_title(
-            &names(&["Tesla", "CodeInfusion"]),
-            "account",
-            false,
-            MAIL_HINT,
-        );
+        let title = offline_banner_title(&names(&["Tesla", "CodeInfusion"]), false);
         assert_eq!(
             title,
             "Tesla and CodeInfusion are offline. Sign in again to reconnect."
@@ -196,9 +201,7 @@ mod tests {
     fn many_accounts_name_two_and_point_at_the_menu() {
         let title = offline_banner_title(
             &names(&["Tesla", "CodeInfusion", "Work", "Personal"]),
-            "account",
             false,
-            MAIL_HINT,
         );
         assert_eq!(
             title,
@@ -208,12 +211,7 @@ mod tests {
 
     #[test]
     fn keyring_lock_says_to_unlock_instead_of_signing_in() {
-        let title = offline_banner_title(
-            &names(&["Tesla", "CodeInfusion"]),
-            "account",
-            true,
-            MAIL_HINT,
-        );
+        let title = offline_banner_title(&names(&["Tesla", "CodeInfusion"]), true);
         assert_eq!(
             title,
             "Tesla and CodeInfusion are offline because the keyring is locked. Unlock it and Alcedo will reconnect."

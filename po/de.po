@@ -1,0 +1,4653 @@
+# German translation of Alcedo.
+# Copyright (C) Windward Logic. Same licence as Alcedo (GPL-3.0-or-later).
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: alcedo\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: crates/alcedo-core/src/attachment.rs:219
+#: crates/alcedo-core/src/attachment.rs:221
+#: crates/alcedo-ui/src/compose_attachments.rs:29
+#: crates/alcedo-ui/src/search_autocomplete.rs:536
+msgid "{size} MB"
+msgstr "{size} MB"
+
+#: crates/alcedo-core/src/attachment.rs:236
+msgid "Attachments total about {total}, over this server's {limit} limit"
+msgstr "Die Anhänge umfassen etwa {total} und überschreiten das Limit dieses Servers von {limit}"
+
+#: crates/alcedo-core/src/attachment.rs:241
+msgid "Attachments total about {total}. Many mail servers reject messages over {limit}"
+msgstr "Die Anhänge umfassen etwa {total}. Viele Mailserver lehnen Nachrichten über {limit} ab"
+
+#: crates/alcedo-core/src/commands.rs:466
+#: crates/alcedo-ui/src/compose_snippets.rs:253
+#: crates/alcedo-ui/src/compose_toolbar.rs:741
+#: crates/alcedo-ui/src/preferences.rs:239
+msgid "Plain text"
+msgstr "Nur-Text"
+
+#: crates/alcedo-core/src/compose_checks.rs:16
+msgid "Send Without a Subject?"
+msgstr "Ohne Betreff senden?"
+
+#: crates/alcedo-core/src/compose_checks.rs:17
+msgid "Send Without an Attachment?"
+msgstr "Ohne Anhang senden?"
+
+#: crates/alcedo-core/src/compose_checks.rs:24
+msgid "This message has no subject. Recipients may overlook it."
+msgstr "Diese Nachricht hat keinen Betreff. Empfänger könnten sie übersehen."
+
+#: crates/alcedo-core/src/compose_checks.rs:26
+msgid "The message mentions an attachment, but nothing is attached."
+msgstr "Die Nachricht erwähnt einen Anhang, aber es ist nichts angehängt."
+
+#: crates/alcedo-core/src/compose_status.rs:22
+msgid "Draft saved on this computer"
+msgstr "Entwurf auf diesem Computer gespeichert"
+
+#: crates/alcedo-core/src/compose_status.rs:23
+msgid "Draft saved to Drafts"
+msgstr "Entwurf in Entwürfe gespeichert"
+
+#: crates/alcedo-core/src/compose_status.rs:24
+msgid "Couldn't save to Drafts — kept on this computer"
+msgstr "Speichern in Entwürfe fehlgeschlagen – auf diesem Computer behalten"
+
+#: crates/alcedo-core/src/compose_status.rs:30
+msgid "Sending in {n} second"
+msgid_plural "Sending in {n} seconds"
+msgstr[0] "Senden in {n} Sekunde"
+msgstr[1] "Senden in {n} Sekunden"
+
+#: crates/alcedo-core/src/compose_status.rs:39
+msgid "Sending canceled — message kept as a draft"
+msgstr "Senden abgebrochen – Nachricht als Entwurf behalten"
+
+#: crates/alcedo-core/src/compose_status.rs:44
+msgid "Finish sending this message?"
+msgstr "Senden dieser Nachricht abschließen?"
+
+#: crates/alcedo-core/src/compose_status.rs:46
+msgid "Finish sending {n} message?"
+msgid_plural "Finish sending {n} messages?"
+msgstr[0] "Senden von {n} Nachricht abschließen?"
+msgstr[1] "Senden von {n} Nachrichten abschließen?"
+
+#: crates/alcedo-core/src/compose_status.rs:52
+msgid "Alcedo closed before this send finished. It may or may not have been delivered, so check Sent before sending again."
+msgstr "Alcedo wurde beendet, bevor dieser Versand abgeschlossen war. Die Nachricht wurde möglicherweise zugestellt; prüfen Sie Gesendet, bevor Sie sie erneut senden."
+
+#: crates/alcedo-core/src/compose_status.rs:63
+msgid "this account"
+msgstr "dieses Konto"
+
+#: crates/alcedo-core/src/compose_status.rs:67
+msgid "Save Changes to {account}?"
+msgstr "Änderungen an {account} speichern?"
+
+#: crates/alcedo-core/src/compose_status.rs:72
+msgid "Your changes will be lost if you don't save them."
+msgstr "Ihre Änderungen gehen verloren, wenn Sie sie nicht speichern."
+
+#: crates/alcedo-core/src/contact.rs:67
+msgid "Group name is required"
+msgstr "Gruppenname ist erforderlich"
+
+#: crates/alcedo-core/src/contact.rs:70
+msgid "Cannot use the name Unapproved"
+msgstr "Der Name „Nicht zugelassen“ kann nicht verwendet werden"
+
+#: crates/alcedo-core/src/envelope.rs:414
+msgid "Encrypted message"
+msgstr "Verschlüsselte Nachricht"
+
+#: crates/alcedo-core/src/envelope.rs:529
+#: crates/alcedo-core/src/row_summary.rs:31
+#: crates/alcedo-ui/src/message_list/cells.rs:136
+msgid "Unknown"
+msgstr "Unbekannt"
+
+#: crates/alcedo-core/src/envelope.rs:540
+msgid "{names}, and {n} more"
+msgid_plural "{names}, and {n} more"
+msgstr[0] "{names} und {n} weitere"
+msgstr[1] "{names} und {n} weitere"
+
+#: crates/alcedo-core/src/folder_ops.rs:15
+msgid "Inbox"
+msgstr "Posteingang"
+
+#: crates/alcedo-core/src/folder_ops.rs:16
+#: crates/alcedo-ui/src/recipient_picker.rs:269
+msgid "Sent"
+msgstr "Gesendet"
+
+#: crates/alcedo-core/src/folder_ops.rs:17
+msgid "Drafts"
+msgstr "Entwürfe"
+
+#: crates/alcedo-core/src/folder_ops.rs:18
+#: crates/alcedo-core/src/rules.rs:351
+#: crates/alcedo-core/src/rules.rs:386
+msgid "Trash"
+msgstr "Papierkorb"
+
+#: crates/alcedo-core/src/folder_ops.rs:19
+#: crates/alcedo-ui/src/mail/list_actions.rs:158
+msgid "Junk"
+msgstr "Spam"
+
+#: crates/alcedo-core/src/folder_ops.rs:20
+#: crates/alcedo-ui/src/commands.rs:310
+#: crates/alcedo-ui/src/mail/list_actions.rs:159
+#: crates/alcedo-ui/src/message_list/pane.rs:152
+#: crates/alcedo-ui/src/reader.rs:513
+#: crates/alcedo-ui/src/reader.rs:514
+#: crates/alcedo-ui/src/reader.rs:1071
+#: crates/alcedo-ui/src/reader.rs:1072
+msgid "Archive"
+msgstr "Archiv"
+
+#: crates/alcedo-core/src/folder_ops.rs:21
+msgid "Snoozed"
+msgstr "Zurückgestellt"
+
+#: crates/alcedo-core/src/folder_ops.rs:22
+msgid "Outbox"
+msgstr "Postausgang"
+
+#. TRANSLATORS: the special folder holding all mail (Gmail's "All Mail").
+#: crates/alcedo-core/src/folder_ops.rs:24
+#: crates/alcedo-ui/src/contacts.rs:200
+#: crates/alcedo-ui/src/contacts.rs:838
+#: crates/alcedo-ui/src/recipient_picker.rs:257
+msgid "All"
+msgstr "Alle Nachrichten"
+
+#: crates/alcedo-core/src/folder_ops.rs:70
+msgid "Enter a folder name"
+msgstr "Geben Sie einen Ordnernamen ein"
+
+#: crates/alcedo-core/src/folder_ops.rs:73
+msgid "Folder name cannot contain “{delimiter}”"
+msgstr "Der Ordnername darf „{delimiter}“ nicht enthalten"
+
+#: crates/alcedo-core/src/mail_feedback.rs:23
+msgid "Message archived"
+msgid_plural "{n} messages archived"
+msgstr[0] "Nachricht archiviert"
+msgstr[1] "{n} Nachrichten archiviert"
+
+#: crates/alcedo-core/src/mail_feedback.rs:25
+msgid "Message marked as spam"
+msgid_plural "{n} messages marked as spam"
+msgstr[0] "Nachricht als Spam markiert"
+msgstr[1] "{n} Nachrichten als Spam markiert"
+
+#: crates/alcedo-core/src/mail_feedback.rs:31
+msgid "Message moved to Inbox"
+msgid_plural "{n} messages moved to Inbox"
+msgstr[0] "Nachricht in den Posteingang verschoben"
+msgstr[1] "{n} Nachrichten in den Posteingang verschoben"
+
+#: crates/alcedo-core/src/mail_feedback.rs:36
+msgid "Message moved to {folder}"
+msgid_plural "{n} messages moved to {folder}"
+msgstr[0] "Nachricht nach {folder} verschoben"
+msgstr[1] "{n} Nachrichten nach {folder} verschoben"
+
+#: crates/alcedo-core/src/mail_feedback.rs:42
+msgid "Message copied to {folder}"
+msgid_plural "{n} messages copied to {folder}"
+msgstr[0] "Nachricht nach {folder} kopiert"
+msgstr[1] "{n} Nachrichten nach {folder} kopiert"
+
+#: crates/alcedo-core/src/mail_feedback.rs:53
+msgid "Message moved back"
+msgid_plural "{n} messages moved back"
+msgstr[0] "Nachricht zurückverschoben"
+msgstr[1] "{n} Nachrichten zurückverschoben"
+
+#: crates/alcedo-core/src/pgp_copy.rs:26
+msgid "Valid signature"
+msgstr "Gültige Signatur"
+
+#: crates/alcedo-core/src/pgp_copy.rs:27
+msgid "Key not in your keyring"
+msgstr "Schlüssel nicht in Ihrem Schlüsselbund"
+
+#: crates/alcedo-core/src/pgp_copy.rs:28
+msgid "Not stated by the key"
+msgstr "Vom Schlüssel nicht angegeben"
+
+#: crates/alcedo-core/src/pgp_copy.rs:29
+msgid "Unknown — import the sender’s key to verify"
+msgstr "Unbekannt – importieren Sie den Schlüssel des Absenders zur Prüfung"
+
+#: crates/alcedo-core/src/pgp_copy.rs:36
+msgid "This message is encrypted, and Alcedo could not decrypt it."
+msgstr "Diese Nachricht ist verschlüsselt und Alcedo konnte sie nicht entschlüsseln."
+
+#: crates/alcedo-core/src/pgp_copy.rs:41
+msgid "This message is encrypted, but it is not signed, so you cannot be sure who sent it."
+msgstr "Diese Nachricht ist verschlüsselt, aber nicht signiert. Sie können nicht sicher sein, wer sie gesendet hat."
+
+#: crates/alcedo-core/src/pgp_copy.rs:51
+msgid "This message is encrypted and signed, but the signature is not valid."
+msgstr "Diese Nachricht ist verschlüsselt und signiert, aber die Signatur ist ungültig."
+
+#: crates/alcedo-core/src/pgp_copy.rs:53
+msgid "This message is signed, but the signature is not valid."
+msgstr "Diese Nachricht ist signiert, aber die Signatur ist ungültig."
+
+#: crates/alcedo-core/src/pgp_copy.rs:59
+msgid "This message is encrypted and signed with a key that is not in your keyring."
+msgstr "Diese Nachricht ist verschlüsselt und mit einem Schlüssel signiert, der nicht in Ihrem Schlüsselbund ist."
+
+#: crates/alcedo-core/src/pgp_copy.rs:61
+msgid "This message is signed with a key that is not in your keyring."
+msgstr "Diese Nachricht ist mit einem Schlüssel signiert, der nicht in Ihrem Schlüsselbund ist."
+
+#: crates/alcedo-core/src/pgp_copy.rs:76
+msgid "Signed by {email}. The signature is valid."
+msgstr "Signiert von {email}. Die Signatur ist gültig."
+
+#: crates/alcedo-core/src/pgp_copy.rs:77
+msgid "This message is signed, and the signature is valid."
+msgstr "Diese Nachricht ist signiert und die Signatur ist gültig."
+
+#: crates/alcedo-core/src/pgp_copy.rs:78
+msgid "This message is encrypted and signed by {email}. The signature is valid."
+msgstr "Diese Nachricht ist verschlüsselt und von {email} signiert. Die Signatur ist gültig."
+
+#: crates/alcedo-core/src/pgp_copy.rs:82
+msgid "This message is encrypted, and the signature is valid."
+msgstr "Diese Nachricht ist verschlüsselt und die Signatur ist gültig."
+
+#: crates/alcedo-core/src/provider_label.rs:23
+msgid "Other email"
+msgstr "Andere E-Mail"
+
+#: crates/alcedo-core/src/reaction.rs:319
+msgid "You can't react to an encrypted message"
+msgstr "Sie können nicht auf eine verschlüsselte Nachricht reagieren"
+
+#: crates/alcedo-core/src/reaction.rs:332
+msgid "You can't react to a draft"
+msgstr "Sie können nicht auf einen Entwurf reagieren"
+
+#: crates/alcedo-core/src/reaction.rs:335
+msgid "You can't react to a reaction"
+msgstr "Sie können nicht auf eine Reaktion reagieren"
+
+#: crates/alcedo-core/src/reaction.rs:338
+msgid "This message can't be reacted to"
+msgstr "Auf diese Nachricht kann nicht reagiert werden"
+
+#: crates/alcedo-core/src/reaction.rs:341
+msgid "Reactions aren't available on mailing lists"
+msgstr "Reaktionen sind in Mailinglisten nicht verfügbar"
+
+#: crates/alcedo-core/src/reaction.rs:344
+msgid "Too many recipients to react"
+msgstr "Zu viele Empfänger für eine Reaktion"
+
+#: crates/alcedo-core/src/reaction.rs:347
+msgid "Nobody to send this reaction to"
+msgstr "Niemand, an den diese Reaktion gesendet werden kann"
+
+#: crates/alcedo-core/src/reaction.rs:35
+msgid "You"
+msgstr "Sie"
+
+#: crates/alcedo-core/src/reaction.rs:350
+msgid "You've already sent 20 reactions to this message"
+msgstr "Sie haben bereits 20 Reaktionen auf diese Nachricht gesendet"
+
+#: crates/alcedo-core/src/row_summary.rs:23
+#: crates/alcedo-ui/src/message_list/cells.rs:644
+#: crates/alcedo-ui/src/message_list/column_picker.rs:8
+#: crates/alcedo-ui/src/message_list/columns.rs:568
+#: crates/alcedo-ui/src/search_autocomplete.rs:485
+#: crates/alcedo-ui/src/search_autocomplete.rs:588
+#: crates/alcedo-ui/src/search_bar.rs:53
+msgid "Unread"
+msgstr "Ungelesen"
+
+#: crates/alcedo-core/src/row_summary.rs:24
+#: crates/alcedo-ui/src/message_list/cells.rs:103
+#: crates/alcedo-ui/src/status_bar.rs:317
+msgid "{n} unread"
+msgid_plural "{n} unread"
+msgstr[0] "{n} ungelesen"
+msgstr[1] "{n} ungelesen"
+
+#: crates/alcedo-core/src/row_summary.rs:27
+msgid "starred"
+msgstr "markiert"
+
+#. TRANSLATORS: part of a spoken message-row summary, e.g. "from Ada Lovelace".
+#: crates/alcedo-core/src/row_summary.rs:36
+msgid "from {sender}"
+msgstr "von {sender}"
+
+#: crates/alcedo-core/src/row_summary.rs:51
+msgid "has attachments"
+msgstr "mit Anhängen"
+
+#: crates/alcedo-core/src/rules.rs:148
+msgid "Enter a name."
+msgstr "Geben Sie einen Namen ein."
+
+#: crates/alcedo-core/src/rules.rs:151
+#: crates/alcedo-core/src/rules.rs:161
+msgid "Add a condition."
+msgstr "Fügen Sie eine Bedingung hinzu."
+
+#: crates/alcedo-core/src/rules.rs:154
+msgid "Add an action."
+msgstr "Fügen Sie eine Aktion hinzu."
+
+#: crates/alcedo-core/src/rules.rs:168
+msgid "Choose a folder."
+msgstr "Wählen Sie einen Ordner."
+
+#: crates/alcedo-core/src/rules.rs:322
+#: crates/alcedo-ui/src/composer.rs:862
+#: crates/alcedo-ui/src/composer.rs:893
+#: crates/alcedo-ui/src/message_list/cells.rs:696
+#: crates/alcedo-ui/src/message_list/column_picker.rs:9
+#: crates/alcedo-ui/src/rule_editor.rs:69
+msgid "From"
+msgstr "Von"
+
+#: crates/alcedo-core/src/rules.rs:323
+#: crates/alcedo-ui/src/composer.rs:1319
+#: crates/alcedo-ui/src/rule_editor.rs:70
+msgid "To"
+msgstr "An"
+
+#: crates/alcedo-core/src/rules.rs:324
+#: crates/alcedo-ui/src/composer.rs:418
+#: crates/alcedo-ui/src/composer.rs:1321
+#: crates/alcedo-ui/src/composer.rs:1337
+#: crates/alcedo-ui/src/rule_editor.rs:71
+msgid "Cc"
+msgstr "Cc"
+
+#: crates/alcedo-core/src/rules.rs:325
+#: crates/alcedo-ui/src/rule_editor.rs:72
+#: crates/alcedo-ui/src/search_autocomplete.rs:580
+msgid "Recipient"
+msgstr "Empfänger"
+
+#: crates/alcedo-core/src/rules.rs:326
+#: crates/alcedo-ui/src/composer.rs:1218
+#: crates/alcedo-ui/src/message_list/cells.rs:925
+#: crates/alcedo-ui/src/message_list/column_picker.rs:13
+#: crates/alcedo-ui/src/rule_editor.rs:73
+msgid "Subject"
+msgstr "Betreff"
+
+#: crates/alcedo-core/src/rules.rs:327
+#: crates/alcedo-ui/src/rule_editor.rs:74
+#: crates/alcedo-ui/src/search_bar.rs:55
+msgid "Has attachment"
+msgstr "Mit Anhang"
+
+#: crates/alcedo-core/src/rules.rs:333
+#: crates/alcedo-ui/src/rule_editor.rs:80
+msgid "contains"
+msgstr "enthält"
+
+#: crates/alcedo-core/src/rules.rs:334
+#: crates/alcedo-ui/src/rule_editor.rs:81
+msgid "does not contain"
+msgstr "enthält nicht"
+
+#: crates/alcedo-core/src/rules.rs:335
+#: crates/alcedo-ui/src/rule_editor.rs:82
+msgid "is"
+msgstr "ist"
+
+#: crates/alcedo-core/src/rules.rs:336
+#: crates/alcedo-ui/src/rule_editor.rs:83
+msgid "is not"
+msgstr "ist nicht"
+
+#: crates/alcedo-core/src/rules.rs:337
+#: crates/alcedo-ui/src/rule_editor.rs:84
+msgid "starts with"
+msgstr "beginnt mit"
+
+#: crates/alcedo-core/src/rules.rs:338
+#: crates/alcedo-ui/src/rule_editor.rs:85
+msgid "ends with"
+msgstr "endet mit"
+
+#: crates/alcedo-core/src/rules.rs:347
+#: crates/alcedo-core/src/rules.rs:382
+#: crates/alcedo-ui/src/notifications.rs:133
+#: crates/alcedo-ui/src/rule_editor.rs:93
+msgid "Mark as read"
+msgstr "Als gelesen markieren"
+
+#: crates/alcedo-core/src/rules.rs:348
+#: crates/alcedo-core/src/rules.rs:383
+#: crates/alcedo-ui/src/rule_editor.rs:94
+msgid "Mark as unread"
+msgstr "Als ungelesen markieren"
+
+#: crates/alcedo-core/src/rules.rs:349
+#: crates/alcedo-core/src/rules.rs:384
+#: crates/alcedo-ui/src/commands.rs:226
+#: crates/alcedo-ui/src/message_list/pane.rs:133
+#: crates/alcedo-ui/src/message_list/pane.rs:227
+#: crates/alcedo-ui/src/reader.rs:527
+#: crates/alcedo-ui/src/reader.rs:528
+#: crates/alcedo-ui/src/reader.rs:1036
+#: crates/alcedo-ui/src/rule_editor.rs:95
+msgid "Star"
+msgstr "Markieren"
+
+#: crates/alcedo-core/src/rules.rs:350
+#: crates/alcedo-core/src/rules.rs:385
+#: crates/alcedo-ui/src/commands.rs:238
+#: crates/alcedo-ui/src/message_list/pane.rs:226
+#: crates/alcedo-ui/src/reader.rs:1036
+#: crates/alcedo-ui/src/rule_editor.rs:96
+msgid "Unstar"
+msgstr "Markierung entfernen"
+
+#: crates/alcedo-core/src/rules.rs:380
+#: crates/alcedo-ui/src/rule_editor.rs:637
+#: crates/alcedo-ui/src/rule_editor.rs:742
+msgid "Missing folder"
+msgstr "Ordner fehlt"
+
+#: crates/alcedo-core/src/snippet.rs:44
+msgid "Snippet name must be 1–80 characters"
+msgstr "Der Name des Textbausteins muss 1–80 Zeichen lang sein"
+
+#: crates/alcedo-core/src/snippet.rs:47
+msgid "Snippet body is too long"
+msgstr "Der Text des Textbausteins ist zu lang"
+
+#: crates/alcedo-core/src/snippet.rs:56
+msgid "Signature body is too long"
+msgstr "Der Text der Signatur ist zu lang"
+
+#: crates/alcedo-core/src/snippet.rs:59
+#: crates/alcedo-sync/src/worker/send.rs:18
+#: crates/alcedo-ui/src/compose_attachments.rs:610
+msgid "Too many inline images (max 10)"
+msgstr "Zu viele eingebettete Bilder (höchstens 10)"
+
+#: crates/alcedo-core/src/subject.rs:6
+msgid "(No Subject)"
+msgstr "(Kein Betreff)"
+
+#: crates/alcedo-core/src/welcome.rs:13
+msgid "Welcome to Alcedo"
+msgstr "Willkommen bei Alcedo"
+
+#: crates/alcedo-core/src/welcome.rs:17
+msgid "Add an email account to read and send mail."
+msgstr "Fügen Sie ein E-Mail-Konto hinzu, um E-Mails zu lesen und zu senden."
+
+#: crates/alcedo-oauth/src/loopback.rs:19
+msgid "Authorization successful. You can close this window."
+msgstr "Autorisierung erfolgreich. Sie können dieses Fenster schließen."
+
+#: crates/alcedo-sync/src/runtime.rs:1001
+#: crates/alcedo-sync/src/runtime.rs:1054
+#: crates/alcedo-sync/src/runtime.rs:1151
+#: crates/alcedo-sync/src/runtime.rs:1525
+#: crates/alcedo-sync/src/runtime.rs:1559
+#: crates/alcedo-sync/src/runtime.rs:1586
+#: crates/alcedo-sync/src/runtime.rs:1610
+#: crates/alcedo-sync/src/runtime.rs:1634
+msgid "Account is not connected"
+msgstr "Das Konto ist nicht verbunden"
+
+#: crates/alcedo-sync/src/runtime.rs:1156
+#: crates/alcedo-ui/src/mail/reader.rs:362
+msgid "Message not found"
+msgstr "Nachricht nicht gefunden"
+
+#: crates/alcedo-sync/src/runtime.rs:1295
+msgid "Another account already uses this email"
+msgstr "Ein anderes Konto verwendet diese E-Mail-Adresse bereits"
+
+#: crates/alcedo-sync/src/runtime.rs:1310
+msgid "This address is already a From address on this account"
+msgstr "Diese Adresse ist bereits eine Absenderadresse dieses Kontos"
+
+#: crates/alcedo-sync/src/runtime.rs:1508
+#: crates/alcedo-sync/src/runtime.rs:1542
+msgid "Couldn't find messages to delete"
+msgstr "Zu löschende Nachrichten wurden nicht gefunden"
+
+#: crates/alcedo-sync/src/runtime.rs:343
+msgid "Could not queue message for sending"
+msgstr "Nachricht konnte nicht zum Senden eingereiht werden"
+
+#: crates/alcedo-sync/src/runtime.rs:368
+msgid "Cannot delete the Unapproved group"
+msgstr "Die Gruppe „Nicht zugelassen“ kann nicht gelöscht werden"
+
+#: crates/alcedo-sync/src/runtime.rs:931
+msgid "Mail account is not connected"
+msgstr "Das E-Mail-Konto ist nicht verbunden"
+
+#: crates/alcedo-sync/src/runtime.rs:938
+#: crates/alcedo-sync/src/runtime.rs:961
+#: crates/alcedo-sync/src/worker/folders.rs:151
+#: crates/alcedo-sync/src/worker/folders.rs:243
+msgid "This folder cannot be modified"
+msgstr "Dieser Ordner kann nicht geändert werden"
+
+#: crates/alcedo-sync/src/runtime.rs:940
+#: crates/alcedo-sync/src/runtime.rs:964
+#: crates/alcedo-sync/src/worker/folders.rs:42
+#: crates/alcedo-sync/src/worker/folders.rs:144
+#: crates/alcedo-sync/src/worker/folders.rs:236
+#: crates/alcedo-sync/src/worker/moves.rs:81
+#: crates/alcedo-ui/src/mail/list_actions.rs:424
+msgid "Folder not found"
+msgstr "Ordner nicht gefunden"
+
+#: crates/alcedo-sync/src/unsubscribe.rs:13
+msgid "Could not unsubscribe. Try the link in the message."
+msgstr "Abmelden fehlgeschlagen. Versuchen Sie den Link in der Nachricht."
+
+#: crates/alcedo-sync/src/unsubscribe.rs:77
+#: crates/alcedo-ui/src/mail/reader.rs:620
+msgid "this mailing list"
+msgstr "diese Mailingliste"
+
+#: crates/alcedo-sync/src/unsubscribe.rs:78
+msgid "Unsubscribed from {sender}."
+msgstr "Von {sender} abgemeldet."
+
+#: crates/alcedo-sync/src/worker/drafts.rs:633
+msgid "This account has no Drafts folder"
+msgstr "Dieses Konto hat keinen Entwürfe-Ordner"
+
+#: crates/alcedo-sync/src/worker/flags.rs:371
+msgid "Marking {folder} read…"
+msgstr "{folder} wird als gelesen markiert …"
+
+#: crates/alcedo-sync/src/worker/folders.rs:112
+#: crates/alcedo-sync/src/worker/moves.rs:799
+#: crates/alcedo-sync/src/worker/session.rs:705
+#: crates/alcedo-sync/src/worker/watched.rs:348
+msgid "Syncing {folder}…"
+msgstr "{folder} wird synchronisiert …"
+
+#: crates/alcedo-sync/src/worker/folders.rs:199
+msgid "Renaming {folder}…"
+msgstr "{folder} wird umbenannt …"
+
+#: crates/alcedo-sync/src/worker/folders.rs:274
+msgid "Deleting {folder}…"
+msgstr "{folder} wird gelöscht …"
+
+#: crates/alcedo-sync/src/worker/folders.rs:309
+msgid "the server kept the folder"
+msgstr "der Server hat den Ordner behalten"
+
+#: crates/alcedo-sync/src/worker/folders.rs:313
+msgid "Couldn't delete {folders}: {reason}"
+msgstr "{folders} konnte nicht gelöscht werden: {reason}"
+
+#: crates/alcedo-sync/src/worker/folders.rs:389
+msgid "Emptying {folder}…"
+msgstr "{folder} wird geleert …"
+
+#: crates/alcedo-sync/src/worker/folders.rs:541
+#: crates/alcedo-ui/src/mail/folder_ops.rs:190
+msgid "Deleting older mail…"
+msgstr "Ältere E-Mails werden gelöscht …"
+
+#: crates/alcedo-sync/src/worker/folders.rs:556
+#: crates/alcedo-ui/src/mail/folder_ops.rs:386
+msgid "No messages on or before {date}."
+msgstr "Keine Nachrichten bis einschließlich {date}."
+
+#: crates/alcedo-sync/src/worker/folders.rs:89
+#: crates/alcedo-sync/src/worker/folders.rs:181
+#: crates/alcedo-ui/src/folder_editor.rs:304
+msgid "A folder with this name already exists"
+msgstr "Ein Ordner mit diesem Namen existiert bereits"
+
+#: crates/alcedo-sync/src/worker/folders.rs:94
+msgid "Creating {folder}…"
+msgstr "{folder} wird erstellt …"
+
+#: crates/alcedo-sync/src/worker/moves.rs:105
+msgid "Cannot move to a folder on another account"
+msgstr "Verschieben in einen Ordner eines anderen Kontos nicht möglich"
+
+#: crates/alcedo-sync/src/worker/moves.rs:118
+msgid "Cannot copy to a folder on another account"
+msgstr "Kopieren in einen Ordner eines anderen Kontos nicht möglich"
+
+#: crates/alcedo-sync/src/worker/moves.rs:21
+msgid "No Junk folder on this account"
+msgstr "Kein Spam-Ordner in diesem Konto"
+
+#: crates/alcedo-sync/src/worker/moves.rs:22
+msgid "No Archive folder on this account"
+msgstr "Kein Archiv-Ordner in diesem Konto"
+
+#: crates/alcedo-sync/src/worker/moves.rs:23
+msgid "No Inbox folder on this account"
+msgstr "Kein Posteingang in diesem Konto"
+
+#: crates/alcedo-sync/src/worker/moves.rs:24
+msgid "No {folder} folder on this account"
+msgstr "Kein Ordner {folder} in diesem Konto"
+
+#: crates/alcedo-sync/src/worker/moves.rs:86
+#: crates/alcedo-ui/src/mail/list_actions.rs:429
+msgid "Folder cannot hold messages"
+msgstr "Der Ordner kann keine Nachrichten enthalten"
+
+#: crates/alcedo-sync/src/worker/rules.rs:398
+msgid "Ran rules: {n} message updated."
+msgid_plural "Ran rules: {n} messages updated."
+msgstr[0] "Regeln angewendet: {n} Nachricht aktualisiert."
+msgstr[1] "Regeln angewendet: {n} Nachrichten aktualisiert."
+
+#: crates/alcedo-sync/src/worker/search_import.rs:73
+msgid "This account isn't connected"
+msgstr "Dieses Konto ist nicht verbunden"
+
+#: crates/alcedo-sync/src/worker/search_import.rs:95
+msgid "Couldn't search {folder}: {reason}"
+msgstr "Suche in {folder} fehlgeschlagen: {reason}"
+
+#: crates/alcedo-sync/src/worker/sent_copy.rs:824
+msgid "Saving to Sent…"
+msgstr "Wird in Gesendet gespeichert …"
+
+#: crates/alcedo-sync/src/worker/session.rs:182
+#: crates/alcedo-ui/src/folder_bar.rs:886
+#: crates/alcedo-ui/src/folder_bar.rs:958
+msgid "Syncing…"
+msgstr "Wird synchronisiert …"
+
+#: crates/alcedo-sync/src/worker/session.rs:261
+#: crates/alcedo-sync/src/worker/session.rs:393
+#: crates/alcedo-sync/src/worker/session.rs:477
+#: crates/alcedo-sync/src/worker/session.rs:513
+msgid "Reconnecting…"
+msgstr "Verbindung wird wiederhergestellt …"
+
+#: crates/alcedo-sync/src/worker/session.rs:682
+msgid "Connecting…"
+msgstr "Verbindung wird hergestellt …"
+
+#: crates/alcedo-sync/src/worker/session.rs:684
+msgid "Listing folders…"
+msgstr "Ordner werden aufgelistet …"
+
+#: crates/alcedo-sync/src/worker/watched.rs:405
+msgid "Loading {folder}…"
+msgstr "{folder} wird geladen …"
+
+#: crates/alcedo-ui/src/account_chip.rs:66
+#: crates/alcedo-ui/src/account_chip.rs:77
+#: crates/alcedo-ui/src/account_settings.rs:2125
+msgid "Could not read image"
+msgstr "Bild konnte nicht gelesen werden"
+
+#: crates/alcedo-ui/src/account_chip.rs:69
+msgid "Image is too large (max 10 MB)"
+msgstr "Das Bild ist zu groß (höchstens 10 MB)"
+
+#: crates/alcedo-ui/src/account_chip.rs:84
+#: crates/alcedo-ui/src/account_chip.rs:92
+msgid "Could not crop image"
+msgstr "Bild konnte nicht zugeschnitten werden"
+
+#: crates/alcedo-ui/src/account_settings.rs:122
+#: crates/alcedo-ui/src/account_settings.rs:144
+#: crates/alcedo-ui/src/activity_log.rs:398
+#: crates/alcedo-ui/src/preferences.rs:143
+msgid "Accounts"
+msgstr "Konten"
+
+#: crates/alcedo-ui/src/account_settings.rs:123
+#: crates/alcedo-ui/src/account_settings.rs:171
+msgid "Add an email account to send and receive mail."
+msgstr "Fügen Sie ein E-Mail-Konto hinzu, um E-Mails zu senden und zu empfangen."
+
+#: crates/alcedo-ui/src/account_settings.rs:128
+#: crates/alcedo-ui/src/add_account.rs:175
+#: crates/alcedo-ui/src/add_account.rs:188
+#: crates/alcedo-ui/src/commands.rs:514
+#: crates/alcedo-ui/src/folder_bar.rs:1689
+#: crates/alcedo-ui/src/folder_bar_accounts.rs:486
+#: crates/alcedo-ui/src/folder_bar_accounts.rs:491
+#: crates/alcedo-ui/src/mail/welcome.rs:21
+#: crates/alcedo-ui/src/rules.rs:177
+msgid "Add Account"
+msgstr "Konto hinzufügen"
+
+#: crates/alcedo-ui/src/account_settings.rs:1329
+#: crates/alcedo-ui/src/add_account.rs:472
+#: crates/alcedo-ui/src/mail/accounts.rs:111
+msgid "Opening browser for sign-in…"
+msgstr "Browser wird zur Anmeldung geöffnet …"
+
+#: crates/alcedo-ui/src/account_settings.rs:1354
+#: crates/alcedo-ui/src/add_account.rs:493
+#: crates/alcedo-ui/src/mail/accounts.rs:122
+msgid "OAuth sign-in was interrupted"
+msgstr "Die OAuth-Anmeldung wurde unterbrochen"
+
+#: crates/alcedo-ui/src/account_settings.rs:1435
+msgid "Choose a passphrase"
+msgstr "Passphrase wählen"
+
+#: crates/alcedo-ui/src/account_settings.rs:1479
+msgid "Remove OpenPGP key?"
+msgstr "OpenPGP-Schlüssel entfernen?"
+
+#: crates/alcedo-ui/src/account_settings.rs:1480
+msgid "The secret key will be deleted from this device. Sent mail is not affected."
+msgstr "Der geheime Schlüssel wird von diesem Gerät gelöscht. Gesendete E-Mails sind nicht betroffen."
+
+#: crates/alcedo-ui/src/account_settings.rs:1484
+#: crates/alcedo-ui/src/account_settings.rs:1514
+#: crates/alcedo-ui/src/account_settings.rs:1843
+#: crates/alcedo-ui/src/account_settings.rs:2025
+#: crates/alcedo-ui/src/account_settings.rs:2066
+#: crates/alcedo-ui/src/account_settings.rs:2341
+#: crates/alcedo-ui/src/activity_log.rs:541
+#: crates/alcedo-ui/src/add_account.rs:166
+#: crates/alcedo-ui/src/address_popover.rs:283
+#: crates/alcedo-ui/src/compose_snippets.rs:282
+#: crates/alcedo-ui/src/compose_toolbar.rs:1316
+#: crates/alcedo-ui/src/compose_toolbar.rs:1383
+#: crates/alcedo-ui/src/compose_toolbar.rs:1432
+#: crates/alcedo-ui/src/contacts.rs:743
+#: crates/alcedo-ui/src/contacts.rs:769
+#: crates/alcedo-ui/src/contacts.rs:1184
+#: crates/alcedo-ui/src/folder_editor.rs:496
+#: crates/alcedo-ui/src/folder_picker.rs:288
+#: crates/alcedo-ui/src/keyboard_prefs.rs:120
+#: crates/alcedo-ui/src/keyboard_prefs.rs:159
+#: crates/alcedo-ui/src/mail/compose.rs:340
+#: crates/alcedo-ui/src/mail/delete.rs:446
+#: crates/alcedo-ui/src/mail/folder_ops.rs:56
+#: crates/alcedo-ui/src/mail/folder_ops.rs:610
+#: crates/alcedo-ui/src/mail/folder_ops.rs:812
+#: crates/alcedo-ui/src/mail/reader.rs:638
+#: crates/alcedo-ui/src/reader.rs:2368
+#: crates/alcedo-ui/src/recipient_picker.rs:241
+#: crates/alcedo-ui/src/rule_editor.rs:205
+#: crates/alcedo-ui/src/rules.rs:262
+#: crates/alcedo-ui/src/rules.rs:552
+#: crates/alcedo-ui/src/signature_dialog.rs:70
+msgid "Cancel"
+msgstr "Abbrechen"
+
+#: crates/alcedo-ui/src/account_settings.rs:1485
+#: crates/alcedo-ui/src/account_settings.rs:1515
+#: crates/alcedo-ui/src/rule_editor.rs:567
+#: crates/alcedo-ui/src/rule_editor.rs:685
+msgid "Remove"
+msgstr "Entfernen"
+
+#: crates/alcedo-ui/src/account_settings.rs:1508
+msgid "Remove account?"
+msgstr "Konto entfernen?"
+
+#: crates/alcedo-ui/src/account_settings.rs:1509
+msgid "Mail for {email} will be deleted from this computer. The mailbox on the server is not deleted."
+msgstr "Die E-Mails von {email} werden von diesem Computer gelöscht. Das Postfach auf dem Server wird nicht gelöscht."
+
+#: crates/alcedo-ui/src/account_settings.rs:1577
+#: crates/alcedo-ui/src/composer.rs:827
+#: crates/alcedo-ui/src/composer.rs:830
+#: crates/alcedo-ui/src/mail/accounts.rs:470
+#: crates/alcedo-ui/src/mail/sync_events/accounts.rs:167
+#: crates/alcedo-ui/src/message_list/cells.rs:814
+#: crates/alcedo-ui/src/message_list/column_picker.rs:11
+#: crates/alcedo-ui/src/rule_editor.rs:233
+#: crates/alcedo-ui/src/rules.rs:214
+msgid "Account"
+msgstr "Konto"
+
+#: crates/alcedo-ui/src/account_settings.rs:182
+#: crates/alcedo-ui/src/folder_bar.rs:1469
+#: crates/alcedo-ui/src/folder_bar.rs:1635
+#: crates/alcedo-ui/src/folder_bar_accounts.rs:372
+#: crates/alcedo-ui/src/status_bar.rs:255
+msgid "Sign-in required"
+msgstr "Anmeldung erforderlich"
+
+#: crates/alcedo-ui/src/account_settings.rs:1844
+#: crates/alcedo-ui/src/composer.rs:2498
+#: crates/alcedo-ui/src/mail/drafts.rs:55
+#: crates/alcedo-ui/src/mail/drafts.rs:82
+msgid "Discard"
+msgstr "Verwerfen"
+
+#: crates/alcedo-ui/src/account_settings.rs:1982
+#: crates/alcedo-ui/src/add_account.rs:285
+msgid "IMAP username"
+msgstr "IMAP-Benutzername"
+
+#: crates/alcedo-ui/src/account_settings.rs:1983
+#: crates/alcedo-ui/src/add_account.rs:278
+msgid "IMAP password"
+msgstr "IMAP-Passwort"
+
+#: crates/alcedo-ui/src/account_settings.rs:1986
+msgid "Each saved password appears as dots. Replace the dots only to change that password. Mail filters keep using the incoming sign-in."
+msgstr "Jedes gespeicherte Passwort erscheint als Punkte. Ersetzen Sie die Punkte nur, um dieses Passwort zu ändern. Mailfilter verwenden weiterhin die Anmeldung für eingehende E-Mails."
+
+#: crates/alcedo-ui/src/account_settings.rs:2002
+#: crates/alcedo-ui/src/account_settings.rs:2056
+msgid "Passphrase"
+msgstr "Passphrase"
+
+#: crates/alcedo-ui/src/account_settings.rs:2006
+msgid "Confirm passphrase"
+msgstr "Passphrase bestätigen"
+
+#: crates/alcedo-ui/src/account_settings.rs:2020
+msgid "Use a strong passphrase. Alcedo stores it in your system keyring."
+msgstr "Verwenden Sie eine starke Passphrase. Alcedo speichert sie im Schlüsselbund des Systems."
+
+#: crates/alcedo-ui/src/account_settings.rs:2026
+msgid "Continue"
+msgstr "Weiter"
+
+#: crates/alcedo-ui/src/account_settings.rs:2060
+#: crates/alcedo-ui/src/account_settings.rs:2134
+msgid "Import OpenPGP key"
+msgstr "OpenPGP-Schlüssel importieren"
+
+#: crates/alcedo-ui/src/account_settings.rs:2061
+msgid "Leave the passphrase blank if the key is not encrypted."
+msgstr "Lassen Sie die Passphrase leer, wenn der Schlüssel nicht verschlüsselt ist."
+
+#: crates/alcedo-ui/src/account_settings.rs:2067
+msgid "Import"
+msgstr "Importieren"
+
+#: crates/alcedo-ui/src/account_settings.rs:2091
+msgid "Cropped to a circle"
+msgstr "Kreisförmig zugeschnitten"
+
+#: crates/alcedo-ui/src/account_settings.rs:2101
+msgid "Choose chip photo"
+msgstr "Foto für das Kürzel wählen"
+
+#: crates/alcedo-ui/src/account_settings.rs:2103
+#: crates/alcedo-ui/src/compose_attachments.rs:195
+msgid "Images"
+msgstr "Bilder"
+
+#: crates/alcedo-ui/src/account_settings.rs:2136
+msgid "OpenPGP keys"
+msgstr "OpenPGP-Schlüssel"
+
+#: crates/alcedo-ui/src/account_settings.rs:2172
+msgid "Extra From addresses only work if you have added them in Gmail under Settings → Accounts → Send mail as. Plus-addresses of this account (like you+shop@gmail.com) usually work. Keep “Send from the saved address itself” off unless Gmail has accepted that address."
+msgstr "Zusätzliche Absenderadressen funktionieren nur, wenn Sie sie in Gmail unter Einstellungen → Konten → Senden als hinzugefügt haben. Plus-Adressen dieses Kontos (wie sie+shop@gmail.com) funktionieren meist. Lassen Sie „Von der gespeicherten Adresse selbst senden“ aus, sofern Gmail diese Adresse nicht akzeptiert hat."
+
+#: crates/alcedo-ui/src/account_settings.rs:2179
+msgid "Extra From addresses only work if Outlook allows this mailbox to send as them. Keep “Send from the saved address itself” off unless Outlook has accepted that address."
+msgstr "Zusätzliche Absenderadressen funktionieren nur, wenn Outlook diesem Postfach erlaubt, als diese Adressen zu senden. Lassen Sie „Von der gespeicherten Adresse selbst senden“ aus, sofern Outlook diese Adresse nicht akzeptiert hat."
+
+#: crates/alcedo-ui/src/account_settings.rs:2184
+msgid "Add extra addresses you can choose as the From address when writing. Saved addresses on this account’s domain can be used as the real sender too (see the switch below). An address you type while writing, or one on another domain, is still sent through this account. Some mail servers reject mail sent from an address they don’t know."
+msgstr "Fügen Sie weitere Adressen hinzu, die Sie beim Schreiben als Absender wählen können. Gespeicherte Adressen in der Domain dieses Kontos können auch als tatsächlicher Absender dienen (siehe Schalter unten). Eine beim Schreiben eingegebene Adresse oder eine aus einer anderen Domain wird trotzdem über dieses Konto gesendet. Manche Mailserver lehnen E-Mails von Adressen ab, die sie nicht kennen."
+
+#: crates/alcedo-ui/src/account_settings.rs:2243
+msgid "From address {email}"
+msgstr "Absenderadresse {email}"
+
+#: crates/alcedo-ui/src/account_settings.rs:2247
+#: crates/alcedo-ui/src/commands.rs:322
+#: crates/alcedo-ui/src/compose_snippets.rs:73
+#: crates/alcedo-ui/src/contacts.rs:273
+#: crates/alcedo-ui/src/contacts.rs:744
+#: crates/alcedo-ui/src/contacts.rs:1185
+#: crates/alcedo-ui/src/mail/folder_ops.rs:611
+#: crates/alcedo-ui/src/mail/folder_ops.rs:813
+#: crates/alcedo-ui/src/message_list/pane.rs:150
+#: crates/alcedo-ui/src/notifications.rs:137
+#: crates/alcedo-ui/src/reader.rs:553
+#: crates/alcedo-ui/src/reader.rs:554
+#: crates/alcedo-ui/src/reader.rs:1076
+#: crates/alcedo-ui/src/reader.rs:1077
+#: crates/alcedo-ui/src/rules.rs:553
+msgid "Delete"
+msgstr "Löschen"
+
+#: crates/alcedo-ui/src/account_settings.rs:2275
+msgid "Catch-all domains (comma separated)"
+msgstr "Catch-all-Domains (durch Kommas getrennt)"
+
+#: crates/alcedo-ui/src/account_settings.rs:2278
+msgid "Every address on these domains is yours. Replies use the address the mail was sent to."
+msgstr "Jede Adresse in diesen Domains gehört Ihnen. Antworten verwenden die Adresse, an die die E-Mail gesendet wurde."
+
+#: crates/alcedo-ui/src/account_settings.rs:2331
+#: crates/alcedo-ui/src/address_popover.rs:268
+#: crates/alcedo-ui/src/compose_snippets.rs:248
+#: crates/alcedo-ui/src/contacts.rs:896
+#: crates/alcedo-ui/src/contacts.rs:1101
+#: crates/alcedo-ui/src/folder_editor.rs:431
+msgid "Name"
+msgstr "Name"
+
+#: crates/alcedo-ui/src/account_settings.rs:2346
+#: crates/alcedo-ui/src/add_account.rs:170
+#: crates/alcedo-ui/src/address_popover.rs:284
+#: crates/alcedo-ui/src/contacts.rs:251
+#: crates/alcedo-ui/src/recipient_picker.rs:243
+#: crates/alcedo-ui/src/recipient_picker.rs:361
+msgid "Add"
+msgstr "Hinzufügen"
+
+#: crates/alcedo-ui/src/account_settings.rs:2370
+#: crates/alcedo-ui/src/composer.rs:859
+msgid "From address"
+msgstr "Absenderadresse"
+
+#: crates/alcedo-ui/src/account_settings.rs:2395
+#: crates/alcedo-ui/src/account_validation.rs:13
+msgid "Email is required"
+msgstr "E-Mail-Adresse ist erforderlich"
+
+#: crates/alcedo-ui/src/account_settings.rs:2399
+#: crates/alcedo-ui/src/account_validation.rs:14
+msgid "Email must contain @"
+msgstr "Die E-Mail-Adresse muss @ enthalten"
+
+#: crates/alcedo-ui/src/account_settings.rs:2403
+#: crates/alcedo-ui/src/account_validation.rs:28
+msgid "This address is already the account address"
+msgstr "Diese Adresse ist bereits die Kontoadresse"
+
+#: crates/alcedo-ui/src/account_settings.rs:308
+#: crates/alcedo-ui/src/account_settings.rs:313
+#: crates/alcedo-ui/src/account_settings.rs:678
+msgid "OpenPGP key"
+msgstr "OpenPGP-Schlüssel"
+
+#: crates/alcedo-ui/src/account_settings.rs:311
+msgid "Fingerprint {fingerprint}"
+msgstr "Fingerabdruck {fingerprint}"
+
+#: crates/alcedo-ui/src/account_settings.rs:316
+#: crates/alcedo-ui/src/account_settings.rs:679
+msgid "No key configured for this account"
+msgstr "Für dieses Konto ist kein Schlüssel eingerichtet"
+
+#: crates/alcedo-ui/src/account_settings.rs:443
+#: crates/alcedo-ui/src/add_account.rs:76
+msgid "Account name"
+msgstr "Kontoname"
+
+#: crates/alcedo-ui/src/account_settings.rs:449
+#: crates/alcedo-ui/src/account_settings.rs:2332
+#: crates/alcedo-ui/src/add_account.rs:77
+#: crates/alcedo-ui/src/address_popover.rs:273
+#: crates/alcedo-ui/src/contacts.rs:898
+msgid "Email"
+msgstr "E-Mail"
+
+#: crates/alcedo-ui/src/account_settings.rs:455
+msgid "Your name"
+msgstr "Ihr Name"
+
+#: crates/alcedo-ui/src/account_settings.rs:461
+#: crates/alcedo-ui/src/message_list/cells.rs:869
+msgid "Chip"
+msgstr "Kürzel"
+
+#: crates/alcedo-ui/src/account_settings.rs:467
+msgid "Chip color"
+msgstr "Farbe des Kürzels"
+
+#: crates/alcedo-ui/src/account_settings.rs:473
+msgid "Background"
+msgstr "Hintergrund"
+
+#: crates/alcedo-ui/src/account_settings.rs:474
+msgid "Color behind the chip initials"
+msgstr "Farbe hinter den Initialen des Kürzels"
+
+#: crates/alcedo-ui/src/account_settings.rs:481
+msgid "Photo"
+msgstr "Foto"
+
+#: crates/alcedo-ui/src/account_settings.rs:486
+msgid "Remove photo"
+msgstr "Foto entfernen"
+
+#: crates/alcedo-ui/src/account_settings.rs:494
+#: crates/alcedo-ui/src/account_settings.rs:1988
+#: crates/alcedo-ui/src/add_account.rs:78
+#: crates/alcedo-ui/src/add_account.rs:293
+msgid "Username"
+msgstr "Benutzername"
+
+#: crates/alcedo-ui/src/account_settings.rs:502
+msgid "Google (browser sign-in)"
+msgstr "Google (Anmeldung im Browser)"
+
+#: crates/alcedo-ui/src/account_settings.rs:505
+msgid "Microsoft (browser sign-in)"
+msgstr "Microsoft (Anmeldung im Browser)"
+
+#: crates/alcedo-ui/src/account_settings.rs:506
+msgid "Username and password (already saved)"
+msgstr "Benutzername und Passwort (bereits gespeichert)"
+
+#: crates/alcedo-ui/src/account_settings.rs:509
+msgid "Sign-in method"
+msgstr "Anmeldemethode"
+
+#: crates/alcedo-ui/src/account_settings.rs:515
+msgid "Identity"
+msgstr "Identität"
+
+#: crates/alcedo-ui/src/account_settings.rs:517
+msgid "Account name is only a label inside Alcedo. Email is the mailbox address and the default From. Your name is what people see when you react. Leave Chip blank to use initials from the account name."
+msgstr "Der Kontoname ist nur eine Bezeichnung in Alcedo. Die E-Mail-Adresse ist die Postfachadresse und der Standardabsender. Ihr Name ist das, was andere sehen, wenn Sie reagieren. Lassen Sie Kürzel leer, um die Initialen des Kontonamens zu verwenden."
+
+#: crates/alcedo-ui/src/account_settings.rs:530
+#: crates/alcedo-ui/src/signature_dialog.rs:293
+msgid "Signature"
+msgstr "Signatur"
+
+#: crates/alcedo-ui/src/account_settings.rs:531
+#: crates/alcedo-ui/src/account_settings.rs:2088
+msgid "None"
+msgstr "Keine"
+
+#: crates/alcedo-ui/src/account_settings.rs:536
+msgid "Edit"
+msgstr "Bearbeiten"
+
+#: crates/alcedo-ui/src/account_settings.rs:543
+#: crates/alcedo-ui/src/composer.rs:869
+msgid "From addresses"
+msgstr "Absenderadressen"
+
+#: crates/alcedo-ui/src/account_settings.rs:548
+msgid "Send from the saved address itself"
+msgstr "Von der gespeicherten Adresse selbst senden"
+
+#: crates/alcedo-ui/src/account_settings.rs:549
+msgid "When you send from a saved address on this account’s domain, the mail server also treats that address as the sender, and failed-delivery notices come back to it. Turn off if your provider rejects those messages. Press Save to apply."
+msgstr "Wenn Sie von einer gespeicherten Adresse in der Domain dieses Kontos senden, behandelt der Mailserver diese Adresse auch als Absender, und Unzustellbarkeitsmeldungen gehen an sie. Schalten Sie dies aus, wenn Ihr Anbieter solche Nachrichten ablehnt. Drücken Sie Speichern, um es anzuwenden."
+
+#: crates/alcedo-ui/src/account_settings.rs:553
+msgid "Add Address"
+msgstr "Adresse hinzufügen"
+
+#: crates/alcedo-ui/src/account_settings.rs:562
+#: crates/alcedo-ui/src/add_account.rs:104
+msgid "IMAP host"
+msgstr "IMAP-Server"
+
+#: crates/alcedo-ui/src/account_settings.rs:570
+#: crates/alcedo-ui/src/add_account.rs:106
+msgid "IMAP port"
+msgstr "IMAP-Port"
+
+#: crates/alcedo-ui/src/account_settings.rs:574
+#: crates/alcedo-ui/src/preferences.rs:288
+msgid "Incoming mail"
+msgstr "Eingehende E-Mails"
+
+#: crates/alcedo-ui/src/account_settings.rs:580
+#: crates/alcedo-ui/src/add_account.rs:109
+msgid "SMTP host"
+msgstr "SMTP-Server"
+
+#: crates/alcedo-ui/src/account_settings.rs:588
+#: crates/alcedo-ui/src/add_account.rs:111
+msgid "SMTP port"
+msgstr "SMTP-Port"
+
+#: crates/alcedo-ui/src/account_settings.rs:593
+#: crates/alcedo-ui/src/add_account.rs:115
+msgid "SMTP security"
+msgstr "SMTP-Sicherheit"
+
+#: crates/alcedo-ui/src/account_settings.rs:594
+msgid "SSL/TLS (port 465) or STARTTLS (port 587). Unencrypted SMTP is not supported."
+msgstr "SSL/TLS (Port 465) oder STARTTLS (Port 587). Unverschlüsseltes SMTP wird nicht unterstützt."
+
+#: crates/alcedo-ui/src/account_settings.rs:611
+#: crates/alcedo-ui/src/preferences.rs:350
+msgid "Outgoing mail"
+msgstr "Ausgehende E-Mails"
+
+#: crates/alcedo-ui/src/account_settings.rs:618
+#: crates/alcedo-ui/src/add_account.rs:83
+msgid "Different SMTP sign-in"
+msgstr "Eigene SMTP-Anmeldung"
+
+#: crates/alcedo-ui/src/account_settings.rs:619
+#: crates/alcedo-ui/src/add_account.rs:84
+msgid "Use a separate username and password for outgoing mail."
+msgstr "Für ausgehende E-Mails einen eigenen Benutzernamen und ein eigenes Passwort verwenden."
+
+#: crates/alcedo-ui/src/account_settings.rs:625
+#: crates/alcedo-ui/src/account_settings.rs:1989
+#: crates/alcedo-ui/src/add_account.rs:80
+#: crates/alcedo-ui/src/add_account.rs:273
+#: crates/alcedo-ui/src/add_account.rs:291
+#: crates/alcedo-ui/src/add_account.rs:816
+msgid "Password"
+msgstr "Passwort"
+
+#: crates/alcedo-ui/src/account_settings.rs:629
+#: crates/alcedo-ui/src/account_settings.rs:1984
+#: crates/alcedo-ui/src/add_account.rs:89
+#: crates/alcedo-ui/src/add_account.rs:286
+msgid "SMTP username"
+msgstr "SMTP-Benutzername"
+
+#: crates/alcedo-ui/src/account_settings.rs:633
+#: crates/alcedo-ui/src/account_settings.rs:1985
+#: crates/alcedo-ui/src/add_account.rs:91
+#: crates/alcedo-ui/src/add_account.rs:283
+msgid "SMTP password"
+msgstr "SMTP-Passwort"
+
+#: crates/alcedo-ui/src/account_settings.rs:637
+msgid "Sign in again"
+msgstr "Erneut anmelden"
+
+#: crates/alcedo-ui/src/account_settings.rs:638
+msgid "Opens the browser to refresh this account."
+msgstr "Öffnet den Browser, um dieses Konto zu aktualisieren."
+
+#: crates/alcedo-ui/src/account_settings.rs:646
+#: crates/alcedo-ui/src/account_settings.rs:652
+msgid "Authentication"
+msgstr "Authentifizierung"
+
+#: crates/alcedo-ui/src/account_settings.rs:647
+#: crates/alcedo-ui/src/account_settings.rs:1990
+msgid "The saved password appears as dots. Replace the dots only to change it."
+msgstr "Das gespeicherte Passwort erscheint als Punkte. Ersetzen Sie die Punkte nur, um es zu ändern."
+
+#: crates/alcedo-ui/src/account_settings.rs:672
+#: crates/alcedo-ui/src/account_settings.rs:1845
+#: crates/alcedo-ui/src/account_settings.rs:2344
+#: crates/alcedo-ui/src/compose_snippets.rs:284
+#: crates/alcedo-ui/src/contacts.rs:908
+#: crates/alcedo-ui/src/contacts.rs:1118
+#: crates/alcedo-ui/src/folder_editor.rs:317
+#: crates/alcedo-ui/src/rule_editor.rs:207
+#: crates/alcedo-ui/src/search_bar.rs:80
+#: crates/alcedo-ui/src/signature_dialog.rs:72
+msgid "Save"
+msgstr "Speichern"
+
+#: crates/alcedo-ui/src/account_settings.rs:684
+msgid "Sign outgoing mail"
+msgstr "Ausgehende E-Mails signieren"
+
+#: crates/alcedo-ui/src/account_settings.rs:685
+msgid "Attach an OpenPGP signature to messages you send"
+msgstr "Gesendeten Nachrichten eine OpenPGP-Signatur hinzufügen"
+
+#: crates/alcedo-ui/src/account_settings.rs:690
+msgid "Generate key"
+msgstr "Schlüssel erzeugen"
+
+#: crates/alcedo-ui/src/account_settings.rs:691
+msgid "Create a new OpenPGP key for this account"
+msgstr "Einen neuen OpenPGP-Schlüssel für dieses Konto erstellen"
+
+#: crates/alcedo-ui/src/account_settings.rs:698
+msgid "Import key"
+msgstr "Schlüssel importieren"
+
+#: crates/alcedo-ui/src/account_settings.rs:699
+msgid "Import an existing secret key from a file"
+msgstr "Einen vorhandenen geheimen Schlüssel aus einer Datei importieren"
+
+#: crates/alcedo-ui/src/account_settings.rs:706
+msgid "Export public key"
+msgstr "Öffentlichen Schlüssel exportieren"
+
+#: crates/alcedo-ui/src/account_settings.rs:707
+msgid "Copy your public key to the clipboard"
+msgstr "Ihren öffentlichen Schlüssel in die Zwischenablage kopieren"
+
+#: crates/alcedo-ui/src/account_settings.rs:714
+msgid "Remove OpenPGP key"
+msgstr "OpenPGP-Schlüssel entfernen"
+
+#: crates/alcedo-ui/src/account_settings.rs:719
+msgid "OpenPGP"
+msgstr "OpenPGP"
+
+#: crates/alcedo-ui/src/account_settings.rs:720
+msgid "Sign and encrypt mail with OpenPGP."
+msgstr "E-Mails mit OpenPGP signieren und verschlüsseln."
+
+#: crates/alcedo-ui/src/account_settings.rs:731
+msgid "Remove Account"
+msgstr "Konto entfernen"
+
+#: crates/alcedo-ui/src/account_settings.rs:757
+#: crates/alcedo-ui/src/account_settings.rs:757
+#: crates/alcedo-ui/src/composer.rs:617
+#: crates/alcedo-ui/src/contacts.rs:178
+msgid "Back"
+msgstr "Zurück"
+
+#: crates/alcedo-ui/src/account_validation.rs:15
+#: crates/alcedo-ui/src/composer.rs:1186
+msgid "Email is invalid"
+msgstr "Die E-Mail-Adresse ist ungültig"
+
+#: crates/alcedo-ui/src/account_validation.rs:16
+msgid "IMAP host is required"
+msgstr "IMAP-Server ist erforderlich"
+
+#: crates/alcedo-ui/src/account_validation.rs:17
+msgid "IMAP host must match the OAuth provider"
+msgstr "Der IMAP-Server muss zum OAuth-Anbieter passen"
+
+#: crates/alcedo-ui/src/account_validation.rs:18
+msgid "SMTP host is required"
+msgstr "SMTP-Server ist erforderlich"
+
+#: crates/alcedo-ui/src/account_validation.rs:19
+msgid "SMTP host must match the OAuth provider"
+msgstr "Der SMTP-Server muss zum OAuth-Anbieter passen"
+
+#: crates/alcedo-ui/src/account_validation.rs:20
+msgid "IMAP port must be between 1 and 65535"
+msgstr "Der IMAP-Port muss zwischen 1 und 65535 liegen"
+
+#: crates/alcedo-ui/src/account_validation.rs:21
+msgid "SMTP port must be between 1 and 65535"
+msgstr "Der SMTP-Port muss zwischen 1 und 65535 liegen"
+
+#: crates/alcedo-ui/src/account_validation.rs:22
+msgid "Password is required"
+msgstr "Passwort ist erforderlich"
+
+#: crates/alcedo-ui/src/account_validation.rs:23
+msgid "SMTP password is required"
+msgstr "SMTP-Passwort ist erforderlich"
+
+#: crates/alcedo-ui/src/account_validation.rs:24
+msgid "OAuth provider is required"
+msgstr "OAuth-Anbieter ist erforderlich"
+
+#: crates/alcedo-ui/src/account_validation.rs:25
+msgid "OAuth sign-in is required"
+msgstr "OAuth-Anmeldung ist erforderlich"
+
+#: crates/alcedo-ui/src/account_validation.rs:26
+msgid "OAuth refresh token is required"
+msgstr "OAuth-Aktualisierungstoken ist erforderlich"
+
+#: crates/alcedo-ui/src/account_validation.rs:30
+msgid "This address uses Google OAuth"
+msgstr "Diese Adresse verwendet Google OAuth"
+
+#: crates/alcedo-ui/src/account_validation.rs:31
+msgid "This address uses Microsoft OAuth"
+msgstr "Diese Adresse verwendet Microsoft OAuth"
+
+#: crates/alcedo-ui/src/account_validation.rs:33
+msgid "Use an app password for this address, not OAuth"
+msgstr "Verwenden Sie für diese Adresse ein App-Passwort, nicht OAuth"
+
+#: crates/alcedo-ui/src/activity_log.rs:356
+#: crates/alcedo-ui/src/pgp_banner.rs:183
+#: crates/alcedo-ui/src/rules.rs:60
+#: crates/alcedo-ui/src/source_viewer.rs:88
+msgid "Close"
+msgstr "Schließen"
+
+#: crates/alcedo-ui/src/activity_log.rs:360
+#: crates/alcedo-ui/src/activity_log.rs:542
+msgid "Clear"
+msgstr "Leeren"
+
+#: crates/alcedo-ui/src/activity_log.rs:361
+msgid "Clear activity log"
+msgstr "Aktivitätsprotokoll leeren"
+
+#: crates/alcedo-ui/src/activity_log.rs:364
+#: crates/alcedo-ui/src/folder_picker.rs:178
+#: crates/alcedo-ui/src/notifications.rs:129
+#: crates/alcedo-ui/src/verification_code.rs:51
+#: crates/alcedo-ui/src/verification_code.rs:154
+msgid "Copy"
+msgstr "Kopieren"
+
+#: crates/alcedo-ui/src/activity_log.rs:365
+msgid "Copy activity log"
+msgstr "Aktivitätsprotokoll kopieren"
+
+#: crates/alcedo-ui/src/activity_log.rs:368
+msgid "Save…"
+msgstr "Speichern …"
+
+#: crates/alcedo-ui/src/activity_log.rs:369
+msgid "Save activity log to a file"
+msgstr "Aktivitätsprotokoll in einer Datei speichern"
+
+#: crates/alcedo-ui/src/activity_log.rs:376
+#: crates/alcedo-ui/src/activity_log.rs:450
+msgid "Activity"
+msgstr "Aktivität"
+
+#: crates/alcedo-ui/src/activity_log.rs:393
+msgid "Activity filters"
+msgstr "Aktivitätsfilter"
+
+#: crates/alcedo-ui/src/activity_log.rs:396
+#: crates/alcedo-ui/src/app.rs:217
+#: crates/alcedo-ui/src/app.rs:231
+#: crates/alcedo-ui/src/commands.rs:32
+#: crates/alcedo-ui/src/commands.rs:382
+#: crates/alcedo-ui/src/menu.rs:418
+msgid "Mail"
+msgstr "E-Mail"
+
+#: crates/alcedo-ui/src/activity_log.rs:397
+msgid "Sync"
+msgstr "Synchronisierung"
+
+#: crates/alcedo-ui/src/activity_log.rs:399
+#: crates/alcedo-ui/src/app.rs:244
+#: crates/alcedo-ui/src/app.rs:258
+#: crates/alcedo-ui/src/commands.rs:394
+#: crates/alcedo-ui/src/contacts.rs:170
+#: crates/alcedo-ui/src/contacts.rs:214
+#: crates/alcedo-ui/src/contacts.rs:303
+#: crates/alcedo-ui/src/contacts.rs:459
+#: crates/alcedo-ui/src/contacts.rs:767
+#: crates/alcedo-ui/src/contacts.rs:785
+#: crates/alcedo-ui/src/menu.rs:422
+#: crates/alcedo-ui/src/recipient_picker.rs:263
+msgid "Contacts"
+msgstr "Kontakte"
+
+#: crates/alcedo-ui/src/activity_log.rs:400
+msgid "Failures"
+msgstr "Fehler"
+
+#: crates/alcedo-ui/src/activity_log.rs:414
+msgid "Activity entries"
+msgstr "Aktivitätseinträge"
+
+#: crates/alcedo-ui/src/activity_log.rs:425
+msgid "No activity yet"
+msgstr "Noch keine Aktivität"
+
+#: crates/alcedo-ui/src/activity_log.rs:426
+msgid "Actions you take in Alcedo show up here."
+msgstr "Ihre Aktionen in Alcedo werden hier angezeigt."
+
+#: crates/alcedo-ui/src/activity_log.rs:429
+msgid "No matching activity"
+msgstr "Keine passende Aktivität"
+
+#: crates/alcedo-ui/src/activity_log.rs:430
+msgid "Turn on a filter to see those entries."
+msgstr "Schalten Sie einen Filter ein, um diese Einträge zu sehen."
+
+#: crates/alcedo-ui/src/activity_log.rs:482
+msgid "Activity log copied"
+msgstr "Aktivitätsprotokoll kopiert"
+
+#: crates/alcedo-ui/src/activity_log.rs:494
+msgid "Save activity log"
+msgstr "Aktivitätsprotokoll speichern"
+
+#: crates/alcedo-ui/src/activity_log.rs:497
+msgid "Text file"
+msgstr "Textdatei"
+
+#: crates/alcedo-ui/src/activity_log.rs:510
+#: crates/alcedo-ui/src/activity_log.rs:518
+#: crates/alcedo-ui/src/activity_log.rs:525
+msgid "Could not save activity log"
+msgstr "Aktivitätsprotokoll konnte nicht gespeichert werden"
+
+#: crates/alcedo-ui/src/activity_log.rs:517
+msgid "Activity log saved"
+msgstr "Aktivitätsprotokoll gespeichert"
+
+#: crates/alcedo-ui/src/activity_log.rs:536
+msgid "Clear activity log?"
+msgstr "Aktivitätsprotokoll leeren?"
+
+#: crates/alcedo-ui/src/activity_log.rs:537
+msgid "This removes all entries for this session. This cannot be undone."
+msgstr "Alle Einträge dieser Sitzung werden entfernt. Dies kann nicht rückgängig gemacht werden."
+
+#: crates/alcedo-ui/src/add_account.rs:136
+msgid "Server Settings"
+msgstr "Servereinstellungen"
+
+#: crates/alcedo-ui/src/add_account.rs:137
+msgid "Filled in from your email address when Alcedo recognizes it."
+msgstr "Wird aus Ihrer E-Mail-Adresse ausgefüllt, wenn Alcedo sie erkennt."
+
+#: crates/alcedo-ui/src/add_account.rs:151
+msgid "Browser sign-in"
+msgstr "Anmeldung im Browser"
+
+#: crates/alcedo-ui/src/add_account.rs:152
+msgid "Click Add to open your browser and complete sign-in."
+msgstr "Klicken Sie auf Hinzufügen, um Ihren Browser zu öffnen und die Anmeldung abzuschließen."
+
+#: crates/alcedo-ui/src/add_account.rs:276
+msgid "IMAP app password"
+msgstr "IMAP-App-Passwort"
+
+#: crates/alcedo-ui/src/add_account.rs:281
+msgid "SMTP app password"
+msgstr "SMTP-App-Passwort"
+
+#: crates/alcedo-ui/src/add_account.rs:289
+msgid "App password"
+msgstr "App-Passwort"
+
+#: crates/alcedo-ui/src/add_account.rs:94
+msgid "Provider"
+msgstr "Anbieter"
+
+#: crates/alcedo-ui/src/address_popover.rs:128
+msgid "Send message"
+msgstr "Nachricht senden"
+
+#: crates/alcedo-ui/src/address_popover.rs:141
+msgid "Stop loading remote images"
+msgstr "Externe Bilder nicht mehr laden"
+
+#: crates/alcedo-ui/src/address_popover.rs:143
+msgid "Always load remote images"
+msgstr "Externe Bilder immer laden"
+
+#: crates/alcedo-ui/src/address_popover.rs:166
+msgid "View contact"
+msgstr "Kontakt anzeigen"
+
+#: crates/alcedo-ui/src/address_popover.rs:179
+msgid "Add to Contacts"
+msgstr "Zu Kontakten hinzufügen"
+
+#: crates/alcedo-ui/src/address_popover.rs:24
+msgid "Copy Name"
+msgstr "Namen kopieren"
+
+#: crates/alcedo-ui/src/address_popover.rs:248
+msgid "Copy email address"
+msgstr "E-Mail-Adresse kopieren"
+
+#: crates/alcedo-ui/src/address_popover.rs:26
+msgid "Copy Name and Email"
+msgstr "Namen und E-Mail kopieren"
+
+#: crates/alcedo-ui/src/address_popover.rs:265
+#: crates/alcedo-ui/src/contacts.rs:223
+msgid "Add contact"
+msgstr "Kontakt hinzufügen"
+
+#: crates/alcedo-ui/src/address_popover.rs:29
+msgid "Copy Email"
+msgstr "E-Mail kopieren"
+
+#: crates/alcedo-ui/src/address_popover.rs:51
+msgid "Name copied"
+msgstr "Name kopiert"
+
+#: crates/alcedo-ui/src/address_popover.rs:62
+msgid "Name and email copied"
+msgstr "Name und E-Mail kopiert"
+
+#: crates/alcedo-ui/src/address_popover.rs:73
+#: crates/alcedo-ui/src/address_popover.rs:255
+msgid "Email copied"
+msgstr "E-Mail-Adresse kopiert"
+
+#: crates/alcedo-ui/src/app.rs:204
+#: crates/alcedo-ui/src/app.rs:361
+#: crates/alcedo-ui/src/app.rs:362
+#: crates/alcedo-ui/src/app.rs:518
+#: crates/alcedo-ui/src/app.rs:519
+#: crates/alcedo-ui/src/commands.rs:34
+#: crates/alcedo-ui/src/composer.rs:608
+#: crates/alcedo-ui/src/composer.rs:1879
+#: crates/alcedo-ui/src/mail/compose.rs:176
+#: crates/alcedo-ui/src/mail/drafts.rs:124
+#: crates/alcedo-ui/src/mail/drafts.rs:149
+#: crates/alcedo-ui/src/mail/send.rs:335
+msgid "Compose"
+msgstr "Verfassen"
+
+#: crates/alcedo-ui/src/app.rs:273
+msgid "Hide app rail"
+msgstr "App-Leiste ausblenden"
+
+#: crates/alcedo-ui/src/appearance.rs:148
+msgid "Default (system accent)"
+msgstr "Standard (Systemakzent)"
+
+#: crates/alcedo-ui/src/appearance.rs:21
+msgid "Color scheme"
+msgstr "Farbschema"
+
+#: crates/alcedo-ui/src/appearance.rs:22
+msgid "Follow the system, or always use light or dark"
+msgstr "Dem System folgen oder immer hell bzw. dunkel verwenden"
+
+#: crates/alcedo-ui/src/appearance.rs:27
+#: crates/alcedo-ui/src/theme_switcher.rs:35
+msgid "Theme"
+msgstr "Design"
+
+#: crates/alcedo-ui/src/appearance.rs:32
+msgid "Accent color"
+msgstr "Akzentfarbe"
+
+#: crates/alcedo-ui/src/appearance.rs:33
+msgid "Applies to buttons, links, and highlights throughout Alcedo."
+msgstr "Gilt für Schaltflächen, Links und Hervorhebungen in ganz Alcedo."
+
+#: crates/alcedo-ui/src/appearance.rs:40
+msgid "Application"
+msgstr "Anwendung"
+
+#: crates/alcedo-ui/src/appearance.rs:41
+msgid "Folders, lists, and chrome"
+msgstr "Ordner, Listen und Oberfläche"
+
+#: crates/alcedo-ui/src/appearance.rs:46
+msgid "Reader"
+msgstr "Lesebereich"
+
+#: crates/alcedo-ui/src/appearance.rs:47
+msgid "Mail in the reading pane"
+msgstr "E-Mails im Lesebereich"
+
+#: crates/alcedo-ui/src/appearance.rs:52
+msgid "Editor"
+msgstr "Editor"
+
+#: crates/alcedo-ui/src/appearance.rs:53
+msgid "Plain, HTML, and Markdown compose"
+msgstr "Verfassen als Nur-Text, HTML und Markdown"
+
+#: crates/alcedo-ui/src/appearance.rs:58
+msgid "Font size"
+msgstr "Schriftgröße"
+
+#: crates/alcedo-ui/src/appearance.rs:65
+msgid "Appearance"
+msgstr "Erscheinungsbild"
+
+#: crates/alcedo-ui/src/attachment_save.rs:209
+#: crates/alcedo-ui/src/reader.rs:2525
+msgid "Attachment saved"
+msgstr "Anhang gespeichert"
+
+#: crates/alcedo-ui/src/attachment_save.rs:211
+msgid "{n} attachment saved"
+msgid_plural "{n} attachments saved"
+msgstr[0] "{n} Anhang gespeichert"
+msgstr[1] "{n} Anhänge gespeichert"
+
+#: crates/alcedo-ui/src/attachment_save.rs:214
+#: crates/alcedo-ui/src/reader.rs:2486
+msgid "Could not save attachments"
+msgstr "Anhänge konnten nicht gespeichert werden"
+
+#: crates/alcedo-ui/src/attachment_save.rs:216
+msgid "Saved {saved} of {n} attachment"
+msgid_plural "Saved {saved} of {n} attachments"
+msgstr[0] "{saved} von {n} Anhang gespeichert"
+msgstr[1] "{saved} von {n} Anhängen gespeichert"
+
+#: crates/alcedo-ui/src/attachment_save.rs:64
+msgid "“{filename}” is still downloading"
+msgstr "„{filename}“ wird noch heruntergeladen"
+
+#: crates/alcedo-ui/src/attachment_save.rs:66
+msgid "“{filename}” didn’t download completely, so it wasn’t saved. Reopen the message to download it again."
+msgstr "„{filename}“ wurde nicht vollständig heruntergeladen und daher nicht gespeichert. Öffnen Sie die Nachricht erneut, um es noch einmal herunterzuladen."
+
+#. TRANSLATORS: {names} is one to three account names, already joined.
+#: crates/alcedo-ui/src/auth_banner.rs:106
+msgid "{names} is offline. Sign in again to reconnect."
+msgid_plural "{names} are offline. Sign in again to reconnect."
+msgstr[0] "{names} ist offline. Melden Sie sich erneut an, um die Verbindung wiederherzustellen."
+msgstr[1] "{names} sind offline. Melden Sie sich erneut an, um die Verbindung wiederherzustellen."
+
+#. TRANSLATORS: two account names in a list.
+#: crates/alcedo-ui/src/auth_banner.rs:120
+msgid "{first} and {second}"
+msgstr "{first} und {second}"
+
+#. TRANSLATORS: {list} is two or more names separated by ", "; {last} is the final name.
+#: crates/alcedo-ui/src/auth_banner.rs:122
+msgid "{list}, and {last}"
+msgstr "{list} und {last}"
+
+#: crates/alcedo-ui/src/auth_banner.rs:27
+msgid "Sign in"
+msgstr "Anmelden"
+
+#: crates/alcedo-ui/src/auth_banner.rs:28
+msgid "Update password"
+msgstr "Passwort aktualisieren"
+
+#: crates/alcedo-ui/src/auth_banner.rs:33
+msgid "Sign in to {account}"
+msgstr "Bei {account} anmelden"
+
+#: crates/alcedo-ui/src/auth_banner.rs:34
+msgid "Fix {account}"
+msgstr "{account} reparieren"
+
+#: crates/alcedo-ui/src/auth_banner.rs:41
+msgid "{n} account is offline because the keyring is locked."
+msgid_plural "{n} accounts are offline because the keyring is locked."
+msgstr[0] "{n} Konto ist offline, weil der Schlüsselbund gesperrt ist."
+msgstr[1] "{n} Konten sind offline, weil der Schlüsselbund gesperrt ist."
+
+#: crates/alcedo-ui/src/auth_banner.rs:47
+msgid "{n} account is offline. Sign in again to reconnect."
+msgid_plural "{n} accounts are offline. Sign in again to reconnect."
+msgstr[0] "{n} Konto ist offline. Melden Sie sich erneut an, um die Verbindung wiederherzustellen."
+msgstr[1] "{n} Konten sind offline. Melden Sie sich erneut an, um die Verbindung wiederherzustellen."
+
+#. TRANSLATORS: {n} is four or more; {first} and {second} are account names.
+#: crates/alcedo-ui/src/auth_banner.rs:77
+msgid "{n} account is offline because the keyring is locked, including {first} and {second}. Open the account menu above the folder list to see the rest. Alcedo will reconnect after you unlock it."
+msgid_plural "{n} accounts are offline because the keyring is locked, including {first} and {second}. Open the account menu above the folder list to see the rest. Alcedo will reconnect after you unlock it."
+msgstr[0] "{n} Konto ist offline, weil der Schlüsselbund gesperrt ist, darunter {first} und {second}. Öffnen Sie das Kontomenü über der Ordnerliste, um die übrigen zu sehen. Alcedo verbindet sich wieder, sobald Sie ihn entsperren."
+msgstr[1] "{n} Konten sind offline, weil der Schlüsselbund gesperrt ist, darunter {first} und {second}. Öffnen Sie das Kontomenü über der Ordnerliste, um die übrigen zu sehen. Alcedo verbindet sich wieder, sobald Sie ihn entsperren."
+
+#. TRANSLATORS: {n} is four or more; {first} and {second} are account names.
+#: crates/alcedo-ui/src/auth_banner.rs:86
+msgid "{n} account is offline, including {first} and {second}. Open the account menu above the folder list to see the rest, then sign in again."
+msgid_plural "{n} accounts are offline, including {first} and {second}. Open the account menu above the folder list to see the rest, then sign in again."
+msgstr[0] "{n} Konto ist offline, darunter {first} und {second}. Öffnen Sie das Kontomenü über der Ordnerliste, um die übrigen zu sehen, und melden Sie sich dann erneut an."
+msgstr[1] "{n} Konten sind offline, darunter {first} und {second}. Öffnen Sie das Kontomenü über der Ordnerliste, um die übrigen zu sehen, und melden Sie sich dann erneut an."
+
+#. TRANSLATORS: {names} is one to three account names, already joined.
+#: crates/alcedo-ui/src/auth_banner.rs:98
+msgid "{names} is offline because the keyring is locked. Unlock it and Alcedo will reconnect."
+msgid_plural "{names} are offline because the keyring is locked. Unlock it and Alcedo will reconnect."
+msgstr[0] "{names} ist offline, weil der Schlüsselbund gesperrt ist. Entsperren Sie ihn, dann verbindet sich Alcedo wieder."
+msgstr[1] "{names} sind offline, weil der Schlüsselbund gesperrt ist. Entsperren Sie ihn, dann verbindet sich Alcedo wieder."
+
+#: crates/alcedo-ui/src/command_palette.rs:149
+msgid "Compose to {recipient}"
+msgstr "An {recipient} schreiben"
+
+#: crates/alcedo-ui/src/command_palette.rs:287
+msgid "Type a command"
+msgstr "Befehl eingeben"
+
+#: crates/alcedo-ui/src/command_palette.rs:290
+msgid "Filter commands"
+msgstr "Befehle filtern"
+
+#: crates/alcedo-ui/src/command_palette.rs:298
+msgid "No matching commands"
+msgstr "Keine passenden Befehle"
+
+#: crates/alcedo-ui/src/command_palette.rs:318
+msgid "Command palette"
+msgstr "Befehlspalette"
+
+#: crates/alcedo-ui/src/commands.rs:118
+#: crates/alcedo-ui/src/contacts.rs:278
+#: crates/alcedo-ui/src/contacts.rs:279
+#: crates/alcedo-ui/src/message_list/pane.rs:154
+#: crates/alcedo-ui/src/message_list/pane.rs:155
+msgid "Select All"
+msgstr "Alle auswählen"
+
+#: crates/alcedo-ui/src/commands.rs:130
+#: crates/alcedo-ui/src/commands.rs:142
+#: crates/alcedo-ui/src/mail/reply.rs:104
+#: crates/alcedo-ui/src/mail/send.rs:333
+#: crates/alcedo-ui/src/reader.rs:392
+#: crates/alcedo-ui/src/reader.rs:402
+#: crates/alcedo-ui/src/reader.rs:403
+#: crates/alcedo-ui/src/reader.rs:1052
+#: crates/alcedo-ui/src/reader.rs:1061
+#: crates/alcedo-ui/src/reader.rs:1062
+msgid "Reply"
+msgstr "Antworten"
+
+#: crates/alcedo-ui/src/commands.rs:154
+#: crates/alcedo-ui/src/commands.rs:166
+#: crates/alcedo-ui/src/reader.rs:359
+msgid "Reply All"
+msgstr "Allen antworten"
+
+#: crates/alcedo-ui/src/commands.rs:178
+#: crates/alcedo-ui/src/commands.rs:190
+#: crates/alcedo-ui/src/mail/reply.rs:128
+#: crates/alcedo-ui/src/reader.rs:419
+#: crates/alcedo-ui/src/reader.rs:429
+#: crates/alcedo-ui/src/reader.rs:430
+#: crates/alcedo-ui/src/reader.rs:1053
+#: crates/alcedo-ui/src/reader.rs:1066
+#: crates/alcedo-ui/src/reader.rs:1067
+msgid "Forward"
+msgstr "Weiterleiten"
+
+#: crates/alcedo-ui/src/commands.rs:202
+#: crates/alcedo-ui/src/message_list/pane.rs:131
+#: crates/alcedo-ui/src/message_list/pane.rs:217
+msgid "Mark as Read"
+msgstr "Als gelesen markieren"
+
+#: crates/alcedo-ui/src/commands.rs:214
+#: crates/alcedo-ui/src/message_list/pane.rs:216
+msgid "Mark as Unread"
+msgstr "Als ungelesen markieren"
+
+#: crates/alcedo-ui/src/commands.rs:250
+msgid "Mark as Spam"
+msgstr "Als Spam markieren"
+
+#: crates/alcedo-ui/src/commands.rs:262
+msgid "Mark as Not Spam"
+msgstr "Als kein Spam markieren"
+
+#: crates/alcedo-ui/src/commands.rs:274
+msgid "Move to Folder…"
+msgstr "In Ordner verschieben …"
+
+#: crates/alcedo-ui/src/commands.rs:286
+msgid "Copy to Folder…"
+msgstr "In Ordner kopieren …"
+
+#: crates/alcedo-ui/src/commands.rs:298
+msgid "Create Rule…"
+msgstr "Regel erstellen …"
+
+#: crates/alcedo-ui/src/commands.rs:33
+msgid "Go to"
+msgstr "Gehe zu"
+
+#: crates/alcedo-ui/src/commands.rs:334
+msgid "Delete Permanently…"
+msgstr "Endgültig löschen …"
+
+#: crates/alcedo-ui/src/commands.rs:346
+#: crates/alcedo-ui/src/mail/layout.rs:169
+#: crates/alcedo-ui/src/mail/layout.rs:170
+#: crates/alcedo-ui/src/message_list/pane.rs:512
+#: crates/alcedo-ui/src/message_list/pane.rs:515
+msgid "Sync Folder"
+msgstr "Ordner synchronisieren"
+
+#: crates/alcedo-ui/src/commands.rs:35
+msgid "Search"
+msgstr "Suchen"
+
+#: crates/alcedo-ui/src/commands.rs:358
+msgid "Activity Log"
+msgstr "Aktivitätsprotokoll"
+
+#: crates/alcedo-ui/src/commands.rs:36
+#: crates/alcedo-ui/src/menu.rs:426
+msgid "View"
+msgstr "Ansicht"
+
+#: crates/alcedo-ui/src/commands.rs:370
+msgid "Unified Inbox"
+msgstr "Gemeinsamer Posteingang"
+
+#: crates/alcedo-ui/src/commands.rs:406
+#: crates/alcedo-ui/src/menu.rs:438
+msgid "Preferences"
+msgstr "Einstellungen"
+
+#: crates/alcedo-ui/src/commands.rs:418
+#: crates/alcedo-ui/src/mail/layout.rs:66
+#: crates/alcedo-ui/src/mail/layout.rs:67
+#: crates/alcedo-ui/src/mail/layout.rs:174
+#: crates/alcedo-ui/src/mail/layout.rs:175
+#: crates/alcedo-ui/src/mail/layout.rs:179
+#: crates/alcedo-ui/src/mail/layout.rs:180
+#: crates/alcedo-ui/src/message_list/pane.rs:502
+#: crates/alcedo-ui/src/message_list/pane.rs:503
+msgid "New Message"
+msgstr "Neue Nachricht"
+
+#: crates/alcedo-ui/src/commands.rs:430
+#: crates/alcedo-ui/src/commands.rs:442
+msgid "Command Palette"
+msgstr "Befehlspalette"
+
+#: crates/alcedo-ui/src/commands.rs:454
+msgid "Show app rail"
+msgstr "App-Leiste anzeigen"
+
+#: crates/alcedo-ui/src/commands.rs:466
+#: crates/alcedo-ui/src/preferences.rs:122
+msgid "Show message previews"
+msgstr "Nachrichtenvorschau anzeigen"
+
+#: crates/alcedo-ui/src/commands.rs:478
+#: crates/alcedo-ui/src/rules.rs:66
+#: crates/alcedo-ui/src/rules.rs:123
+#: crates/alcedo-ui/src/rules.rs:183
+msgid "Message Rules"
+msgstr "Nachrichtenregeln"
+
+#: crates/alcedo-ui/src/commands.rs:490
+#: crates/alcedo-ui/src/menu.rs:431
+msgid "New Folder…"
+msgstr "Neuer Ordner …"
+
+#: crates/alcedo-ui/src/commands.rs:502
+#: crates/alcedo-ui/src/menu.rs:432
+msgid "Edit Folder…"
+msgstr "Ordner bearbeiten …"
+
+#: crates/alcedo-ui/src/commands.rs:526
+#: crates/alcedo-ui/src/menu.rs:441
+msgid "Keyboard Shortcuts"
+msgstr "Tastenkürzel"
+
+#: crates/alcedo-ui/src/commands.rs:538
+#: crates/alcedo-ui/src/composer.rs:423
+#: crates/alcedo-ui/src/help.rs:222
+#: crates/alcedo-ui/src/help.rs:229
+#: crates/alcedo-ui/src/help.rs:332
+#: crates/alcedo-ui/src/menu.rs:444
+msgid "Help"
+msgstr "Hilfe"
+
+#: crates/alcedo-ui/src/commands.rs:550
+#: crates/alcedo-ui/src/menu.rs:445
+msgid "About"
+msgstr "Info"
+
+#: crates/alcedo-ui/src/commands.rs:811
+msgid "When the message list is focused"
+msgstr "Wenn die Nachrichtenliste den Fokus hat"
+
+#: crates/alcedo-ui/src/commands.rs:812
+msgid "Everywhere except compose and other text fields"
+msgstr "Überall außer beim Verfassen und in anderen Textfeldern"
+
+#: crates/alcedo-ui/src/compose_attachments.rs:181
+msgid "Remove {filename}"
+msgstr "{filename} entfernen"
+
+#: crates/alcedo-ui/src/compose_attachments.rs:205
+msgid "All files"
+msgstr "Alle Dateien"
+
+#: crates/alcedo-ui/src/compose_attachments.rs:224
+#: crates/alcedo-ui/src/compose_toolbar.rs:320
+msgid "Insert image"
+msgstr "Bild einfügen"
+
+#: crates/alcedo-ui/src/compose_attachments.rs:226
+#: crates/alcedo-ui/src/compose_toolbar.rs:713
+msgid "Attach files"
+msgstr "Dateien anhängen"
+
+#: crates/alcedo-ui/src/compose_attachments.rs:34
+#: crates/alcedo-ui/src/search_autocomplete.rs:535
+msgid "{size} KB"
+msgstr "{size} KB"
+
+#. TRANSLATORS: a file size in bytes.
+#: crates/alcedo-ui/src/compose_attachments.rs:40
+msgid "{size} B"
+msgstr "{size} B"
+
+#: crates/alcedo-ui/src/compose_attachments.rs:51
+#: crates/alcedo-ui/src/compose_attachments.rs:66
+#: crates/alcedo-ui/src/compose_attachments.rs:79
+#: crates/alcedo-ui/src/compose_attachments.rs:121
+#: crates/alcedo-ui/src/composer.rs:1463
+#: crates/alcedo-ui/src/signature_dialog.rs:237
+msgid "Could not read file"
+msgstr "Datei konnte nicht gelesen werden"
+
+#: crates/alcedo-ui/src/compose_html.rs:104
+msgid "Markdown preview"
+msgstr "Markdown-Vorschau"
+
+#: crates/alcedo-ui/src/compose_html.rs:92
+msgid "HTML source"
+msgstr "HTML-Quelltext"
+
+#: crates/alcedo-ui/src/compose_snippets.rs:117
+msgid "Search snippets"
+msgstr "Textbausteine durchsuchen"
+
+#: crates/alcedo-ui/src/compose_snippets.rs:136
+msgid "No snippets yet"
+msgstr "Noch keine Textbausteine"
+
+#: crates/alcedo-ui/src/compose_snippets.rs:143
+msgid "Manage snippets…"
+msgstr "Textbausteine verwalten …"
+
+#: crates/alcedo-ui/src/compose_snippets.rs:157
+#: crates/alcedo-ui/src/compose_snippets.rs:163
+msgid "Insert snippet"
+msgstr "Textbaustein einfügen"
+
+#: crates/alcedo-ui/src/compose_snippets.rs:243
+msgid "Edit snippet"
+msgstr "Textbaustein bearbeiten"
+
+#: crates/alcedo-ui/src/compose_snippets.rs:245
+msgid "New snippet"
+msgstr "Neuer Textbaustein"
+
+#: crates/alcedo-ui/src/compose_snippets.rs:253
+#: crates/alcedo-ui/src/compose_toolbar.rs:741
+#: crates/alcedo-ui/src/preferences.rs:239
+msgid "Markdown"
+msgstr "Markdown"
+
+#: crates/alcedo-ui/src/compose_snippets.rs:255
+msgid "Format"
+msgstr "Format"
+
+#: crates/alcedo-ui/src/compose_snippets.rs:28
+msgid "Add Snippet"
+msgstr "Textbaustein hinzufügen"
+
+#: crates/alcedo-ui/src/compose_snippets.rs:39
+#: crates/alcedo-ui/src/compose_snippets.rs:125
+msgid "Snippets"
+msgstr "Textbausteine"
+
+#: crates/alcedo-ui/src/compose_snippets.rs:40
+msgid "Insert from the compose toolbar. Placeholders: {{first_name}}, {{full_name}}, {{email}}."
+msgstr "Über die Leiste beim Verfassen einfügen. Platzhalter: {{first_name}}, {{full_name}}, {{email}}."
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:1009
+msgid "Paragraph"
+msgstr "Absatz"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:1010
+msgid "Heading 1"
+msgstr "Überschrift 1"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:1011
+msgid "Heading 2"
+msgstr "Überschrift 2"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:1012
+msgid "Heading 3"
+msgstr "Überschrift 3"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:1016
+msgid "Heading"
+msgstr "Überschrift"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:1041
+msgid "Single"
+msgstr "Einfach"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:1044
+msgid "Double"
+msgstr "Doppelt"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:1048
+#: crates/alcedo-ui/src/compose_toolbar.rs:1054
+msgid "Line spacing"
+msgstr "Zeilenabstand"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:1313
+msgid "Insert link"
+msgstr "Link einfügen"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:1317
+#: crates/alcedo-ui/src/compose_toolbar.rs:1384
+#: crates/alcedo-ui/src/compose_toolbar.rs:1433
+msgid "Insert"
+msgstr "Einfügen"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:1363
+#: crates/alcedo-ui/src/compose_toolbar.rs:1412
+msgid "Header row"
+msgstr "Kopfzeile"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:1368
+#: crates/alcedo-ui/src/compose_toolbar.rs:1417
+msgid "Rows"
+msgstr "Zeilen"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:1371
+#: crates/alcedo-ui/src/compose_toolbar.rs:1420
+#: crates/alcedo-ui/src/message_list/pane.rs:696
+msgid "Columns"
+msgstr "Spalten"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:193
+msgid "Preview only. Switch the format dropdown to Markdown to send a formatted message."
+msgstr "Nur Vorschau. Stellen Sie das Format auf Markdown um, um eine formatierte Nachricht zu senden."
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:198
+#: crates/alcedo-ui/src/compose_toolbar.rs:738
+msgid "Preview (Ctrl+Shift+P)"
+msgstr "Vorschau (Strg+Umschalt+P)"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:305
+msgid "Bold (Ctrl+B)"
+msgstr "Fett (Strg+B)"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:306
+msgid "Italic (Ctrl+I)"
+msgstr "Kursiv (Strg+I)"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:307
+msgid "Underline (Ctrl+U)"
+msgstr "Unterstrichen (Strg+U)"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:308
+msgid "Strikethrough"
+msgstr "Durchgestrichen"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:310
+msgid "Bulleted list (Ctrl+Shift+8)"
+msgstr "Aufzählung (Strg+Umschalt+8)"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:313
+msgid "Numbered list (Ctrl+Shift+7)"
+msgstr "Nummerierte Liste (Strg+Umschalt+7)"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:315
+msgid "Quote (Ctrl+Shift+9)"
+msgstr "Zitat (Strg+Umschalt+9)"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:319
+msgid "Insert link (Ctrl+K)"
+msgstr "Link einfügen (Strg+K)"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:321
+#: crates/alcedo-ui/src/compose_toolbar.rs:1380
+#: crates/alcedo-ui/src/compose_toolbar.rs:1429
+msgid "Insert table"
+msgstr "Tabelle einfügen"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:322
+msgid "Horizontal rule"
+msgstr "Horizontale Linie"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:323
+#: crates/alcedo-ui/src/compose_toolbar.rs:735
+msgid "Inline code"
+msgstr "Inline-Code"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:324
+msgid "Clear formatting"
+msgstr "Formatierung entfernen"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:325
+msgid "HTML source (Ctrl+Shift+H)"
+msgstr "HTML-Quelltext (Strg+Umschalt+H)"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:708
+#: crates/alcedo-ui/src/signature_dialog.rs:88
+msgid "Formatting toolbar"
+msgstr "Formatierungsleiste"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:719
+#: crates/alcedo-ui/src/compose_toolbar.rs:722
+msgid "Include signature"
+msgstr "Signatur einfügen"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:732
+msgid "Quote"
+msgstr "Zitat"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:733
+msgid "Bulleted list"
+msgstr "Aufzählung"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:734
+msgid "Numbered list"
+msgstr "Nummerierte Liste"
+
+#: crates/alcedo-ui/src/compose_toolbar.rs:744
+msgid "Message format"
+msgstr "Nachrichtenformat"
+
+#: crates/alcedo-ui/src/composer.rs:1172
+msgid "Still attaching files. Try again in a moment."
+msgstr "Dateien werden noch angehängt. Versuchen Sie es gleich noch einmal."
+
+#: crates/alcedo-ui/src/composer.rs:1245
+msgid "Sending message…"
+msgstr "Nachricht wird gesendet …"
+
+#: crates/alcedo-ui/src/composer.rs:1259
+msgid "Sign this message"
+msgstr "Diese Nachricht signieren"
+
+#: crates/alcedo-ui/src/composer.rs:1261
+msgid "Sign outgoing message"
+msgstr "Ausgehende Nachricht signieren"
+
+#: crates/alcedo-ui/src/composer.rs:1266
+msgid "Encrypt this message"
+msgstr "Diese Nachricht verschlüsseln"
+
+#: crates/alcedo-ui/src/composer.rs:1268
+msgid "Encrypt outgoing message"
+msgstr "Ausgehende Nachricht verschlüsseln"
+
+#: crates/alcedo-ui/src/composer.rs:1337
+#: crates/alcedo-ui/src/composer.rs:1942
+#: crates/alcedo-ui/src/composer.rs:2439
+msgid "Show Cc"
+msgstr "Cc anzeigen"
+
+#: crates/alcedo-ui/src/composer.rs:1338
+#: crates/alcedo-ui/src/composer.rs:1964
+#: crates/alcedo-ui/src/composer.rs:2448
+msgid "Show Bcc"
+msgstr "Bcc anzeigen"
+
+#: crates/alcedo-ui/src/composer.rs:1360
+msgid "Message body"
+msgstr "Nachrichtentext"
+
+#: crates/alcedo-ui/src/composer.rs:1940
+#: crates/alcedo-ui/src/composer.rs:2437
+msgid "Hide Cc"
+msgstr "Cc ausblenden"
+
+#: crates/alcedo-ui/src/composer.rs:1962
+#: crates/alcedo-ui/src/composer.rs:2446
+msgid "Hide Bcc"
+msgstr "Bcc ausblenden"
+
+#: crates/alcedo-ui/src/composer.rs:2075
+msgid "Add an OpenPGP key to encrypt messages."
+msgstr "Fügen Sie einen OpenPGP-Schlüssel hinzu, um Nachrichten zu verschlüsseln."
+
+#: crates/alcedo-ui/src/composer.rs:2082
+msgid "Missing public keys for: {recipients}"
+msgstr "Fehlende öffentliche Schlüssel für: {recipients}"
+
+#: crates/alcedo-ui/src/composer.rs:2490
+msgid "Discard draft?"
+msgstr "Entwurf verwerfen?"
+
+#: crates/alcedo-ui/src/composer.rs:2492
+msgid "This will also delete the copy saved in Drafts on the server."
+msgstr "Dadurch wird auch die in Entwürfe auf dem Server gespeicherte Kopie gelöscht."
+
+#: crates/alcedo-ui/src/composer.rs:2494
+msgid "Your message has not been sent."
+msgstr "Ihre Nachricht wurde nicht gesendet."
+
+#: crates/alcedo-ui/src/composer.rs:2497
+msgid "Keep editing"
+msgstr "Weiter bearbeiten"
+
+#: crates/alcedo-ui/src/composer.rs:419
+#: crates/alcedo-ui/src/composer.rs:1322
+#: crates/alcedo-ui/src/composer.rs:1338
+msgid "Bcc"
+msgstr "Bcc"
+
+#: crates/alcedo-ui/src/composer.rs:422
+#: crates/alcedo-ui/src/composer.rs:627
+#: crates/alcedo-ui/src/composer.rs:628
+msgid "Open in New Window"
+msgstr "In neuem Fenster öffnen"
+
+#: crates/alcedo-ui/src/composer.rs:43
+#: crates/alcedo-ui/src/preferences.rs:316
+msgid "Recipients may be notified when this is read."
+msgstr "Empfänger werden beim Lesen möglicherweise benachrichtigt."
+
+#: crates/alcedo-ui/src/composer.rs:437
+#: crates/alcedo-ui/src/composer.rs:437
+msgid "Compose Options"
+msgstr "Optionen zum Verfassen"
+
+#: crates/alcedo-ui/src/composer.rs:44
+msgid "A tracking image will be inserted."
+msgstr "Ein Tracking-Bild wird eingefügt."
+
+#: crates/alcedo-ui/src/composer.rs:494
+msgid "Sending"
+msgstr "Wird gesendet"
+
+#: crates/alcedo-ui/src/composer.rs:495
+#: crates/alcedo-ui/src/composer.rs:502
+#: crates/alcedo-ui/src/composer.rs:534
+#: crates/alcedo-ui/src/composer.rs:555
+msgid "Send"
+msgstr "Senden"
+
+#: crates/alcedo-ui/src/composer.rs:551
+msgid "Sending…"
+msgstr "Wird gesendet …"
+
+#: crates/alcedo-ui/src/composer.rs:617
+msgid "Back (Esc)"
+msgstr "Zurück (Esc)"
+
+#: crates/alcedo-ui/src/composer.rs:824
+msgid "Sending account"
+msgstr "Absenderkonto"
+
+#: crates/alcedo-ui/src/composer.rs:883
+#: crates/alcedo-ui/src/composer.rs:888
+msgid "Choose a From address"
+msgstr "Wählen Sie eine Absenderadresse"
+
+#: crates/alcedo-ui/src/contacts.rs:1104
+msgid "Members"
+msgstr "Mitglieder"
+
+#: crates/alcedo-ui/src/contacts.rs:1122
+msgid "Delete group"
+msgstr "Gruppe löschen"
+
+#: crates/alcedo-ui/src/contacts.rs:1181
+msgid "Delete group?"
+msgstr "Gruppe löschen?"
+
+#: crates/alcedo-ui/src/contacts.rs:1182
+msgid "Contacts are not deleted."
+msgstr "Die Kontakte werden nicht gelöscht."
+
+#: crates/alcedo-ui/src/contacts.rs:1360
+#: crates/alcedo-ui/src/contacts.rs:1364
+#: crates/alcedo-ui/src/contacts.rs:1453
+#: crates/alcedo-ui/src/contacts.rs:1457
+msgid "Contact saved"
+msgstr "Kontakt gespeichert"
+
+#: crates/alcedo-ui/src/contacts.rs:1391
+msgid "Contact deleted"
+msgstr "Kontakt gelöscht"
+
+#: crates/alcedo-ui/src/contacts.rs:1393
+msgid "{n} contact deleted"
+msgid_plural "{n} contacts deleted"
+msgstr[0] "{n} Kontakt gelöscht"
+msgstr[1] "{n} Kontakte gelöscht"
+
+#: crates/alcedo-ui/src/contacts.rs:1411
+#: crates/alcedo-ui/src/contacts.rs:1415
+msgid "Group saved"
+msgstr "Gruppe gespeichert"
+
+#: crates/alcedo-ui/src/contacts.rs:1431
+#: crates/alcedo-ui/src/contacts.rs:1435
+msgid "Group deleted"
+msgstr "Gruppe gelöscht"
+
+#: crates/alcedo-ui/src/contacts.rs:1553
+#: crates/alcedo-ui/src/contacts.rs:1564
+msgid "Already in contacts"
+msgstr "Bereits in den Kontakten"
+
+#: crates/alcedo-ui/src/contacts.rs:187
+#: crates/alcedo-ui/src/contacts.rs:762
+msgid "Select"
+msgstr "Auswählen"
+
+#: crates/alcedo-ui/src/contacts.rs:188
+#: crates/alcedo-ui/src/contacts.rs:765
+msgid "Select contacts"
+msgstr "Kontakte auswählen"
+
+#: crates/alcedo-ui/src/contacts.rs:195
+msgid "Search contacts"
+msgstr "Kontakte durchsuchen"
+
+#: crates/alcedo-ui/src/contacts.rs:201
+#: crates/alcedo-ui/src/contacts.rs:839
+msgid "Approved"
+msgstr "Zugelassen"
+
+#: crates/alcedo-ui/src/contacts.rs:202
+#: crates/alcedo-ui/src/contacts.rs:840
+msgid "Unapproved"
+msgstr "Nicht zugelassen"
+
+#: crates/alcedo-ui/src/contacts.rs:203
+#: crates/alcedo-ui/src/contacts.rs:841
+msgid "Blocked"
+msgstr "Blockiert"
+
+#: crates/alcedo-ui/src/contacts.rs:206
+msgid "Show"
+msgstr "Anzeigen"
+
+#: crates/alcedo-ui/src/contacts.rs:215
+#: crates/alcedo-ui/src/contacts.rs:506
+#: crates/alcedo-ui/src/recipient_picker.rs:397
+msgid "No contacts yet. Add someone or send a message."
+msgstr "Noch keine Kontakte. Fügen Sie jemanden hinzu oder senden Sie eine Nachricht."
+
+#: crates/alcedo-ui/src/contacts.rs:219
+msgid "Groups"
+msgstr "Gruppen"
+
+#: crates/alcedo-ui/src/contacts.rs:240
+msgid "Add group"
+msgstr "Gruppe hinzufügen"
+
+#: crates/alcedo-ui/src/contacts.rs:427
+msgid "Open Contacts"
+msgstr "Kontakte öffnen"
+
+#: crates/alcedo-ui/src/contacts.rs:428
+msgid "Search, add, and edit people in the Contacts view."
+msgstr "Personen in der Kontaktansicht suchen, hinzufügen und bearbeiten."
+
+#: crates/alcedo-ui/src/contacts.rs:443
+msgid "Add outgoing addresses to Unapproved"
+msgstr "Empfängeradressen zu „Nicht zugelassen“ hinzufügen"
+
+#: crates/alcedo-ui/src/contacts.rs:444
+msgid "Addresses you send to are saved as unapproved contacts until you keep them."
+msgstr "Adressen, an die Sie schreiben, werden als nicht zugelassene Kontakte gespeichert, bis Sie sie behalten."
+
+#: crates/alcedo-ui/src/contacts.rs:452
+msgid "Address book"
+msgstr "Adressbuch"
+
+#: crates/alcedo-ui/src/contacts.rs:508
+msgid "No matching contacts"
+msgstr "Keine passenden Kontakte"
+
+#: crates/alcedo-ui/src/contacts.rs:688
+msgid "Unapproved, {details}"
+msgstr "Nicht zugelassen, {details}"
+
+#: crates/alcedo-ui/src/contacts.rs:690
+msgid "Blocked, {details}"
+msgstr "Blockiert, {details}"
+
+#: crates/alcedo-ui/src/contacts.rs:719
+#: crates/alcedo-ui/src/contacts.rs:912
+msgid "Delete contact"
+msgstr "Kontakt löschen"
+
+#: crates/alcedo-ui/src/contacts.rs:732
+msgid "Delete contact?"
+msgstr "Kontakt löschen?"
+
+#: crates/alcedo-ui/src/contacts.rs:734
+msgid "Delete {n} contact?"
+msgid_plural "Delete {n} contacts?"
+msgstr[0] "{n} Kontakt löschen?"
+msgstr[1] "{n} Kontakte löschen?"
+
+#: crates/alcedo-ui/src/contacts.rs:741
+msgid "This cannot be undone."
+msgstr "Dies kann nicht rückgängig gemacht werden."
+
+#: crates/alcedo-ui/src/contacts.rs:772
+msgid "Cancel selection"
+msgstr "Auswahl abbrechen"
+
+#: crates/alcedo-ui/src/contacts.rs:782
+#: crates/alcedo-ui/src/message_list/pane.rs:199
+#: crates/alcedo-ui/src/status_bar.rs:342
+msgid "{n} selected"
+msgid_plural "{n} selected"
+msgstr[0] "{n} ausgewählt"
+msgstr[1] "{n} ausgewählt"
+
+#: crates/alcedo-ui/src/contacts.rs:805
+#: crates/alcedo-ui/src/recipient_picker.rs:406
+#: crates/alcedo-ui/src/recipient_row.rs:697
+msgid "{n} member"
+msgid_plural "{n} members"
+msgstr[0] "{n} Mitglied"
+msgstr[1] "{n} Mitglieder"
+
+#: crates/alcedo-ui/src/contacts.rs:900
+msgid "Nickname"
+msgstr "Spitzname"
+
+#: crates/alcedo-ui/src/contacts.rs:902
+msgid "Organization"
+msgstr "Organisation"
+
+#: crates/alcedo-ui/src/contacts.rs:904
+msgid "Notes"
+msgstr "Notizen"
+
+#: crates/alcedo-ui/src/contacts.rs:930
+#: crates/alcedo-ui/src/preferences.rs:280
+msgid "Load remote images"
+msgstr "Externe Bilder laden"
+
+#: crates/alcedo-ui/src/contacts.rs:931
+msgid "HTML mail from this address loads remote images automatically."
+msgstr "HTML-E-Mails von dieser Adresse laden externe Bilder automatisch."
+
+#: crates/alcedo-ui/src/contacts.rs:942
+msgid "Save to contacts"
+msgstr "In Kontakten speichern"
+
+#: crates/alcedo-ui/src/folder_bar.rs:1131
+msgid "Unified inbox across accounts"
+msgstr "Gemeinsamer Posteingang aller Konten"
+
+#: crates/alcedo-ui/src/folder_bar.rs:1160
+msgid "Waiting for folders"
+msgstr "Warten auf Ordner"
+
+#: crates/alcedo-ui/src/folder_bar.rs:1161
+msgid "Waiting for folders…"
+msgstr "Warten auf Ordner …"
+
+#: crates/alcedo-ui/src/folder_bar.rs:1437
+msgid "{n} account"
+msgid_plural "{n} accounts"
+msgstr[0] "{n} Konto"
+msgstr[1] "{n} Konten"
+
+#: crates/alcedo-ui/src/folder_bar.rs:1470
+msgid "{account} needs sign-in"
+msgstr "{account} erfordert eine Anmeldung"
+
+#: crates/alcedo-ui/src/folder_bar.rs:1482
+msgid "{email} added"
+msgstr "{email} hinzugefügt"
+
+#: crates/alcedo-ui/src/folder_bar.rs:1568
+#: crates/alcedo-ui/src/folder_bar.rs:1575
+#: crates/alcedo-ui/src/folder_bar.rs:1729
+msgid "Switch account"
+msgstr "Konto wechseln"
+
+#: crates/alcedo-ui/src/folder_bar.rs:1726
+msgid "Select account"
+msgstr "Konto auswählen"
+
+#: crates/alcedo-ui/src/folder_bar.rs:30
+msgid "Everything"
+msgstr "Alles"
+
+#: crates/alcedo-ui/src/folder_bar.rs:863
+#: crates/alcedo-ui/src/folder_editor.rs:359
+#: crates/alcedo-ui/src/folder_picker.rs:217
+msgid "Collapse folder"
+msgstr "Ordner einklappen"
+
+#: crates/alcedo-ui/src/folder_bar.rs:865
+#: crates/alcedo-ui/src/folder_editor.rs:361
+#: crates/alcedo-ui/src/folder_picker.rs:219
+msgid "Expand folder"
+msgstr "Ordner ausklappen"
+
+#: crates/alcedo-ui/src/folder_bar.rs:887
+#: crates/alcedo-ui/src/folder_bar.rs:959
+#: crates/alcedo-ui/src/status_bar.rs:71
+#: crates/alcedo-ui/src/status_bar.rs:74
+msgid "Syncing"
+msgstr "Synchronisierung"
+
+#: crates/alcedo-ui/src/folder_bar.rs:989
+msgid "Collapse {section}"
+msgstr "{section} einklappen"
+
+#: crates/alcedo-ui/src/folder_bar.rs:991
+msgid "Expand {section}"
+msgstr "{section} ausklappen"
+
+#: crates/alcedo-ui/src/folder_bar_accounts.rs:122
+msgid "Hidden Accounts ({n})"
+msgid_plural "Hidden Accounts ({n})"
+msgstr[0] "Ausgeblendete Konten ({n})"
+msgstr[1] "Ausgeblendete Konten ({n})"
+
+#: crates/alcedo-ui/src/folder_bar_accounts.rs:127
+msgid "{email}\nSign-in required"
+msgstr "{email}\nAnmeldung erforderlich"
+
+#. TRANSLATORS: screen-reader label; {label} is an account name.
+#: crates/alcedo-ui/src/folder_bar_accounts.rs:135
+msgid "{label} account"
+msgstr "Konto {label}"
+
+#: crates/alcedo-ui/src/folder_bar_accounts.rs:231
+msgid "Collapse hidden accounts"
+msgstr "Ausgeblendete Konten einklappen"
+
+#: crates/alcedo-ui/src/folder_bar_accounts.rs:233
+msgid "Show hidden accounts"
+msgstr "Ausgeblendete Konten anzeigen"
+
+#: crates/alcedo-ui/src/folder_bar_accounts.rs:337
+msgid "Collapse account"
+msgstr "Konto einklappen"
+
+#: crates/alcedo-ui/src/folder_bar_accounts.rs:339
+msgid "Expand account"
+msgstr "Konto ausklappen"
+
+#: crates/alcedo-ui/src/folder_bar_accounts.rs:485
+msgid "Add another email account"
+msgstr "Weiteres E-Mail-Konto hinzufügen"
+
+#: crates/alcedo-ui/src/folder_bar_personal.rs:134
+msgid "Collapse folders"
+msgstr "Ordner einklappen"
+
+#: crates/alcedo-ui/src/folder_bar_personal.rs:136
+msgid "Expand folders"
+msgstr "Ordner ausklappen"
+
+#: crates/alcedo-ui/src/folder_bar_personal.rs:18
+msgid "Folders"
+msgstr "Ordner"
+
+#: crates/alcedo-ui/src/folder_editor.rs:117
+msgid "Account root"
+msgstr "Kontostamm"
+
+#: crates/alcedo-ui/src/folder_editor.rs:316
+msgid "New Folder"
+msgstr "Neuer Ordner"
+
+#: crates/alcedo-ui/src/folder_editor.rs:316
+msgid "Create"
+msgstr "Erstellen"
+
+#: crates/alcedo-ui/src/folder_editor.rs:317
+msgid "Edit Folder"
+msgstr "Ordner bearbeiten"
+
+#: crates/alcedo-ui/src/folder_editor.rs:448
+msgid "IMAP path"
+msgstr "IMAP-Pfad"
+
+#: crates/alcedo-ui/src/folder_editor.rs:452
+#: crates/alcedo-ui/src/preferences.rs:254
+msgid "Messages"
+msgstr "Nachrichten"
+
+#: crates/alcedo-ui/src/folder_editor.rs:453
+msgid "{unread} unread, {total} total"
+msgstr "{unread} ungelesen, {total} insgesamt"
+
+#: crates/alcedo-ui/src/folder_editor.rs:465
+msgid "Location"
+msgstr "Ort"
+
+#: crates/alcedo-ui/src/folder_picker.rs:151
+msgid "Recent"
+msgstr "Zuletzt verwendet"
+
+#: crates/alcedo-ui/src/folder_picker.rs:177
+msgid "Move to Folder"
+msgstr "In Ordner verschieben"
+
+#: crates/alcedo-ui/src/folder_picker.rs:177
+msgid "Move"
+msgstr "Verschieben"
+
+#: crates/alcedo-ui/src/folder_picker.rs:178
+msgid "Copy to Folder"
+msgstr "In Ordner kopieren"
+
+#: crates/alcedo-ui/src/folder_picker.rs:179
+#: crates/alcedo-ui/src/rules.rs:94
+msgid "Run Rules"
+msgstr "Regeln anwenden"
+
+#: crates/alcedo-ui/src/folder_picker.rs:179
+msgid "Run"
+msgstr "Anwenden"
+
+#: crates/alcedo-ui/src/folder_picker.rs:269
+msgid "Filter folders"
+msgstr "Ordner filtern"
+
+#: crates/alcedo-ui/src/folder_picker.rs:278
+#: crates/alcedo-ui/src/folder_picker.rs:353
+msgid "No folders"
+msgstr "Keine Ordner"
+
+#: crates/alcedo-ui/src/folder_picker.rs:356
+msgid "No matching folders"
+msgstr "Keine passenden Ordner"
+
+#: crates/alcedo-ui/src/folder_picker.rs:357
+msgid "Try a different folder name."
+msgstr "Versuchen Sie einen anderen Ordnernamen."
+
+#: crates/alcedo-ui/src/help.rs:244
+msgid "Alcedo Help"
+msgstr "Alcedo-Hilfe"
+
+#: crates/alcedo-ui/src/help.rs:347
+msgid "Help could not be loaded."
+msgstr "Die Hilfe konnte nicht geladen werden."
+
+#: crates/alcedo-ui/src/keyboard_prefs.rs:102
+msgid "Restore Defaults"
+msgstr "Standard wiederherstellen"
+
+#: crates/alcedo-ui/src/keyboard_prefs.rs:117
+msgid "Restore default shortcuts?"
+msgstr "Standard-Tastenkürzel wiederherstellen?"
+
+#: crates/alcedo-ui/src/keyboard_prefs.rs:118
+msgid "This resets all custom keyboard shortcuts."
+msgstr "Alle eigenen Tastenkürzel werden zurückgesetzt."
+
+#: crates/alcedo-ui/src/keyboard_prefs.rs:121
+#: crates/alcedo-ui/src/mail/drafts.rs:56
+#: crates/alcedo-ui/src/mail/drafts.rs:83
+msgid "Restore"
+msgstr "Wiederherstellen"
+
+#: crates/alcedo-ui/src/keyboard_prefs.rs:152
+msgid "Set shortcut"
+msgstr "Tastenkürzel festlegen"
+
+#: crates/alcedo-ui/src/keyboard_prefs.rs:153
+msgid "Press a new shortcut for {command}. Press Escape to cancel, or Backspace to restore the default."
+msgstr "Drücken Sie ein neues Tastenkürzel für {command}. Esc bricht ab, Rücktaste stellt den Standard wieder her."
+
+#: crates/alcedo-ui/src/keyboard_prefs.rs:188
+msgid "That shortcut is already used by {command}."
+msgstr "Dieses Tastenkürzel wird bereits von {command} verwendet."
+
+#: crates/alcedo-ui/src/keyboard_prefs.rs:24
+msgid "Keyboard"
+msgstr "Tastatur"
+
+#: crates/alcedo-ui/src/keyboard_prefs.rs:40
+msgid "Select a command to change its shortcut."
+msgstr "Wählen Sie einen Befehl, um sein Tastenkürzel zu ändern."
+
+#: crates/alcedo-ui/src/mail/accounts.rs:179
+#: crates/alcedo-ui/src/mail/accounts.rs:182
+#: crates/alcedo-ui/src/mail/accounts.rs:187
+#: crates/alcedo-ui/src/mail/sync_events/accounts.rs:143
+#: crates/alcedo-ui/src/mail/sync_events/accounts.rs:146
+#: crates/alcedo-ui/src/mail/sync_events/accounts.rs:151
+msgid "Account removed"
+msgstr "Konto entfernt"
+
+#: crates/alcedo-ui/src/mail/accounts.rs:332
+msgid "Open inbox"
+msgstr "Posteingang öffnen"
+
+#: crates/alcedo-ui/src/mail/accounts.rs:605
+msgid "Waiting for browser…"
+msgstr "Warten auf den Browser …"
+
+#: crates/alcedo-ui/src/mail/accounts.rs:72
+#: crates/alcedo-ui/src/mail/accounts.rs:76
+#: crates/alcedo-ui/src/mail/sync_events/accounts.rs:119
+#: crates/alcedo-ui/src/mail/sync_events/accounts.rs:123
+msgid "Account saved"
+msgstr "Konto gespeichert"
+
+#: crates/alcedo-ui/src/mail/compose.rs:331
+msgid "another account"
+msgstr "ein anderes Konto"
+
+#: crates/alcedo-ui/src/mail/compose.rs:333
+msgid "Send from a different account?"
+msgstr "Von einem anderen Konto senden?"
+
+#: crates/alcedo-ui/src/mail/compose.rs:334
+msgid "This will send from {from_email}. You're viewing {viewing}."
+msgstr "Die Nachricht wird von {from_email} gesendet. Sie sehen gerade {viewing}."
+
+#: crates/alcedo-ui/src/mail/compose.rs:341
+msgid "Send anyway"
+msgstr "Trotzdem senden"
+
+#: crates/alcedo-ui/src/mail/compose.rs:488
+msgid "Signature images were left out because this message already has 10 images."
+msgstr "Die Bilder der Signatur wurden weggelassen, weil diese Nachricht bereits 10 Bilder enthält."
+
+#: crates/alcedo-ui/src/mail/delete.rs:121
+#: crates/alcedo-ui/src/mail/delete.rs:150
+#: crates/alcedo-ui/src/mail/send_guard.rs:72
+#: crates/alcedo-ui/src/mail/undo_move.rs:62
+msgid "Undo"
+msgstr "Rückgängig"
+
+#: crates/alcedo-ui/src/mail/delete.rs:552
+#: crates/alcedo-ui/src/mail/delete.rs:557
+#: crates/alcedo-ui/src/mail/notify.rs:39
+#: crates/alcedo-ui/src/verification_code.rs:103
+msgid "Code copied"
+msgstr "Code kopiert"
+
+#: crates/alcedo-ui/src/mail/delete.rs:674
+msgid "Delete this message permanently?"
+msgstr "Diese Nachricht endgültig löschen?"
+
+#: crates/alcedo-ui/src/mail/delete.rs:675
+msgid "This cannot be undone. The message is erased from the mail server."
+msgstr "Dies kann nicht rückgängig gemacht werden. Die Nachricht wird vom Mailserver gelöscht."
+
+#: crates/alcedo-ui/src/mail/delete.rs:679
+msgid "Delete {n} message permanently?"
+msgid_plural "Delete {n} messages permanently?"
+msgstr[0] "{n} Nachricht endgültig löschen?"
+msgstr[1] "{n} Nachrichten endgültig löschen?"
+
+#: crates/alcedo-ui/src/mail/delete.rs:684
+msgid "This cannot be undone. These messages are erased from the mail server."
+msgstr "Dies kann nicht rückgängig gemacht werden. Diese Nachrichten werden vom Mailserver gelöscht."
+
+#: crates/alcedo-ui/src/mail/delete.rs:687
+msgid "Delete Permanently"
+msgstr "Endgültig löschen"
+
+#: crates/alcedo-ui/src/mail/delete.rs:697
+#: crates/alcedo-ui/src/mail/delete.rs:722
+msgid "Deleting permanently…"
+msgstr "Wird endgültig gelöscht …"
+
+#: crates/alcedo-ui/src/mail/delete.rs:699
+#: crates/alcedo-ui/src/mail/delete.rs:724
+msgid "Deleting {n} message permanently…"
+msgid_plural "Deleting {n} messages permanently…"
+msgstr[0] "{n} Nachricht wird endgültig gelöscht …"
+msgstr[1] "{n} Nachrichten werden endgültig gelöscht …"
+
+#: crates/alcedo-ui/src/mail/delete.rs:707
+#: crates/alcedo-ui/src/mail/delete.rs:711
+msgid "Moving to Trash…"
+msgstr "Wird in den Papierkorb verschoben …"
+
+#: crates/alcedo-ui/src/mail/delete.rs:713
+msgid "Moving {n} message to Trash…"
+msgid_plural "Moving {n} messages to Trash…"
+msgstr[0] "{n} Nachricht wird in den Papierkorb verschoben …"
+msgstr[1] "{n} Nachrichten werden in den Papierkorb verschoben …"
+
+#: crates/alcedo-ui/src/mail/delete.rs:731
+msgid "Deleting {n} message…"
+msgid_plural "Deleting {n} messages…"
+msgstr[0] "{n} Nachricht wird gelöscht …"
+msgstr[1] "{n} Nachrichten werden gelöscht …"
+
+#: crates/alcedo-ui/src/mail/delete.rs:744
+msgid "Code copied. Moved to Trash."
+msgstr "Code kopiert. In den Papierkorb verschoben."
+
+#: crates/alcedo-ui/src/mail/delete.rs:747
+msgid "Moved to Trash."
+msgstr "In den Papierkorb verschoben."
+
+#: crates/alcedo-ui/src/mail/delete.rs:749
+#: crates/alcedo-ui/src/mail/folder_ops.rs:388
+msgid "Moved {n} message to Trash."
+msgid_plural "Moved {n} messages to Trash."
+msgstr[0] "{n} Nachricht in den Papierkorb verschoben."
+msgstr[1] "{n} Nachrichten in den Papierkorb verschoben."
+
+#: crates/alcedo-ui/src/mail/delete.rs:757
+msgid "Permanently deleted."
+msgstr "Endgültig gelöscht."
+
+#: crates/alcedo-ui/src/mail/delete.rs:759
+#: crates/alcedo-ui/src/mail/folder_ops.rs:394
+msgid "Permanently deleted {n} message."
+msgid_plural "Permanently deleted {n} messages."
+msgstr[0] "{n} Nachricht endgültig gelöscht."
+msgstr[1] "{n} Nachrichten endgültig gelöscht."
+
+#: crates/alcedo-ui/src/mail/delete.rs:766
+msgid "Deleted {n} message."
+msgid_plural "Deleted {n} messages."
+msgstr[0] "{n} Nachricht gelöscht."
+msgstr[1] "{n} Nachrichten gelöscht."
+
+#: crates/alcedo-ui/src/mail/delete.rs:778
+msgid "Couldn't permanently delete — connection lost"
+msgstr "Endgültiges Löschen fehlgeschlagen – Verbindung verloren"
+
+#: crates/alcedo-ui/src/mail/delete.rs:780
+msgid "Couldn't permanently delete."
+msgstr "Endgültiges Löschen fehlgeschlagen."
+
+#: crates/alcedo-ui/src/mail/delete.rs:785
+msgid "Code copied. Couldn't move to Trash — connection lost"
+msgstr "Code kopiert. Verschieben in den Papierkorb fehlgeschlagen – Verbindung verloren"
+
+#: crates/alcedo-ui/src/mail/delete.rs:787
+msgid "Code copied. Couldn't move to Trash."
+msgstr "Code kopiert. Verschieben in den Papierkorb fehlgeschlagen."
+
+#: crates/alcedo-ui/src/mail/delete.rs:792
+msgid "Couldn't move to Trash — connection lost"
+msgstr "Verschieben in den Papierkorb fehlgeschlagen – Verbindung verloren"
+
+#: crates/alcedo-ui/src/mail/delete.rs:794
+msgid "Couldn't move to Trash."
+msgstr "Verschieben in den Papierkorb fehlgeschlagen."
+
+#: crates/alcedo-ui/src/mail/delete.rs:798
+msgid "Couldn't delete message — connection lost"
+msgstr "Löschen der Nachricht fehlgeschlagen – Verbindung verloren"
+
+#: crates/alcedo-ui/src/mail/delete.rs:800
+msgid "Couldn't delete message."
+msgstr "Löschen der Nachricht fehlgeschlagen."
+
+#: crates/alcedo-ui/src/mail/drafts.rs:166
+msgid "Re-attach files: {files}"
+msgstr "Dateien erneut anhängen: {files}"
+
+#: crates/alcedo-ui/src/mail/drafts.rs:374
+msgid "Draft"
+msgstr "Entwurf"
+
+#: crates/alcedo-ui/src/mail/drafts.rs:38
+msgid "Restore unsent message?"
+msgstr "Nicht gesendete Nachricht wiederherstellen?"
+
+#: crates/alcedo-ui/src/mail/drafts.rs:39
+msgid "Alcedo saved a draft from your last session."
+msgstr "Alcedo hat einen Entwurf aus Ihrer letzten Sitzung gespeichert."
+
+#: crates/alcedo-ui/src/mail/drafts.rs:43
+msgid "Restore {n} unsent message?"
+msgid_plural "Restore {n} unsent messages?"
+msgstr[0] "{n} nicht gesendete Nachricht wiederherstellen?"
+msgstr[1] "{n} nicht gesendete Nachrichten wiederherstellen?"
+
+#: crates/alcedo-ui/src/mail/drafts.rs:48
+msgid "Alcedo saved drafts from your last session."
+msgstr "Alcedo hat Entwürfe aus Ihrer letzten Sitzung gespeichert."
+
+#: crates/alcedo-ui/src/mail/folder_ops.rs:182
+msgid "Deleting messages on or before {date}…"
+msgstr "Nachrichten bis einschließlich {date} werden gelöscht …"
+
+#: crates/alcedo-ui/src/mail/folder_ops.rs:32
+msgid "Empty {folder}?"
+msgstr "{folder} leeren?"
+
+#. TRANSLATORS: button; {folder} is a folder name such as "Trash".
+#: crates/alcedo-ui/src/mail/folder_ops.rs:34
+msgid "Empty {folder}"
+msgstr "{folder} leeren"
+
+#: crates/alcedo-ui/src/mail/folder_ops.rs:36
+msgid "All messages and folders in {folder} will be permanently deleted."
+msgstr "Alle Nachrichten und Ordner in {folder} werden endgültig gelöscht."
+
+#: crates/alcedo-ui/src/mail/folder_ops.rs:41
+msgid "All messages in {folder} will be moved to {trash}, the same as deleting them in the list."
+msgstr "Alle Nachrichten in {folder} werden nach {trash} verschoben, genau wie beim Löschen in der Liste."
+
+#: crates/alcedo-ui/src/mail/folder_ops.rs:47
+msgid "All messages in {folder} will be permanently deleted."
+msgstr "Alle Nachrichten in {folder} werden endgültig gelöscht."
+
+#: crates/alcedo-ui/src/mail/folder_ops.rs:600
+msgid "This folder and its subfolders, including all messages, will be permanently deleted from the server."
+msgstr "Dieser Ordner und seine Unterordner werden samt allen Nachrichten endgültig vom Server gelöscht."
+
+#: crates/alcedo-ui/src/mail/folder_ops.rs:604
+msgid "All messages in this folder will be permanently deleted from the server."
+msgstr "Alle Nachrichten in diesem Ordner werden endgültig vom Server gelöscht."
+
+#: crates/alcedo-ui/src/mail/folder_ops.rs:607
+msgid "Delete “{folder}”?"
+msgstr "„{folder}“ löschen?"
+
+#. TRANSLATORS: strftime pattern for a date like "Monday 7 September 2026".
+#: crates/alcedo-ui/src/mail/folder_ops.rs:765
+msgctxt "strftime pattern: weekday, day, month, year"
+msgid "%A %-d %B %Y"
+msgstr "%A, %-d. %B %Y"
+
+#: crates/alcedo-ui/src/mail/folder_ops.rs:788
+msgid "Delete through date"
+msgstr "Bis zu einem Datum löschen"
+
+#: crates/alcedo-ui/src/mail/folder_ops.rs:797
+#: crates/alcedo-ui/src/mail/folder_ops.rs:804
+msgid "Messages on or before the selected date will be permanently deleted."
+msgstr "Nachrichten bis einschließlich zum gewählten Datum werden endgültig gelöscht."
+
+#: crates/alcedo-ui/src/mail/folder_ops.rs:799
+msgid "Messages on or before the selected date will be moved to {trash}, the same as deleting them in the list."
+msgstr "Nachrichten bis einschließlich zum gewählten Datum werden nach {trash} verschoben, genau wie beim Löschen in der Liste."
+
+#: crates/alcedo-ui/src/mail/folder_ops.rs:808
+msgid "Delete messages through this date?"
+msgstr "Nachrichten bis zu diesem Datum löschen?"
+
+#: crates/alcedo-ui/src/mail/invite_response.rs:211
+msgid "Meeting"
+msgstr "Besprechung"
+
+#: crates/alcedo-ui/src/mail/invite_response.rs:24
+#: crates/alcedo-ui/src/mail/reactions.rs:272
+msgid "Wait until the current message finishes sending."
+msgstr "Warten Sie, bis die aktuelle Nachricht gesendet ist."
+
+#: crates/alcedo-ui/src/mail/invite_response.rs:35
+#: crates/alcedo-ui/src/mail/invite_response.rs:46
+msgid "Couldn't send a response to this invitation"
+msgstr "Antwort auf diese Einladung konnte nicht gesendet werden"
+
+#: crates/alcedo-ui/src/mail/invite_response.rs:54
+#: crates/alcedo-ui/src/mail/invite_response.rs:62
+#: crates/alcedo-ui/src/meeting_invite.rs:387
+msgid "Could not read this calendar invitation"
+msgstr "Diese Kalendereinladung konnte nicht gelesen werden"
+
+#: crates/alcedo-ui/src/mail/layout.rs:104
+#: crates/alcedo-ui/src/message_list/pane.rs:477
+#: crates/alcedo-ui/src/message_list/pane.rs:482
+msgid "Hide Folders"
+msgstr "Ordner ausblenden"
+
+#: crates/alcedo-ui/src/mail/layout.rs:106
+#: crates/alcedo-ui/src/message_list/pane.rs:484
+msgid "Show Folders"
+msgstr "Ordner anzeigen"
+
+#. TRANSLATORS: {name} is a folder name, "Junk" or "Archive".
+#: crates/alcedo-ui/src/mail/list_actions.rs:179
+msgid "No {name} folder on this account"
+msgstr "Kein Ordner {name} in diesem Konto"
+
+#: crates/alcedo-ui/src/mail/list_actions.rs:452
+msgid "Cannot copy messages to another account"
+msgstr "Nachrichten können nicht in ein anderes Konto kopiert werden"
+
+#: crates/alcedo-ui/src/mail/list_actions.rs:454
+msgid "Cannot move messages from another account"
+msgstr "Nachrichten aus einem anderen Konto können nicht verschoben werden"
+
+#: crates/alcedo-ui/src/mail/reactions.rs:204
+#: crates/alcedo-ui/src/reader.rs:440
+msgid "Add reaction"
+msgstr "Reaktion hinzufügen"
+
+#: crates/alcedo-ui/src/mail/reactions.rs:244
+msgid "Wait until the message finishes loading"
+msgstr "Warten Sie, bis die Nachricht geladen ist"
+
+#: crates/alcedo-ui/src/mail/reactions.rs:278
+msgid "That emoji can't be sent as a reaction."
+msgstr "Dieses Emoji kann nicht als Reaktion gesendet werden."
+
+#: crates/alcedo-ui/src/mail/reactions.rs:349
+msgid "Reaction"
+msgstr "Reaktion"
+
+#: crates/alcedo-ui/src/mail/reader.rs:622
+msgid "Alcedo will send an unsubscribe request for you. You may still receive a few messages while it takes effect."
+msgstr "Alcedo sendet eine Abmeldeanfrage für Sie. Bis sie wirkt, erhalten Sie möglicherweise noch einige Nachrichten."
+
+#: crates/alcedo-ui/src/mail/reader.rs:626
+msgid "Alcedo will open a message to {address}. Send it to finish unsubscribing."
+msgstr "Alcedo öffnet eine Nachricht an {address}. Senden Sie sie, um die Abmeldung abzuschließen."
+
+#: crates/alcedo-ui/src/mail/reader.rs:631
+msgid "Alcedo will open the sender’s unsubscribe page in your browser."
+msgstr "Alcedo öffnet die Abmeldeseite des Absenders in Ihrem Browser."
+
+#. TRANSLATORS: {sender} is a sender's name, or "this mailing list".
+#: crates/alcedo-ui/src/mail/reader.rs:635
+msgid "Unsubscribe from {sender}?"
+msgstr "Von {sender} abmelden?"
+
+#: crates/alcedo-ui/src/mail/reader.rs:639
+#: crates/alcedo-ui/src/reader.rs:334
+#: crates/alcedo-ui/src/reader.rs:1413
+#: crates/alcedo-ui/src/reader.rs:1421
+#: crates/alcedo-ui/src/reader.rs:1424
+msgid "Unsubscribe"
+msgstr "Abmelden"
+
+#: crates/alcedo-ui/src/mail/rules.rs:167
+msgid "Mail from {sender}"
+msgstr "E-Mails von {sender}"
+
+#: crates/alcedo-ui/src/mail/search.rs:291
+#: crates/alcedo-ui/src/mail/search.rs:301
+#: crates/alcedo-ui/src/mail/search.rs:303
+#: crates/alcedo-ui/src/search_bar.rs:42
+msgid "All mail"
+msgstr "Alle E-Mails"
+
+#: crates/alcedo-ui/src/mail/send.rs:130
+#: crates/alcedo-ui/src/mail/send.rs:388
+msgid "Add at least one recipient"
+msgstr "Fügen Sie mindestens einen Empfänger hinzu"
+
+#: crates/alcedo-ui/src/mail/send.rs:219
+#: crates/alcedo-ui/src/mail/send.rs:223
+#: crates/alcedo-ui/src/mail/send.rs:254
+#: crates/alcedo-ui/src/mail/send.rs:258
+msgid "Message sent (mock)"
+msgstr "Nachricht gesendet (Simulation)"
+
+#: crates/alcedo-ui/src/mail/send.rs:383
+msgid "A message is already sending"
+msgstr "Es wird bereits eine Nachricht gesendet"
+
+#: crates/alcedo-ui/src/mail/send.rs:489
+msgid "Message sent from {email}"
+msgstr "Nachricht von {email} gesendet"
+
+#: crates/alcedo-ui/src/mail/send.rs:490
+#: crates/alcedo-ui/src/mail/sync_events/send.rs:38
+msgid "Message sent"
+msgstr "Nachricht gesendet"
+
+#: crates/alcedo-ui/src/mail/send_guard.rs:38
+msgid "Keep Editing"
+msgstr "Weiter bearbeiten"
+
+#: crates/alcedo-ui/src/mail/send_guard.rs:39
+msgid "Send Anyway"
+msgstr "Trotzdem senden"
+
+#: crates/alcedo-ui/src/mail/sync_events/accounts.rs:169
+msgid "{email} is offline until the keyring is unlocked"
+msgstr "{email} ist offline, bis der Schlüsselbund entsperrt ist"
+
+#: crates/alcedo-ui/src/mail/sync_events/accounts.rs:174
+msgid "{email} is offline — reconnect required"
+msgstr "{email} ist offline – erneute Verbindung erforderlich"
+
+#: crates/alcedo-ui/src/mail/sync_events/accounts.rs:309
+msgid "Public key copied ({fingerprint})"
+msgstr "Öffentlicher Schlüssel kopiert ({fingerprint})"
+
+#: crates/alcedo-ui/src/mail/sync_events/reader.rs:42
+msgid "{name} reacted {emoji}"
+msgstr "{name} hat mit {emoji} reagiert"
+
+#: crates/alcedo-ui/src/mail/sync_events/send.rs:110
+msgid "Response sent to {organizer}"
+msgstr "Antwort an {organizer} gesendet"
+
+#: crates/alcedo-ui/src/mail/sync_events/send.rs:172
+msgid "Send failed"
+msgstr "Senden fehlgeschlagen"
+
+#: crates/alcedo-ui/src/mail/sync_events/send.rs:185
+msgid "Send failed: {reason}"
+msgstr "Senden fehlgeschlagen: {reason}"
+
+#: crates/alcedo-ui/src/mail/sync_events/send.rs:214
+msgid "Kept the newer copy of this draft from the other mail program."
+msgstr "Die neuere Kopie dieses Entwurfs aus dem anderen E-Mail-Programm wurde behalten."
+
+#: crates/alcedo-ui/src/mail/sync_events/send.rs:219
+msgid "Replaced a newer copy of this draft on the server."
+msgstr "Eine neuere Kopie dieses Entwurfs auf dem Server wurde ersetzt."
+
+#: crates/alcedo-ui/src/mail/sync_events/send.rs:224
+msgid "Original draft was removed; saved a new copy."
+msgstr "Der ursprüngliche Entwurf wurde entfernt; eine neue Kopie wurde gespeichert."
+
+#: crates/alcedo-ui/src/mail/sync_events/send.rs:235
+msgid "Couldn't save to Drafts: {reason}"
+msgstr "Speichern in Entwürfe fehlgeschlagen: {reason}"
+
+#: crates/alcedo-ui/src/mail/sync_events/send.rs:34
+msgid "Reaction sent"
+msgstr "Reaktion gesendet"
+
+#: crates/alcedo-ui/src/mail/sync_events/send.rs:36
+msgid "Invite response sent"
+msgstr "Antwort auf die Einladung gesendet"
+
+#: crates/alcedo-ui/src/mail/sync_events/send.rs:56
+msgid "Sent reaction {emoji}"
+msgstr "Reaktion {emoji} gesendet"
+
+#: crates/alcedo-ui/src/meeting_invite.rs:139
+msgid "Add to Calendar"
+msgstr "Zum Kalender hinzufügen"
+
+#: crates/alcedo-ui/src/meeting_invite.rs:141
+#: crates/alcedo-ui/src/meeting_invite.rs:358
+msgid "Add this meeting to a calendar"
+msgstr "Diese Besprechung zu einem Kalender hinzufügen"
+
+#: crates/alcedo-ui/src/meeting_invite.rs:259
+msgid "Calendar invitation"
+msgstr "Kalendereinladung"
+
+#: crates/alcedo-ui/src/meeting_invite.rs:260
+#: crates/alcedo-ui/src/meeting_invite.rs:267
+msgid "Loading calendar file…"
+msgstr "Kalenderdatei wird geladen …"
+
+#: crates/alcedo-ui/src/meeting_invite.rs:294
+msgid "{title} (+{n} more)"
+msgid_plural "{title} (+{n} more)"
+msgstr[0] "{title} (+{n} weitere)"
+msgstr[1] "{title} (+{n} weitere)"
+
+#: crates/alcedo-ui/src/meeting_invite.rs:347
+msgid "Respond using the buttons"
+msgstr "Antworten Sie über die Schaltflächen"
+
+#: crates/alcedo-ui/src/meeting_invite.rs:354
+msgid "Add this cancelled meeting to a calendar"
+msgstr "Diese abgesagte Besprechung zu einem Kalender hinzufügen"
+
+#: crates/alcedo-ui/src/meeting_invite.rs:51
+msgctxt "strftime pattern: short month, day"
+msgid "%b %d"
+msgstr "%-d. %b"
+
+#: crates/alcedo-ui/src/meeting_invite.rs:53
+msgid "{date} (all day)"
+msgstr "{date} (ganztägig)"
+
+#: crates/alcedo-ui/src/meeting_invite.rs:59
+msgctxt "strftime pattern: short weekday, month, day"
+msgid "%a, %b %d"
+msgstr "%a, %-d. %b"
+
+#. TRANSLATORS: a meeting on one day, e.g. "Mon, Sep 07, 9:00 AM – 10:00 AM · CEST".
+#: crates/alcedo-ui/src/meeting_invite.rs:63
+msgid "{date}, {start} – {end} · {zone}"
+msgstr "{date}, {start} – {end} · {zone}"
+
+#. TRANSLATORS: a meeting across days, e.g. "Mon, Sep 07, 9:00 AM – Tue, Sep 08, 10:00 AM · CEST".
+#: crates/alcedo-ui/src/meeting_invite.rs:72
+msgid "{start_date}, {start_time} – {end_date}, {end_time} · {zone}"
+msgstr "{start_date}, {start_time} – {end_date}, {end_time} · {zone}"
+
+#: crates/alcedo-ui/src/meeting_rsvp.rs:78
+msgid "Accept"
+msgstr "Annehmen"
+
+#: crates/alcedo-ui/src/meeting_rsvp.rs:80
+msgid "Accept this invitation"
+msgstr "Diese Einladung annehmen"
+
+#: crates/alcedo-ui/src/meeting_rsvp.rs:83
+msgid "Tentative"
+msgstr "Vorläufig"
+
+#: crates/alcedo-ui/src/meeting_rsvp.rs:84
+msgid "Reply that you might attend"
+msgstr "Antworten, dass Sie vielleicht teilnehmen"
+
+#: crates/alcedo-ui/src/meeting_rsvp.rs:87
+msgid "Decline"
+msgstr "Ablehnen"
+
+#: crates/alcedo-ui/src/meeting_rsvp.rs:88
+msgid "Decline this invitation"
+msgstr "Diese Einladung ablehnen"
+
+#: crates/alcedo-ui/src/menu.rs:177
+#: crates/alcedo-ui/src/menu.rs:181
+#: crates/alcedo-ui/src/menu.rs:187
+msgid "_New Folder…"
+msgstr "_Neuer Ordner …"
+
+#: crates/alcedo-ui/src/menu.rs:199
+msgid "_Sync Unified Inbox"
+msgstr "Gemeinsamen Posteingang _synchronisieren"
+
+#: crates/alcedo-ui/src/menu.rs:201
+#: crates/alcedo-ui/src/menu.rs:208
+msgid "Mark All as _Read"
+msgstr "Alle als _gelesen markieren"
+
+#: crates/alcedo-ui/src/menu.rs:202
+msgid "_Search Unified Inbox"
+msgstr "Gemeinsamen Posteingang _durchsuchen"
+
+#: crates/alcedo-ui/src/menu.rs:206
+msgid "_Sync This Folder"
+msgstr "Diesen Ordner _synchronisieren"
+
+#: crates/alcedo-ui/src/menu.rs:209
+msgid "_Search This Folder"
+msgstr "Diesen Ordner _durchsuchen"
+
+#. TRANSLATORS: menu item; {folder} is a folder name such as "Trash". Keep one underscore for the mnemonic.
+#: crates/alcedo-ui/src/menu.rs:212
+msgid "E_mpty {folder}"
+msgstr "{folder} _leeren"
+
+#: crates/alcedo-ui/src/menu.rs:216
+msgid "_Delete All From Date…"
+msgstr "Alles bis zu einem Datum _löschen …"
+
+#: crates/alcedo-ui/src/menu.rs:241
+#: crates/alcedo-ui/src/menu.rs:251
+msgid "Account _Settings…"
+msgstr "Konto_einstellungen …"
+
+#: crates/alcedo-ui/src/menu.rs:245
+msgid "_Hide Account"
+msgstr "Konto aus_blenden"
+
+#: crates/alcedo-ui/src/menu.rs:255
+msgid "Un_hide Account"
+msgstr "Konto ein_blenden"
+
+#: crates/alcedo-ui/src/menu.rs:284
+msgid "Select _All"
+msgstr "_Alle auswählen"
+
+#: crates/alcedo-ui/src/menu.rs:289
+#: crates/alcedo-ui/src/menu.rs:357
+msgid "Reply _All"
+msgstr "_Allen antworten"
+
+#: crates/alcedo-ui/src/menu.rs:297
+#: crates/alcedo-ui/src/menu.rs:365
+msgid "Mark as _Read"
+msgstr "Als _gelesen markieren"
+
+#: crates/alcedo-ui/src/menu.rs:298
+#: crates/alcedo-ui/src/menu.rs:366
+msgid "Mark as _Unread"
+msgstr "Als _ungelesen markieren"
+
+#: crates/alcedo-ui/src/menu.rs:306
+#: crates/alcedo-ui/src/menu.rs:374
+msgid "Mark as _Spam"
+msgstr "Als _Spam markieren"
+
+#: crates/alcedo-ui/src/menu.rs:307
+#: crates/alcedo-ui/src/menu.rs:375
+msgid "Mark as _Not Spam"
+msgstr "Als _kein Spam markieren"
+
+#: crates/alcedo-ui/src/menu.rs:313
+#: crates/alcedo-ui/src/menu.rs:381
+msgid "_Move to Folder…"
+msgstr "In Ordner _verschieben …"
+
+#: crates/alcedo-ui/src/menu.rs:314
+#: crates/alcedo-ui/src/menu.rs:382
+msgid "_Copy to Folder…"
+msgstr "In Ordner _kopieren …"
+
+#: crates/alcedo-ui/src/menu.rs:315
+#: crates/alcedo-ui/src/menu.rs:383
+msgid "_Create Rule…"
+msgstr "Regel _erstellen …"
+
+#: crates/alcedo-ui/src/menu.rs:323
+#: crates/alcedo-ui/src/menu.rs:391
+msgid "Delete _Permanently…"
+msgstr "_Endgültig löschen …"
+
+#: crates/alcedo-ui/src/menu.rs:334
+msgid "_Command Palette…"
+msgstr "_Befehlspalette …"
+
+#: crates/alcedo-ui/src/menu.rs:335
+msgid "_Sync Folder"
+msgstr "Ordner _synchronisieren"
+
+#: crates/alcedo-ui/src/menu.rs:336
+msgid "Activity _Log"
+msgstr "Aktivitäts_protokoll"
+
+#: crates/alcedo-ui/src/menu.rs:342
+msgid "Show App _Rail"
+msgstr "App-_Leiste anzeigen"
+
+#: crates/alcedo-ui/src/menu.rs:343
+msgid "Show Message _Previews"
+msgstr "Nachrichten_vorschau anzeigen"
+
+#: crates/alcedo-ui/src/menu.rs:344
+msgid "Group by _Conversation"
+msgstr "Nach _Unterhaltung gruppieren"
+
+#: crates/alcedo-ui/src/menu.rs:423
+msgid "Go To"
+msgstr "Gehe zu"
+
+#: crates/alcedo-ui/src/menu.rs:425
+msgid "Message"
+msgstr "Nachricht"
+
+#: crates/alcedo-ui/src/menu.rs:433
+msgid "Add Account…"
+msgstr "Konto hinzufügen …"
+
+#: crates/alcedo-ui/src/menu.rs:439
+msgid "Rules"
+msgstr "Regeln"
+
+#: crates/alcedo-ui/src/menu.rs:471
+#: crates/alcedo-ui/src/menu.rs:472
+msgid "Main Menu"
+msgstr "Hauptmenü"
+
+#: crates/alcedo-ui/src/message_list/cells.rs:1045
+#: crates/alcedo-ui/src/message_list/column_picker.rs:14
+#: crates/alcedo-ui/src/message_list/columns.rs:569
+#: crates/alcedo-ui/src/preferences.rs:306
+msgid "Attachments"
+msgstr "Anhänge"
+
+#: crates/alcedo-ui/src/message_list/cells.rs:1172
+#: crates/alcedo-ui/src/message_list/column_picker.rs:16
+msgid "Size"
+msgstr "Größe"
+
+#: crates/alcedo-ui/src/message_list/cells.rs:1216
+#: crates/alcedo-ui/src/message_list/column_picker.rs:17
+msgid "Date"
+msgstr "Datum"
+
+#: crates/alcedo-ui/src/message_list/cells.rs:1260
+msgid "Deleted"
+msgstr "Gelöscht"
+
+#: crates/alcedo-ui/src/message_list/cells.rs:1328
+msgctxt "strftime pattern: short month, day"
+msgid "%b %-d"
+msgstr "%-d. %b"
+
+#: crates/alcedo-ui/src/message_list/cells.rs:1334
+msgctxt "strftime pattern: short month, day, year"
+msgid "%b %-d, %Y"
+msgstr "%-d. %b %Y"
+
+#: crates/alcedo-ui/src/message_list/cells.rs:228
+msgid "Collapse thread"
+msgstr "Unterhaltung einklappen"
+
+#: crates/alcedo-ui/src/message_list/cells.rs:230
+msgid "Expand thread"
+msgstr "Unterhaltung ausklappen"
+
+#: crates/alcedo-ui/src/message_list/cells.rs:349
+msgid "Has attachments"
+msgstr "Mit Anhängen"
+
+#: crates/alcedo-ui/src/message_list/cells.rs:363
+#: crates/alcedo-ui/src/message_list/cells.rs:1097
+#: crates/alcedo-ui/src/message_list/column_picker.rs:15
+#: crates/alcedo-ui/src/message_list/columns.rs:570
+#: crates/alcedo-ui/src/search_autocomplete.rs:487
+#: crates/alcedo-ui/src/search_autocomplete.rs:590
+#: crates/alcedo-ui/src/search_bar.rs:54
+msgid "Starred"
+msgstr "Markiert"
+
+#: crates/alcedo-ui/src/message_list/cells.rs:365
+#: crates/alcedo-ui/src/search_autocomplete.rs:488
+#: crates/alcedo-ui/src/search_autocomplete.rs:591
+msgid "Not starred"
+msgstr "Nicht markiert"
+
+#: crates/alcedo-ui/src/message_list/cells.rs:439
+msgid "Size unknown"
+msgstr "Größe unbekannt"
+
+#: crates/alcedo-ui/src/message_list/cells.rs:441
+msgid "{n} byte"
+msgid_plural "{n} bytes"
+msgstr[0] "{n} Byte"
+msgstr[1] "{n} Bytes"
+
+#: crates/alcedo-ui/src/message_list/cells.rs:595
+#: crates/alcedo-ui/src/message_list/cells.rs:613
+msgid "Drag to a folder"
+msgstr "In einen Ordner ziehen"
+
+#: crates/alcedo-ui/src/message_list/cells.rs:739
+#: crates/alcedo-ui/src/message_list/column_picker.rs:10
+#: crates/alcedo-ui/src/rule_editor.rs:673
+#: crates/alcedo-ui/src/search_autocomplete.rs:582
+msgid "Folder"
+msgstr "Ordner"
+
+#: crates/alcedo-ui/src/message_list/column_picker.rs:12
+msgid "Account chip"
+msgstr "Kontokürzel"
+
+#: crates/alcedo-ui/src/message_list/column_picker.rs:153
+msgid "Move {column} up"
+msgstr "{column} nach oben"
+
+#: crates/alcedo-ui/src/message_list/column_picker.rs:160
+msgid "Move {column} down"
+msgstr "{column} nach unten"
+
+#: crates/alcedo-ui/src/message_list/column_picker.rs:209
+msgid "Reset order"
+msgstr "Reihenfolge zurücksetzen"
+
+#: crates/alcedo-ui/src/message_list/column_picker.rs:285
+msgid "Top of the list is the leftmost column."
+msgstr "Der Anfang der Liste ist die Spalte ganz links."
+
+#: crates/alcedo-ui/src/message_list/mod.rs:1179
+msgid "Loading conversations…"
+msgstr "Unterhaltungen werden geladen …"
+
+#: crates/alcedo-ui/src/message_list/mod.rs:1181
+msgid "Loading messages…"
+msgstr "Nachrichten werden geladen …"
+
+#: crates/alcedo-ui/src/message_list/mod.rs:1186
+msgid "No matching conversations"
+msgstr "Keine passenden Unterhaltungen"
+
+#: crates/alcedo-ui/src/message_list/mod.rs:1187
+#: crates/alcedo-ui/src/message_list/mod.rs:1192
+msgid "Try folder:inbox from:name, or switch to All mail."
+msgstr "Versuchen Sie folder:inbox from:Name oder wechseln Sie zu Alle E-Mails."
+
+#: crates/alcedo-ui/src/message_list/mod.rs:1191
+msgid "No matching messages"
+msgstr "Keine passenden Nachrichten"
+
+#: crates/alcedo-ui/src/message_list/mod.rs:1198
+msgid "No conversations"
+msgstr "Keine Unterhaltungen"
+
+#: crates/alcedo-ui/src/message_list/mod.rs:1199
+#: crates/alcedo-ui/src/status_bar.rs:312
+msgid "No messages"
+msgstr "Keine Nachrichten"
+
+#: crates/alcedo-ui/src/message_list/mod.rs:959
+msgid "New message"
+msgstr "Neue Nachricht"
+
+#: crates/alcedo-ui/src/message_list/mod.rs:960
+msgid "{n} new message"
+msgid_plural "{n} new messages"
+msgstr[0] "{n} neue Nachricht"
+msgstr[1] "{n} neue Nachrichten"
+
+#: crates/alcedo-ui/src/message_list/pane.rs:218
+msgid "Mixed read state — click to mark all read or unread"
+msgstr "Gemischter Lesestatus – klicken, um alle als gelesen oder ungelesen zu markieren"
+
+#: crates/alcedo-ui/src/message_list/pane.rs:228
+msgid "Mixed star state — click to star or unstar all"
+msgstr "Gemischte Markierung – klicken, um alle zu markieren oder die Markierung zu entfernen"
+
+#: crates/alcedo-ui/src/message_list/pane.rs:464
+#: crates/alcedo-ui/src/search_bar.rs:41
+#: crates/alcedo-ui/src/search_bar.rs:227
+msgid "Search this folder"
+msgstr "Diesen Ordner durchsuchen"
+
+#: crates/alcedo-ui/src/message_list/pane.rs:466
+msgid "Search this folder. Switch to All mail in the filter bar, or use operators: from: to: subject: folder: is: has:"
+msgstr "Diesen Ordner durchsuchen. Wechseln Sie in der Filterleiste zu Alle E-Mails oder verwenden Sie Operatoren: from: to: subject: folder: is: has:"
+
+#: crates/alcedo-ui/src/message_list/pane.rs:527
+msgid "Scan server"
+msgstr "Server durchsuchen"
+
+#: crates/alcedo-ui/src/message_list/pane.rs:528
+msgid "Search the server for more messages"
+msgstr "Auf dem Server nach weiteren Nachrichten suchen"
+
+#: crates/alcedo-ui/src/message_list/pane.rs:649
+msgid "View Options"
+msgstr "Ansichtsoptionen"
+
+#: crates/alcedo-ui/src/message_list/pane.rs:653
+msgid "Reading Pane on the Right"
+msgstr "Lesebereich rechts"
+
+#: crates/alcedo-ui/src/message_list/pane.rs:657
+msgid "Reading Pane Below"
+msgstr "Lesebereich unten"
+
+#: crates/alcedo-ui/src/message_list/pane.rs:681
+msgid "Show Message Previews"
+msgstr "Nachrichtenvorschau anzeigen"
+
+#: crates/alcedo-ui/src/message_list/pane.rs:690
+msgid "Reading Pane"
+msgstr "Lesebereich"
+
+#: crates/alcedo-ui/src/notifications.rs:120
+msgid "Verification code\n{code}"
+msgstr "Bestätigungscode\n{code}"
+
+#: crates/alcedo-ui/src/pgp_banner.rs:171
+msgid "Verdict"
+msgstr "Ergebnis"
+
+#: crates/alcedo-ui/src/pgp_banner.rs:172
+msgid "Signer"
+msgstr "Unterzeichner"
+
+#: crates/alcedo-ui/src/pgp_banner.rs:174
+msgid "Fingerprint"
+msgstr "Fingerabdruck"
+
+#: crates/alcedo-ui/src/pgp_banner.rs:179
+msgid "OpenPGP Details"
+msgstr "OpenPGP-Details"
+
+#: crates/alcedo-ui/src/pgp_banner.rs:36
+msgid "Show details"
+msgstr "Details anzeigen"
+
+#: crates/alcedo-ui/src/pgp_banner.rs:43
+msgid "Use key"
+msgstr "Schlüssel verwenden"
+
+#: crates/alcedo-ui/src/pgp_banner.rs:82
+msgid "{email} shared an OpenPGP key via Autocrypt."
+msgstr "{email} hat über Autocrypt einen OpenPGP-Schlüssel geteilt."
+
+#: crates/alcedo-ui/src/preferences.rs:101
+msgid "Close to tray"
+msgstr "In den Infobereich schließen"
+
+#: crates/alcedo-ui/src/preferences.rs:102
+msgid "Window hides in the notification area instead of quitting"
+msgstr "Das Fenster wird im Infobereich ausgeblendet, statt das Programm zu beenden"
+
+#: crates/alcedo-ui/src/preferences.rs:109
+msgid "Desktop"
+msgstr "Arbeitsumgebung"
+
+#: crates/alcedo-ui/src/preferences.rs:115
+msgid "Grouping"
+msgstr "Gruppierung"
+
+#: crates/alcedo-ui/src/preferences.rs:116
+msgid "Group replies into conversations, or show one row per message"
+msgstr "Antworten zu Unterhaltungen gruppieren oder eine Zeile pro Nachricht anzeigen"
+
+#: crates/alcedo-ui/src/preferences.rs:117
+msgid "Conversations"
+msgstr "Unterhaltungen"
+
+#: crates/alcedo-ui/src/preferences.rs:117
+msgid "One message per row"
+msgstr "Eine Nachricht pro Zeile"
+
+#: crates/alcedo-ui/src/preferences.rs:123
+msgid "A line of the message body under each subject"
+msgstr "Eine Zeile des Nachrichtentexts unter jedem Betreff"
+
+#: crates/alcedo-ui/src/preferences.rs:128
+msgid "List density"
+msgstr "Listendichte"
+
+#: crates/alcedo-ui/src/preferences.rs:129
+msgid "Spacing in the message list and reading pane"
+msgstr "Abstände in der Nachrichtenliste und im Lesebereich"
+
+#: crates/alcedo-ui/src/preferences.rs:130
+msgid "Compact"
+msgstr "Kompakt"
+
+#: crates/alcedo-ui/src/preferences.rs:130
+msgid "Comfortable"
+msgstr "Komfortabel"
+
+#: crates/alcedo-ui/src/preferences.rs:130
+msgid "Relaxed"
+msgstr "Großzügig"
+
+#: crates/alcedo-ui/src/preferences.rs:135
+msgid "Message list"
+msgstr "Nachrichtenliste"
+
+#: crates/alcedo-ui/src/preferences.rs:144
+msgid "Show one account at a time, or every account with its folders"
+msgstr "Ein Konto auf einmal anzeigen oder alle Konten mit ihren Ordnern"
+
+#: crates/alcedo-ui/src/preferences.rs:145
+msgid "Account picker"
+msgstr "Kontoauswahl"
+
+#: crates/alcedo-ui/src/preferences.rs:145
+msgid "All accounts stacked"
+msgstr "Alle Konten untereinander"
+
+#: crates/alcedo-ui/src/preferences.rs:150
+msgid "Folder pane"
+msgstr "Ordnerbereich"
+
+#: crates/alcedo-ui/src/preferences.rs:155
+msgid "Show verification codes"
+msgstr "Bestätigungscodes anzeigen"
+
+#: crates/alcedo-ui/src/preferences.rs:156
+msgid "When a message includes a sign-in code, show it in the reader so you can copy it"
+msgstr "Enthält eine Nachricht einen Anmeldecode, wird er im Lesebereich angezeigt, damit Sie ihn kopieren können"
+
+#: crates/alcedo-ui/src/preferences.rs:163
+msgid "Clean up after copy"
+msgstr "Nach dem Kopieren aufräumen"
+
+#: crates/alcedo-ui/src/preferences.rs:164
+msgid "Move that message to Trash after you copy the code. Undo from the toast."
+msgstr "Diese Nachricht nach dem Kopieren des Codes in den Papierkorb verschieben. Über die Meldung rückgängig machen."
+
+#: crates/alcedo-ui/src/preferences.rs:175
+msgid "Verification codes"
+msgstr "Bestätigungscodes"
+
+#: crates/alcedo-ui/src/preferences.rs:183
+#: crates/alcedo-ui/src/rules.rs:80
+msgid "Message rules"
+msgstr "Nachrichtenregeln"
+
+#: crates/alcedo-ui/src/preferences.rs:184
+msgid "Automatically file, star, or delete mail"
+msgstr "E-Mails automatisch ablegen, markieren oder löschen"
+
+#: crates/alcedo-ui/src/preferences.rs:195
+msgid "Automation"
+msgstr "Automatisierung"
+
+#: crates/alcedo-ui/src/preferences.rs:201
+msgid "Maximum lines"
+msgstr "Maximale Zeilenzahl"
+
+#: crates/alcedo-ui/src/preferences.rs:202
+msgid "Oldest entries are dropped when the log is full"
+msgstr "Die ältesten Einträge werden verworfen, wenn das Protokoll voll ist"
+
+#: crates/alcedo-ui/src/preferences.rs:207
+#: crates/alcedo-ui/src/status_bar.rs:92
+#: crates/alcedo-ui/src/status_bar.rs:241
+msgid "Activity log"
+msgstr "Aktivitätsprotokoll"
+
+#: crates/alcedo-ui/src/preferences.rs:209
+msgid "Keeps a session history of sends, sync, and other actions. Open it from Idle on the status bar."
+msgstr "Speichert einen Sitzungsverlauf von Sendungen, Synchronisierung und anderen Aktionen. Öffnen Sie ihn über die Statusleiste."
+
+#: crates/alcedo-ui/src/preferences.rs:215
+msgid "General"
+msgstr "Allgemein"
+
+#: crates/alcedo-ui/src/preferences.rs:237
+msgid "Default format"
+msgstr "Standardformat"
+
+#: crates/alcedo-ui/src/preferences.rs:238
+msgid "Used for new messages and replies"
+msgstr "Für neue Nachrichten und Antworten"
+
+#: crates/alcedo-ui/src/preferences.rs:246
+msgid "Typical inline images"
+msgstr "Übliche eingebettete Bilder"
+
+#: crates/alcedo-ui/src/preferences.rs:247
+msgid "Comma-separated extensions most email clients can display, for example png, jpeg"
+msgstr "Durch Kommas getrennte Endungen, die die meisten E-Mail-Programme anzeigen können, zum Beispiel png, jpeg"
+
+#: crates/alcedo-ui/src/preferences.rs:265
+msgid "Composing"
+msgstr "Verfassen"
+
+#: crates/alcedo-ui/src/preferences.rs:282
+msgid "HTML mail loads remote images automatically. You can still allow a message or sender from the reader."
+msgstr "HTML-E-Mails laden externe Bilder automatisch. Sie können einzelne Nachrichten oder Absender trotzdem im Lesebereich zulassen."
+
+#: crates/alcedo-ui/src/preferences.rs:294
+msgid "Risky extensions"
+msgstr "Riskante Endungen"
+
+#: crates/alcedo-ui/src/preferences.rs:295
+msgid "Comma-separated, for example exe, html, svg"
+msgstr "Durch Kommas getrennt, zum Beispiel exe, html, svg"
+
+#: crates/alcedo-ui/src/preferences.rs:300
+msgid "Risky MIME types"
+msgstr "Riskante MIME-Typen"
+
+#: crates/alcedo-ui/src/preferences.rs:301
+msgid "Comma-separated, for example text/html, image/svg+xml"
+msgstr "Durch Kommas getrennt, zum Beispiel text/html, image/svg+xml"
+
+#: crates/alcedo-ui/src/preferences.rs:308
+msgid "Risky types stay stored, but opening or saving them asks for confirmation. Edit the lists to match what you want flagged."
+msgstr "Riskante Typen bleiben gespeichert, aber Öffnen oder Speichern erfordert eine Bestätigung. Passen Sie die Listen an das an, was Sie markieren möchten."
+
+#: crates/alcedo-ui/src/preferences.rs:315
+msgid "Request read receipts"
+msgstr "Lesebestätigungen anfordern"
+
+#: crates/alcedo-ui/src/preferences.rs:321
+msgid "Insert tracking pixel"
+msgstr "Tracking-Pixel einfügen"
+
+#: crates/alcedo-ui/src/preferences.rs:330
+msgid "Tracking pixel URL"
+msgstr "URL des Tracking-Pixels"
+
+#: crates/alcedo-ui/src/preferences.rs:331
+msgid "Must start with https://"
+msgstr "Muss mit https:// beginnen"
+
+#: crates/alcedo-ui/src/preferences.rs:340
+msgid "Open tracking"
+msgstr "Öffnungsverfolgung"
+
+#: crates/alcedo-ui/src/preferences.rs:341
+msgid "Know when recipients open your mail. Most people should leave this off."
+msgstr "Erfahren Sie, wann Empfänger Ihre E-Mails öffnen. Die meisten sollten dies ausgeschaltet lassen."
+
+#: crates/alcedo-ui/src/preferences.rs:356
+msgid "Privacy"
+msgstr "Datenschutz"
+
+#: crates/alcedo-ui/src/preferences.rs:398
+msgid "Off"
+msgstr "Aus"
+
+#: crates/alcedo-ui/src/preferences.rs:400
+msgid "{n} second"
+msgid_plural "{n} seconds"
+msgstr[0] "{n} Sekunde"
+msgstr[1] "{n} Sekunden"
+
+#: crates/alcedo-ui/src/preferences.rs:420
+msgid "Undo send"
+msgstr "Senden rückgängig machen"
+
+#: crates/alcedo-ui/src/preferences.rs:421
+msgid "Wait before sending so you can take a message back"
+msgstr "Vor dem Senden warten, damit Sie eine Nachricht zurückholen können"
+
+#: crates/alcedo-ui/src/reader.rs:141
+msgid "Thumbs up"
+msgstr "Daumen hoch"
+
+#: crates/alcedo-ui/src/reader.rs:1418
+msgid "Unsubscribed"
+msgstr "Abgemeldet"
+
+#: crates/alcedo-ui/src/reader.rs:142
+msgid "Heart"
+msgstr "Herz"
+
+#: crates/alcedo-ui/src/reader.rs:143
+msgid "Laugh"
+msgstr "Lachen"
+
+#: crates/alcedo-ui/src/reader.rs:144
+msgid "Celebrate"
+msgstr "Feiern"
+
+#: crates/alcedo-ui/src/reader.rs:145
+msgid "Surprised"
+msgstr "Überrascht"
+
+#: crates/alcedo-ui/src/reader.rs:146
+msgid "Sad"
+msgstr "Traurig"
+
+#: crates/alcedo-ui/src/reader.rs:152
+msgid "{n} message selected"
+msgid_plural "{n} messages selected"
+msgstr[0] "{n} Nachricht ausgewählt"
+msgstr[1] "{n} Nachrichten ausgewählt"
+
+#: crates/alcedo-ui/src/reader.rs:1545
+msgid "Copy Subject"
+msgstr "Betreff kopieren"
+
+#: crates/alcedo-ui/src/reader.rs:1560
+msgid "Subject copied"
+msgstr "Betreff kopiert"
+
+#. TRANSLATORS: strftime pattern for a message date like "Sep 07, 2026, 09:05 AM".
+#: crates/alcedo-ui/src/reader.rs:1585
+msgctxt "strftime pattern: short month, day, year, time"
+msgid "%b %d, %Y, %I:%M %p"
+msgstr "%-d. %b %Y, %H:%M"
+
+#: crates/alcedo-ui/src/reader.rs:160
+#: crates/alcedo-ui/src/reader.rs:1989
+#: crates/alcedo-ui/src/reader.rs:2001
+msgid "Attachment"
+msgstr "Anhang"
+
+#: crates/alcedo-ui/src/reader.rs:1602
+msgid "Show fewer recipients"
+msgstr "Weniger Empfänger anzeigen"
+
+#: crates/alcedo-ui/src/reader.rs:1604
+msgid "Show all recipients"
+msgstr "Alle Empfänger anzeigen"
+
+#: crates/alcedo-ui/src/reader.rs:1606
+msgid "Show {n} recipient"
+msgid_plural "Show all {n} recipients"
+msgstr[0] "{n} Empfänger anzeigen"
+msgstr[1] "Alle {n} Empfänger anzeigen"
+
+#: crates/alcedo-ui/src/reader.rs:165
+#: crates/alcedo-ui/src/reader.rs:1994
+#: crates/alcedo-ui/src/reader.rs:2104
+msgid "Attachments are still loading"
+msgstr "Anhänge werden noch geladen"
+
+#: crates/alcedo-ui/src/reader.rs:192
+#: crates/alcedo-ui/src/reader.rs:646
+msgid "Select a message"
+msgstr "Wählen Sie eine Nachricht"
+
+#: crates/alcedo-ui/src/reader.rs:195
+#: crates/alcedo-ui/src/reader.rs:647
+msgid "Choose a message from the list to read it."
+msgstr "Wählen Sie eine Nachricht aus der Liste, um sie zu lesen."
+
+#: crates/alcedo-ui/src/reader.rs:2006
+msgid "Couldn't download the attachment"
+msgstr "Der Anhang konnte nicht heruntergeladen werden"
+
+#: crates/alcedo-ui/src/reader.rs:2084
+msgid "Save all"
+msgstr "Alle speichern"
+
+#: crates/alcedo-ui/src/reader.rs:209
+msgid "Archive, star, or delete from the toolbar."
+msgstr "Archivieren, markieren oder löschen Sie über die Werkzeugleiste."
+
+#: crates/alcedo-ui/src/reader.rs:2098
+msgid "Save {n} attachment to a folder"
+msgid_plural "Save all {n} attachments to a folder"
+msgstr[0] "{n} Anhang in einem Ordner speichern"
+msgstr[1] "Alle {n} Anhänge in einem Ordner speichern"
+
+#: crates/alcedo-ui/src/reader.rs:215
+msgid "Opening draft…"
+msgstr "Entwurf wird geöffnet …"
+
+#: crates/alcedo-ui/src/reader.rs:2165
+#: crates/alcedo-ui/src/reader.rs:2241
+msgid "Open"
+msgstr "Öffnen"
+
+#: crates/alcedo-ui/src/reader.rs:2168
+#: crates/alcedo-ui/src/reader.rs:2244
+msgid "Save All…"
+msgstr "Alle speichern …"
+
+#: crates/alcedo-ui/src/reader.rs:218
+msgid "Fetching this draft from the server."
+msgstr "Dieser Entwurf wird vom Server abgerufen."
+
+#: crates/alcedo-ui/src/reader.rs:2344
+msgid "This attachment may be unsafe"
+msgstr "Dieser Anhang ist möglicherweise unsicher"
+
+#: crates/alcedo-ui/src/reader.rs:2345
+msgid "{name} can run code or harm this computer. Enable it only if you trust the sender."
+msgstr "{name} kann Code ausführen oder diesem Computer schaden. Aktivieren Sie ihn nur, wenn Sie dem Absender vertrauen."
+
+#: crates/alcedo-ui/src/reader.rs:2357
+msgid "Some attachments may be unsafe"
+msgstr "Einige Anhänge sind möglicherweise unsicher"
+
+#: crates/alcedo-ui/src/reader.rs:2358
+msgid "These files can run code or harm this computer. Enable them only if you trust the sender.\n\n{names}"
+msgstr "Diese Dateien können Code ausführen oder diesem Computer schaden. Aktivieren Sie sie nur, wenn Sie dem Absender vertrauen.\n\n{names}"
+
+#: crates/alcedo-ui/src/reader.rs:2369
+msgid "Enable"
+msgstr "Aktivieren"
+
+#: crates/alcedo-ui/src/reader.rs:2466
+msgid "Save all attachments"
+msgstr "Alle Anhänge speichern"
+
+#: crates/alcedo-ui/src/reader.rs:2502
+msgid "Save attachment"
+msgstr "Anhang speichern"
+
+#: crates/alcedo-ui/src/reader.rs:2529
+#: crates/alcedo-ui/src/reader.rs:2532
+msgid "Could not save attachment"
+msgstr "Anhang konnte nicht gespeichert werden"
+
+#: crates/alcedo-ui/src/reader.rs:2585
+msgid "Can’t open attachment"
+msgstr "Anhang kann nicht geöffnet werden"
+
+#: crates/alcedo-ui/src/reader.rs:286
+msgid "Always load images from this sender"
+msgstr "Bilder von diesem Absender immer laden"
+
+#: crates/alcedo-ui/src/reader.rs:295
+msgid "Load images"
+msgstr "Bilder laden"
+
+#: crates/alcedo-ui/src/reader.rs:296
+msgid "Show images from the web in this message"
+msgstr "Bilder aus dem Web in dieser Nachricht anzeigen"
+
+#: crates/alcedo-ui/src/reader.rs:309
+#: crates/alcedo-ui/src/reader.rs:323
+msgid "Remote images blocked"
+msgstr "Externe Bilder blockiert"
+
+#: crates/alcedo-ui/src/reader.rs:330
+msgid "From:"
+msgstr "Von:"
+
+#: crates/alcedo-ui/src/reader.rs:335
+msgid "Unsubscribe from this mailing list"
+msgstr "Von dieser Mailingliste abmelden"
+
+#: crates/alcedo-ui/src/reader.rs:344
+msgid "Sender:"
+msgstr "Absender:"
+
+#: crates/alcedo-ui/src/reader.rs:345
+msgid "Reply-To:"
+msgstr "Antwort an:"
+
+#: crates/alcedo-ui/src/reader.rs:355
+msgid "To:"
+msgstr "An:"
+
+#: crates/alcedo-ui/src/reader.rs:356
+msgid "Cc:"
+msgstr "Cc:"
+
+#: crates/alcedo-ui/src/reader.rs:361
+msgid "Reply to List"
+msgstr "An Liste antworten"
+
+#: crates/alcedo-ui/src/reader.rs:366
+msgid "Reply in New Window"
+msgstr "In neuem Fenster antworten"
+
+#: crates/alcedo-ui/src/reader.rs:370
+msgid "Reply All in New Window"
+msgstr "Allen in neuem Fenster antworten"
+
+#: crates/alcedo-ui/src/reader.rs:408
+msgid "Forward in New Window"
+msgstr "In neuem Fenster weiterleiten"
+
+#: crates/alcedo-ui/src/reader.rs:477
+msgid "More reactions…"
+msgstr "Weitere Reaktionen …"
+
+#: crates/alcedo-ui/src/reader.rs:559
+#: crates/alcedo-ui/src/reader.rs:560
+msgid "Back to Messages"
+msgstr "Zurück zu den Nachrichten"
+
+#: crates/alcedo-ui/src/reader.rs:622
+msgid "Loading message…"
+msgstr "Nachricht wird geladen …"
+
+#: crates/alcedo-ui/src/reader.rs:726
+msgid "View Source"
+msgstr "Quelltext anzeigen"
+
+#: crates/alcedo-ui/src/reader.rs:727
+#: crates/alcedo-ui/src/reader.rs:2166
+#: crates/alcedo-ui/src/reader.rs:2242
+#: crates/alcedo-ui/src/source_viewer.rs:90
+msgid "Save to File…"
+msgstr "In Datei speichern …"
+
+#: crates/alcedo-ui/src/reader.rs:729
+msgid "Show Original Colors"
+msgstr "Originalfarben anzeigen"
+
+#: crates/alcedo-ui/src/reader.rs:778
+#: crates/alcedo-ui/src/reader.rs:779
+msgid "Message Options"
+msgstr "Nachrichtenoptionen"
+
+#: crates/alcedo-ui/src/reader.rs:989
+msgid "You already reacted with {emoji}"
+msgstr "Sie haben bereits mit {emoji} reagiert"
+
+#. TRANSLATORS: {field} is "To", "Cc" or "Bcc".
+#: crates/alcedo-ui/src/recipient_picker.rs:240
+msgid "Add to {field}"
+msgstr "Zu {field} hinzufügen"
+
+#: crates/alcedo-ui/src/recipient_picker.rs:249
+msgid "Search contacts and addresses"
+msgstr "Kontakte und Adressen durchsuchen"
+
+#: crates/alcedo-ui/src/recipient_picker.rs:258
+msgid "All addresses"
+msgstr "Alle Adressen"
+
+#: crates/alcedo-ui/src/recipient_picker.rs:264
+msgid "Saved contacts and groups"
+msgstr "Gespeicherte Kontakte und Gruppen"
+
+#: crates/alcedo-ui/src/recipient_picker.rs:270
+msgid "Addresses from sent messages"
+msgstr "Adressen aus gesendeten Nachrichten"
+
+#: crates/alcedo-ui/src/recipient_picker.rs:364
+msgid "Add ({n})"
+msgid_plural "Add ({n})"
+msgstr[0] "Hinzufügen ({n})"
+msgstr[1] "Hinzufügen ({n})"
+
+#: crates/alcedo-ui/src/recipient_picker.rs:393
+msgid "No matching addresses"
+msgstr "Keine passenden Adressen"
+
+#: crates/alcedo-ui/src/recipient_picker.rs:395
+msgid "No addresses in Sent yet"
+msgstr "Noch keine Adressen in Gesendet"
+
+#. TRANSLATORS: {details} describes an address; "Sent" means it came from sent mail.
+#: crates/alcedo-ui/src/recipient_picker.rs:417
+msgid "{details} · Sent"
+msgstr "{details} · Gesendet"
+
+#: crates/alcedo-ui/src/recipient_row.rs:1061
+msgid "This group has no members"
+msgstr "Diese Gruppe hat keine Mitglieder"
+
+#: crates/alcedo-ui/src/recipient_row.rs:1209
+msgid "Invalid address"
+msgstr "Ungültige Adresse"
+
+#: crates/alcedo-ui/src/recipient_row.rs:196
+msgid "Choose recipients"
+msgstr "Empfänger wählen"
+
+#: crates/alcedo-ui/src/recipient_row.rs:24
+msgid "Name or email"
+msgstr "Name oder E-Mail"
+
+#: crates/alcedo-ui/src/recipient_row.rs:857
+msgid "{name} — 1 member — click to expand"
+msgstr "{name} – 1 Mitglied – zum Ausklappen klicken"
+
+#: crates/alcedo-ui/src/recipient_row.rs:859
+msgid "{name} — {n} member — click to expand"
+msgid_plural "{name} — {n} members — click to expand"
+msgstr[0] "{name} – {n} Mitglied – zum Ausklappen klicken"
+msgstr[1] "{name} – {n} Mitglieder – zum Ausklappen klicken"
+
+#: crates/alcedo-ui/src/recipient_row.rs:898
+msgid "{label}, group, press Enter to expand"
+msgstr "{label}, Gruppe, zum Ausklappen Eingabetaste drücken"
+
+#: crates/alcedo-ui/src/recipient_row.rs:900
+msgid "{label}, recipient"
+msgstr "{label}, Empfänger"
+
+#: crates/alcedo-ui/src/recipient_row.rs:949
+msgid "Remove {recipient}"
+msgstr "{recipient} entfernen"
+
+#: crates/alcedo-ui/src/rule_editor.rs:157
+msgid "New Rule"
+msgstr "Neue Regel"
+
+#: crates/alcedo-ui/src/rule_editor.rs:159
+#: crates/alcedo-ui/src/rules.rs:90
+msgid "Edit Rule"
+msgstr "Regel bearbeiten"
+
+#: crates/alcedo-ui/src/rule_editor.rs:162
+msgid "Rule name"
+msgstr "Regelname"
+
+#: crates/alcedo-ui/src/rule_editor.rs:166
+msgid "All conditions"
+msgstr "Alle Bedingungen"
+
+#: crates/alcedo-ui/src/rule_editor.rs:167
+msgid "Any condition"
+msgstr "Mindestens eine Bedingung"
+
+#: crates/alcedo-ui/src/rule_editor.rs:170
+msgid "Match"
+msgstr "Übereinstimmung"
+
+#: crates/alcedo-ui/src/rule_editor.rs:181
+msgid "Conditions"
+msgstr "Bedingungen"
+
+#: crates/alcedo-ui/src/rule_editor.rs:181
+msgid "Add Condition"
+msgstr "Bedingung hinzufügen"
+
+#: crates/alcedo-ui/src/rule_editor.rs:183
+msgid "Actions"
+msgstr "Aktionen"
+
+#: crates/alcedo-ui/src/rule_editor.rs:183
+msgid "Add Action"
+msgstr "Aktion hinzufügen"
+
+#: crates/alcedo-ui/src/rule_editor.rs:190
+msgid "Stop after this rule"
+msgstr "Nach dieser Regel anhalten"
+
+#: crates/alcedo-ui/src/rule_editor.rs:191
+msgid "Do not apply later rules to the same message"
+msgstr "Spätere Regeln nicht auf dieselbe Nachricht anwenden"
+
+#: crates/alcedo-ui/src/rule_editor.rs:196
+msgid "Also apply to messages in this folder"
+msgstr "Auch auf Nachrichten in diesem Ordner anwenden"
+
+#: crates/alcedo-ui/src/rule_editor.rs:542
+msgid "Field"
+msgstr "Feld"
+
+#: crates/alcedo-ui/src/rule_editor.rs:552
+msgid "Operator"
+msgstr "Operator"
+
+#: crates/alcedo-ui/src/rule_editor.rs:556
+msgid "Value"
+msgstr "Wert"
+
+#: crates/alcedo-ui/src/rule_editor.rs:631
+#: crates/alcedo-ui/src/rule_editor.rs:668
+msgid "Choose folder…"
+msgstr "Ordner wählen …"
+
+#: crates/alcedo-ui/src/rule_editor.rs:659
+msgid "Action"
+msgstr "Aktion"
+
+#: crates/alcedo-ui/src/rule_editor.rs:91
+msgid "Move to folder"
+msgstr "In Ordner verschieben"
+
+#: crates/alcedo-ui/src/rule_editor.rs:92
+msgid "Copy to folder"
+msgstr "In Ordner kopieren"
+
+#: crates/alcedo-ui/src/rule_editor.rs:97
+msgid "Move to Trash"
+msgstr "In den Papierkorb verschieben"
+
+#: crates/alcedo-ui/src/rules.rs:1050
+#: crates/alcedo-ui/src/rules.rs:1051
+msgid "Reorder rule"
+msgstr "Regel neu anordnen"
+
+#: crates/alcedo-ui/src/rules.rs:1061
+msgid "Enable {rule}"
+msgstr "{rule} aktivieren"
+
+#: crates/alcedo-ui/src/rules.rs:184
+msgid "Add an account to create rules."
+msgstr "Fügen Sie ein Konto hinzu, um Regeln zu erstellen."
+
+#: crates/alcedo-ui/src/rules.rs:249
+msgid "Use server instead…"
+msgstr "Stattdessen den Server verwenden …"
+
+#: crates/alcedo-ui/src/rules.rs:257
+msgid "Replace server filters?"
+msgstr "Serverfilter ersetzen?"
+
+#: crates/alcedo-ui/src/rules.rs:259
+msgid "Alcedo will turn on its own server rules. Existing server filters stay on the server but will not run."
+msgstr "Alcedo schaltet seine eigenen Serverregeln ein. Vorhandene Serverfilter bleiben auf dem Server, werden aber nicht ausgeführt."
+
+#: crates/alcedo-ui/src/rules.rs:263
+msgid "Replace"
+msgstr "Ersetzen"
+
+#: crates/alcedo-ui/src/rules.rs:288
+msgid "On the server"
+msgstr "Auf dem Server"
+
+#: crates/alcedo-ui/src/rules.rs:289
+msgid "Already running on this account. Alcedo cannot edit them here."
+msgstr "Laufen bereits in diesem Konto. Alcedo kann sie hier nicht bearbeiten."
+
+#: crates/alcedo-ui/src/rules.rs:297
+msgid "Server rules"
+msgstr "Serverregeln"
+
+#: crates/alcedo-ui/src/rules.rs:309
+msgid "{n} more filter Alcedo can’t display"
+msgid_plural "{n} more filters Alcedo can’t display"
+msgstr[0] "{n} weiterer Filter, den Alcedo nicht anzeigen kann"
+msgstr[1] "{n} weitere Filter, die Alcedo nicht anzeigen kann"
+
+#: crates/alcedo-ui/src/rules.rs:315
+#: crates/alcedo-ui/src/rules.rs:320
+msgid "Other server filters"
+msgstr "Andere Serverfilter"
+
+#: crates/alcedo-ui/src/rules.rs:339
+msgid "None on this computer"
+msgstr "Keine auf diesem Computer"
+
+#: crates/alcedo-ui/src/rules.rs:365
+msgid "No message rules"
+msgstr "Keine Nachrichtenregeln"
+
+#: crates/alcedo-ui/src/rules.rs:366
+msgid "Rules file, star, or delete mail automatically when it arrives."
+msgstr "Regeln legen E-Mails beim Eingang automatisch ab, markieren oder löschen sie."
+
+#: crates/alcedo-ui/src/rules.rs:546
+msgid "Delete rule?"
+msgstr "Regel löschen?"
+
+#: crates/alcedo-ui/src/rules.rs:547
+msgid "“{name}” will no longer apply to incoming mail."
+msgstr "„{name}“ wird nicht mehr auf eingehende E-Mails angewendet."
+
+#: crates/alcedo-ui/src/rules.rs:841
+msgid "These rules run on the server, including when Alcedo is closed."
+msgstr "Diese Regeln laufen auf dem Server, auch wenn Alcedo geschlossen ist."
+
+#: crates/alcedo-ui/src/rules.rs:844
+msgid "This account already has server filters. Alcedo rules run on this computer."
+msgstr "Dieses Konto hat bereits Serverfilter. Alcedo-Regeln laufen auf diesem Computer."
+
+#: crates/alcedo-ui/src/rules.rs:847
+msgid "These rules run on this computer when Alcedo checks the Inbox."
+msgstr "Diese Regeln laufen auf diesem Computer, wenn Alcedo den Posteingang prüft."
+
+#: crates/alcedo-ui/src/rules.rs:867
+msgid " · On the server"
+msgstr " · Auf dem Server"
+
+#: crates/alcedo-ui/src/rules.rs:869
+msgid " · On this computer"
+msgstr " · Auf diesem Computer"
+
+#: crates/alcedo-ui/src/rules.rs:91
+msgid "Delete Rule"
+msgstr "Regel löschen"
+
+#: crates/alcedo-ui/src/rules.rs:92
+msgid "Move Up"
+msgstr "Nach oben"
+
+#: crates/alcedo-ui/src/rules.rs:93
+msgid "Move Down"
+msgstr "Nach unten"
+
+#: crates/alcedo-ui/src/rules.rs:95
+#: crates/alcedo-ui/src/rules.rs:347
+msgid "Add Rule"
+msgstr "Regel hinzufügen"
+
+#: crates/alcedo-ui/src/search_autocomplete.rs:486
+#: crates/alcedo-ui/src/search_autocomplete.rs:589
+msgid "Read"
+msgstr "Gelesen"
+
+#: crates/alcedo-ui/src/search_autocomplete.rs:491
+#: crates/alcedo-ui/src/search_autocomplete.rs:592
+msgid "Has a file attached"
+msgstr "Hat eine angehängte Datei"
+
+#: crates/alcedo-ui/src/search_autocomplete.rs:494
+#: crates/alcedo-ui/src/search_autocomplete.rs:495
+#: crates/alcedo-ui/src/search_autocomplete.rs:583
+msgid "All folders"
+msgstr "Alle Ordner"
+
+#: crates/alcedo-ui/src/search_autocomplete.rs:515
+msgid "1 MB"
+msgstr "1 MB"
+
+#: crates/alcedo-ui/src/search_autocomplete.rs:516
+msgid "5 MB"
+msgstr "5 MB"
+
+#: crates/alcedo-ui/src/search_autocomplete.rs:517
+msgid "10 MB"
+msgstr "10 MB"
+
+#: crates/alcedo-ui/src/search_autocomplete.rs:518
+msgid "25 MB"
+msgstr "25 MB"
+
+#: crates/alcedo-ui/src/search_autocomplete.rs:519
+msgid "50 MB"
+msgstr "50 MB"
+
+#: crates/alcedo-ui/src/search_autocomplete.rs:520
+msgid "100 MB"
+msgstr "100 MB"
+
+#: crates/alcedo-ui/src/search_autocomplete.rs:537
+msgid "{size} GB"
+msgstr "{size} GB"
+
+#: crates/alcedo-ui/src/search_autocomplete.rs:549
+msgid "Smaller than {size}"
+msgstr "Kleiner als {size}"
+
+#: crates/alcedo-ui/src/search_autocomplete.rs:551
+msgid "Larger than {size}"
+msgstr "Größer als {size}"
+
+#: crates/alcedo-ui/src/search_autocomplete.rs:572
+msgid "Today"
+msgstr "Heute"
+
+#: crates/alcedo-ui/src/search_autocomplete.rs:579
+msgid "Sender"
+msgstr "Absender"
+
+#: crates/alcedo-ui/src/search_autocomplete.rs:581
+msgid "Subject text"
+msgstr "Betrefftext"
+
+#: crates/alcedo-ui/src/search_autocomplete.rs:584
+msgid "After date"
+msgstr "Nach Datum"
+
+#: crates/alcedo-ui/src/search_autocomplete.rs:585
+msgid "Before date"
+msgstr "Vor Datum"
+
+#: crates/alcedo-ui/src/search_autocomplete.rs:586
+msgid "Larger than a size"
+msgstr "Größer als eine Größe"
+
+#: crates/alcedo-ui/src/search_autocomplete.rs:587
+msgid "Smaller than a size"
+msgstr "Kleiner als eine Größe"
+
+#: crates/alcedo-ui/src/search_autocomplete.rs:76
+msgid "Search operator suggestions"
+msgstr "Vorschläge für Suchoperatoren"
+
+#: crates/alcedo-ui/src/search_bar.rs:166
+msgid "This view searches all mail unless the query has folder: or in:"
+msgstr "Diese Ansicht durchsucht alle E-Mails, außer die Abfrage enthält folder: oder in:"
+
+#: crates/alcedo-ui/src/search_bar.rs:217
+#: crates/alcedo-ui/src/search_bar.rs:224
+msgid "Folder is set in the search query"
+msgstr "Der Ordner ist in der Suchanfrage festgelegt"
+
+#: crates/alcedo-ui/src/search_bar.rs:40
+msgid "This folder"
+msgstr "Dieser Ordner"
+
+#: crates/alcedo-ui/src/search_bar.rs:43
+#: crates/alcedo-ui/src/search_bar.rs:219
+msgid "Search all folders"
+msgstr "Alle Ordner durchsuchen"
+
+#: crates/alcedo-ui/src/search_bar.rs:81
+msgid "Save search"
+msgstr "Suche speichern"
+
+#: crates/alcedo-ui/src/settings.rs:1049
+msgid "Default"
+msgstr "Standard"
+
+#: crates/alcedo-ui/src/settings.rs:1050
+msgid "Blue"
+msgstr "Blau"
+
+#: crates/alcedo-ui/src/settings.rs:1051
+msgid "Teal"
+msgstr "Petrol"
+
+#: crates/alcedo-ui/src/settings.rs:1052
+msgid "Green"
+msgstr "Grün"
+
+#: crates/alcedo-ui/src/settings.rs:1053
+msgid "Yellow"
+msgstr "Gelb"
+
+#: crates/alcedo-ui/src/settings.rs:1054
+msgid "Orange"
+msgstr "Orange"
+
+#: crates/alcedo-ui/src/settings.rs:1055
+msgid "Red"
+msgstr "Rot"
+
+#: crates/alcedo-ui/src/settings.rs:1056
+msgid "Pink"
+msgstr "Rosa"
+
+#: crates/alcedo-ui/src/settings.rs:1057
+msgid "Purple"
+msgstr "Lila"
+
+#: crates/alcedo-ui/src/settings.rs:1058
+msgid "Slate"
+msgstr "Schiefer"
+
+#. TRANSLATORS: toast; {setting} is the name of a preference.
+#: crates/alcedo-ui/src/settings.rs:203
+msgid "{setting} saved"
+msgstr "{setting} gespeichert"
+
+#: crates/alcedo-ui/src/signature_dialog.rs:104
+msgid "Plain text mail preview"
+msgstr "Vorschau der Nur-Text-E-Mail"
+
+#: crates/alcedo-ui/src/signature_dialog.rs:96
+msgid "Plain text mail"
+msgstr "Nur-Text-E-Mail"
+
+#: crates/alcedo-ui/src/source_viewer.rs:33
+msgid "Save message"
+msgstr "Nachricht speichern"
+
+#: crates/alcedo-ui/src/source_viewer.rs:36
+msgid "Email message"
+msgstr "E-Mail-Nachricht"
+
+#: crates/alcedo-ui/src/source_viewer.rs:98
+#: crates/alcedo-ui/src/source_viewer.rs:110
+msgid "Message Source"
+msgstr "Nachrichtenquelltext"
+
+#: crates/alcedo-ui/src/status_bar.rs:215
+msgid "Never synced"
+msgstr "Nie synchronisiert"
+
+#. TRANSLATORS: tooltip; {status} is a sync state such as "Up to date".
+#: crates/alcedo-ui/src/status_bar.rs:235
+msgid "{email} — {status}. Activity log"
+msgstr "{email} – {status}. Aktivitätsprotokoll"
+
+#: crates/alcedo-ui/src/status_bar.rs:252
+msgid "Ready"
+msgstr "Bereit"
+
+#: crates/alcedo-ui/src/status_bar.rs:253
+msgid "Up to date"
+msgstr "Aktuell"
+
+#: crates/alcedo-ui/src/status_bar.rs:254
+msgid "Polling"
+msgstr "Abfrage"
+
+#: crates/alcedo-ui/src/status_bar.rs:256
+msgid "Mock data"
+msgstr "Testdaten"
+
+#: crates/alcedo-ui/src/status_bar.rs:257
+msgid "No accounts"
+msgstr "Keine Konten"
+
+#. TRANSLATORS: status bar; {scope} is a folder name or "All mail".
+#: crates/alcedo-ui/src/status_bar.rs:295
+msgid "Search · {scope}"
+msgstr "Suche · {scope}"
+
+#: crates/alcedo-ui/src/status_bar.rs:314
+msgid "{n} message"
+msgid_plural "{n} messages"
+msgstr[0] "{n} Nachricht"
+msgstr[1] "{n} Nachrichten"
+
+#: crates/alcedo-ui/src/status_bar.rs:316
+msgid "no unread"
+msgstr "keine ungelesenen"
+
+#: crates/alcedo-ui/src/status_bar.rs:322
+msgid "{n} starred"
+msgid_plural "{n} starred"
+msgstr[0] "{n} markiert"
+msgstr[1] "{n} markiert"
+
+#. TRANSLATORS: position of the selected message, e.g. "3 of 40".
+#: crates/alcedo-ui/src/status_bar.rs:333
+msgid "{index} of {total}"
+msgstr "{index} von {total}"
+
+#: crates/alcedo-ui/src/status_bar.rs:350
+msgid "Last sync just now"
+msgstr "Zuletzt synchronisiert gerade eben"
+
+#. TRANSLATORS: {n} minutes; keep it short, it sits in the status bar.
+#: crates/alcedo-ui/src/status_bar.rs:353
+msgid "Last sync {n}m ago"
+msgid_plural "Last sync {n}m ago"
+msgstr[0] "Zuletzt synchronisiert vor {n} Min."
+msgstr[1] "Zuletzt synchronisiert vor {n} Min."
+
+#: crates/alcedo-ui/src/status_bar.rs:355
+msgid "Last sync {n}h ago"
+msgid_plural "Last sync {n}h ago"
+msgstr[0] "Zuletzt synchronisiert vor {n} Std."
+msgstr[1] "Zuletzt synchronisiert vor {n} Std."
+
+#: crates/alcedo-ui/src/status_bar.rs:357
+msgid "Last sync {n}d ago"
+msgid_plural "Last sync {n}d ago"
+msgstr[0] "Zuletzt synchronisiert vor {n} T."
+msgstr[1] "Zuletzt synchronisiert vor {n} T."
+
+#: crates/alcedo-ui/src/status_bar.rs:367
+#: crates/alcedo-ui/src/status_bar.rs:377
+msgid "Offline"
+msgstr "Offline"
+
+#: crates/alcedo-ui/src/status_bar.rs:370
+msgid "Online"
+msgstr "Online"
+
+#: crates/alcedo-ui/src/status_bar.rs:371
+msgid "Limited"
+msgstr "Eingeschränkt"
+
+#: crates/alcedo-ui/src/status_bar.rs:374
+msgid "Captive portal"
+msgstr "Captive Portal"
+
+#: crates/alcedo-ui/src/status_bar.rs:376
+msgid "Local only"
+msgstr "Nur lokal"
+
+#: crates/alcedo-ui/src/theme_switcher.rs:19
+msgid "System"
+msgstr "System"
+
+#: crates/alcedo-ui/src/theme_switcher.rs:25
+msgid "Light"
+msgstr "Hell"
+
+#: crates/alcedo-ui/src/theme_switcher.rs:31
+msgid "Dark"
+msgstr "Dunkel"
+
+#: crates/alcedo-ui/src/tray.rs:105
+msgid "Show Alcedo"
+msgstr "Alcedo anzeigen"
+
+#. TRANSLATORS: tray icon title.
+#: crates/alcedo-ui/src/tray.rs:70
+msgid "Alcedo ({n} unread)"
+msgid_plural "Alcedo ({n} unread)"
+msgstr[0] "Alcedo ({n} ungelesen)"
+msgstr[1] "Alcedo ({n} ungelesen)"
+
+#: crates/alcedo-ui/src/verification_code.rs:139
+msgid "Copied"
+msgstr "Kopiert"
+
+#: crates/alcedo-ui/src/verification_code.rs:53
+msgid "Copy verification code to clipboard"
+msgstr "Bestätigungscode in die Zwischenablage kopieren"
+
+#: crates/alcedo-ui/src/verification_code.rs:73
+#: crates/alcedo-ui/src/verification_code.rs:176
+msgid "Verification code"
+msgstr "Bestätigungscode"
+
+#: crates/alcedo/src/lib.rs:127
+msgid "Alcedo could not open its mail database, so it cannot start.\n\n{details}\n\nCheck that the data folder (~/.local/share/alcedo, or $ALCEDO_DB) is writable and not used by another Alcedo instance."
+msgstr "Alcedo konnte seine E-Mail-Datenbank nicht öffnen und kann daher nicht starten.\n\n{details}\n\nPrüfen Sie, ob der Datenordner (~/.local/share/alcedo oder $ALCEDO_DB) beschreibbar ist und nicht von einer anderen Alcedo-Instanz verwendet wird."
+
+#: crates/alcedo/src/lib.rs:143
+msgid "Could not open mail database"
+msgstr "E-Mail-Datenbank konnte nicht geöffnet werden"
+
+#: crates/alcedo/src/lib.rs:146
+#: crates/alcedo-ui/src/commands.rs:562
+#: crates/alcedo-ui/src/menu.rs:446
+#: crates/alcedo-ui/src/tray.rs:113
+msgid "Quit"
+msgstr "Beenden"

@@ -1,5 +1,6 @@
 //! Desktop and shell indicators for new inbox mail.
 
+use alcedo_i18n::{trf, trs};
 use std::collections::{HashMap, HashSet};
 
 use alcedo_core::{Contact, Envelope, FolderId, MessageId, sender_is_blocked};
@@ -116,24 +117,24 @@ pub fn notification_otp_code(subject: &str, snippet: &str) -> Option<String> {
 
 pub fn notification_body(envelope: &Envelope, otp: Option<&str>) -> String {
     match otp {
-        Some(code) => format!(
-            "Verification code\n{}",
-            alcedo_html::format_code_display(code)
+        Some(code) => trf!(
+            "Verification code\n{code}",
+            code = alcedo_html::format_code_display(code)
         ),
         None => notification_subject_body(envelope),
     }
 }
 
 pub fn notification_copy_label() -> &'static str {
-    "Copy"
+    trs!("Copy")
 }
 
 pub fn notification_mark_read_label() -> &'static str {
-    "Mark as read"
+    trs!("Mark as read")
 }
 
 pub fn notification_delete_label() -> &'static str {
-    "Delete"
+    trs!("Delete")
 }
 
 /// Action run when the notification banner itself is clicked.

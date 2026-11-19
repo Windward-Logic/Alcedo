@@ -1,6 +1,7 @@
 //! Account, folder-tree, auth, status, rules, PGP and identity updates from sync.
 
 use super::*;
+use alcedo_i18n::{tr, trf, trs};
 
 impl MailModel {
     pub(super) fn on_accounts_sync_event(
@@ -115,11 +116,11 @@ impl MailModel {
                 mark_account_saved(&self.preferences_ui().accounts, &account);
                 self.preferences_ui()
                     .dialog
-                    .add_toast(crate::toast::plain("Account saved"));
+                    .add_toast(crate::toast::plain(&tr!("Account saved")));
                 self.push_activity(
                     activity_log::KIND_ACCOUNT,
                     ActivityOutcome::Success,
-                    "Account saved",
+                    tr!("Account saved"),
                     "",
                     &account.email,
                     "",
@@ -139,15 +140,15 @@ impl MailModel {
                 if self.preferences_ui().dialog.is_mapped() {
                     self.preferences_ui()
                         .dialog
-                        .add_toast(crate::toast::plain("Account removed"));
+                        .add_toast(crate::toast::plain(&tr!("Account removed")));
                 } else {
                     self.toasts
-                        .add_toast(crate::toast::plain("Account removed"));
+                        .add_toast(crate::toast::plain(&tr!("Account removed")));
                 }
                 self.push_activity(
                     activity_log::KIND_ACCOUNT,
                     ActivityOutcome::Success,
-                    "Account removed",
+                    tr!("Account removed"),
                     "",
                     email,
                     "",
@@ -163,11 +164,14 @@ impl MailModel {
                     let resolved = self.accounts.iter().find(|acct| acct.id == account);
                     let email = resolved
                         .map(|acct| acct.email.as_str())
-                        .unwrap_or("Account");
+                        .unwrap_or_else(|| trs!("Account"));
                     let toast = if is_keyring_auth_message(&message) {
-                        format!("{email} is offline until the keyring is unlocked")
+                        trf!(
+                            "{email} is offline until the keyring is unlocked",
+                            email = email
+                        )
                     } else {
-                        format!("{email} is offline — reconnect required")
+                        trf!("{email} is offline — reconnect required", email = email)
                     };
                     self.toasts.add_toast(crate::toast::plain(&toast));
                     let debug = resolved
@@ -302,8 +306,9 @@ impl MailModel {
             } => {
                 notifications::copy_text_to_clipboard(&armored);
                 let grouped = alcedo_core::format_fingerprint_display(&fingerprint);
-                self.toasts.add_toast(crate::toast::plain(&format!(
-                    "Public key copied ({grouped})"
+                self.toasts.add_toast(crate::toast::plain(&trf!(
+                    "Public key copied ({fingerprint})",
+                    fingerprint = grouped
                 )));
             }
             SyncEvent::SignaturesUpdated { account, signature } => {

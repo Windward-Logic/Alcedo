@@ -1,5 +1,6 @@
 //! Preferences → Appearance page (color scheme, accent color, font sizes).
 
+use alcedo_i18n::{tr, trs};
 use relm4::adw;
 use relm4::adw::prelude::*;
 use relm4::gtk;
@@ -17,47 +18,51 @@ pub fn build_appearance_page() -> adw::PreferencesPage {
     scheme_toggle.set_valign(gtk::Align::Center);
 
     let scheme_row = adw::ActionRow::builder()
-        .title("Color scheme")
-        .subtitle("Follow the system, or always use light or dark")
+        .title(tr!("Color scheme"))
+        .subtitle(tr!("Follow the system, or always use light or dark"))
         .activatable_widget(&scheme_toggle)
         .build();
     scheme_row.add_suffix(&scheme_toggle);
 
-    let scheme_group = adw::PreferencesGroup::builder().title("Theme").build();
+    let scheme_group = adw::PreferencesGroup::builder().title(tr!("Theme")).build();
     help::attach_group_help(&scheme_group, TOPIC_APPEARANCE);
     scheme_group.add(&scheme_row);
 
     let accent_group = adw::PreferencesGroup::builder()
-        .title("Accent color")
-        .description("Applies to buttons, links, and highlights throughout Alcedo.")
+        .title(tr!("Accent color"))
+        .description(tr!(
+            "Applies to buttons, links, and highlights throughout Alcedo."
+        ))
         .build();
     accent_group.add(&build_accent_row());
 
     let app_font_row = adw::SpinRow::with_range(10.0, 24.0, 1.0);
-    app_font_row.set_title("Application");
-    app_font_row.set_subtitle("Folders, lists, and chrome");
+    app_font_row.set_title(&tr!("Application"));
+    app_font_row.set_subtitle(&tr!("Folders, lists, and chrome"));
     app_font_row.set_digits(0);
     settings::bind_application_font_size(&app_font_row);
 
     let reader_font_row = adw::SpinRow::with_range(10.0, 24.0, 1.0);
-    reader_font_row.set_title("Reader");
-    reader_font_row.set_subtitle("Mail in the reading pane");
+    reader_font_row.set_title(&tr!("Reader"));
+    reader_font_row.set_subtitle(&tr!("Mail in the reading pane"));
     reader_font_row.set_digits(0);
     settings::bind_reader_font_size(&reader_font_row);
 
     let editor_font_row = adw::SpinRow::with_range(10.0, 24.0, 1.0);
-    editor_font_row.set_title("Editor");
-    editor_font_row.set_subtitle("Plain, HTML, and Markdown compose");
+    editor_font_row.set_title(&tr!("Editor"));
+    editor_font_row.set_subtitle(&tr!("Plain, HTML, and Markdown compose"));
     editor_font_row.set_digits(0);
     settings::bind_editor_font_size(&editor_font_row);
 
-    let font_group = adw::PreferencesGroup::builder().title("Font size").build();
+    let font_group = adw::PreferencesGroup::builder()
+        .title(tr!("Font size"))
+        .build();
     font_group.add(&app_font_row);
     font_group.add(&reader_font_row);
     font_group.add(&editor_font_row);
 
     let page = adw::PreferencesPage::builder()
-        .title("Appearance")
+        .title(tr!("Appearance"))
         .icon_name("preferences-desktop-appearance-symbolic")
         .build();
     page.add(&scheme_group);
@@ -140,7 +145,7 @@ fn accent_swatch_button(accent: AccentColor) -> gtk::ToggleButton {
         .css_classes(["flat", "circular", "alcedo-swatch-btn"])
         .build();
     let tooltip = if accent == AccentColor::Default {
-        "Default (system accent)"
+        trs!("Default (system accent)")
     } else {
         accent.label()
     };

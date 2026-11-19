@@ -1,5 +1,6 @@
 //! In-app help window backed by bundled HTML with section anchors.
 
+use alcedo_i18n::tr;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::sync::OnceLock;
@@ -218,14 +219,14 @@ pub fn help_button(topic: &'static str) -> gtk::Button {
     );
     let btn = gtk::Button::builder()
         .icon_name("dialog-question-symbolic")
-        .tooltip_text("Help")
+        .tooltip_text(tr!("Help"))
         .css_classes(["flat", "circular", "alcedo-help-btn"])
         .valign(gtk::Align::Center)
         .focus_on_click(false)
         .action_name(ACTION_HELP_TOPIC)
         .build();
     btn.set_action_target_value(Some(&glib::Variant::from(topic)));
-    btn.update_property(&[gtk::accessible::Property::Label("Help")]);
+    btn.update_property(&[gtk::accessible::Property::Label(&tr!("Help"))]);
     btn
 }
 
@@ -240,7 +241,7 @@ fn valid_topic(topic: &str) -> bool {
 
 fn build_host(parent: &gtk::Window, runtime: Handle) -> HelpHost {
     let window = adw::Window::builder()
-        .title("Alcedo Help")
+        .title(tr!("Alcedo Help"))
         .default_width(900)
         .default_height(640)
         .hide_on_close(true)
@@ -328,7 +329,7 @@ fn build_help_web_view() -> WebView {
         .css_classes(["alcedo-help-view"])
         .build();
     web_view.set_size_request(1, 1);
-    web_view.update_property(&[gtk::accessible::Property::Label("Help")]);
+    web_view.update_property(&[gtk::accessible::Property::Label(&tr!("Help"))]);
     web_view
 }
 
@@ -340,7 +341,13 @@ fn load_help_html(web_view: &WebView) {
         }
         Err(error) => {
             tracing::warn!(?error, "help HTML missing from gresource");
-            web_view.load_html("<p>Help could not be loaded.</p>", Some("about:blank"));
+            web_view.load_html(
+                &format!(
+                    "<p>{}</p>",
+                    glib::markup_escape_text(&tr!("Help could not be loaded."))
+                ),
+                Some("about:blank"),
+            );
         }
     }
 }

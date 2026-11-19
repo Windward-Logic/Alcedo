@@ -78,7 +78,10 @@ export RUSTFLAGS="--remap-path-prefix=$ROOT=/usr/src/alcedo-$VERSION --remap-pat
 ensure_c_include_path
 
 echo "Building alcedo $VERSION (release, locked)…"
-cargo build --release --locked -p alcedo
+# Translations: refuse a release whose catalogues are stale or incomplete,
+# before the long build. The install location is compiled in; pin it.
+python3 -I "$ROOT/scripts/i18n.py" check
+ALCEDO_INSTALL_LOCALEDIR=/usr/share/locale cargo build --release --locked -p alcedo
 
 STAGE="$CARGO_TARGET_DIR/deb/$NAME"
 rm -rf "$STAGE"
@@ -88,6 +91,7 @@ install -Dm755 "$CARGO_TARGET_DIR/release/alcedo" "$STAGE/usr/bin/alcedo"
 strip --strip-unneeded "$STAGE/usr/bin/alcedo"
 install -Dm644 "$ROOT/data/dev.alcedo.Mail.desktop" \
   "$STAGE/usr/share/applications/dev.alcedo.Mail.desktop"
+python3 -I "$ROOT/scripts/i18n.py" compile "$STAGE/usr/share/locale" >/dev/null
 install -Dm644 "$ROOT/data/dev.alcedo.Mail.gschema.xml" \
   "$STAGE/usr/share/glib-2.0/schemas/dev.alcedo.Mail.gschema.xml"
 install -Dm644 "$ROOT/data/icons/hicolor/scalable/apps/dev.alcedo.Mail.svg" \

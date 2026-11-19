@@ -59,6 +59,37 @@ Validate the desktop entry (optional):
 desktop-file-validate data/dev.alcedo.Mail.desktop
 ```
 
+## Translations
+
+Alcedo's interface is translated into French, Spanish, German and Italian (gettext domain `alcedo`,
+`po/<lang>.po`). The translations were drafted from the English text and are waiting for review by native
+speakers; see `po/GLOSSARY.md` for register and fixed terms. The language comes from the desktop locale, and the
+machine needs that locale installed (`locale -a`).
+
+| Path | Role |
+|---|---|
+| `crates/alcedo-i18n` | `tr!`, `trs!`, `trc!`, `trf!`, `ntr!`, `n_!`/`trm!` over glibc gettext, linked dynamically; each crate names its domain in `I18N_DOMAIN` |
+| `crates/alcedo-ui/src/local_time.rs` | Day and month names in the user's locale (chrono's `format` is English only) |
+| `scripts/i18n.py` | `extract`, `update`, `compile`, `check`; standard library only, no `xgettext` or `msgfmt` needed |
+| `po/` | `alcedo.pot`, one `.po` per language, and `GLOSSARY.md` |
+
+Wrap every user-visible string in a macro, write whole sentences with named `{placeholders}` (never join
+translated pieces), use `ntr!` for counts, and never compare, match or store translated text: keep an English key or
+an enum and translate where the text is shown. Help guides, logs, protocol errors and text that goes into sent mail
+(quote headers, `Fwd:`) stay English.
+
+```bash
+python3 scripts/i18n.py update    # refresh po/alcedo.pot and po/*.po; translate what is new
+python3 scripts/i18n.py check     # fails on untranslated, fuzzy, mismatched-placeholder or bad date-pattern entries
+python3 scripts/i18n.py compile   # writes target/locale/<lang>/LC_MESSAGES/alcedo.mo
+LANGUAGE=fr ALCEDO_LOCALEDIR=$PWD/target/locale cargo run -p alcedo
+python3 -m unittest discover -s scripts/tests
+```
+
+`build-deb.sh` and the Flatpak manifests run `check` before building and install the catalogues, so a release with
+an untranslated string fails. `ALCEDO_LOCALEDIR` points a run at another catalogue folder; packaging sets the
+installed location at build time with the separate `ALCEDO_INSTALL_LOCALEDIR` (default `/usr/share/locale`).
+
 ## Debian package
 
 Build the free app's `.deb` from a clean clone of this repository:

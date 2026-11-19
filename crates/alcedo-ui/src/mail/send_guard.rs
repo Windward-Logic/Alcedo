@@ -3,6 +3,7 @@
 
 use alcedo_core::compose_checks::pre_send_warnings;
 use alcedo_core::compose_status::{delayed_send_toast_title, undo_delayed_send_toast};
+use alcedo_i18n::tr;
 
 use super::*;
 
@@ -34,8 +35,8 @@ impl MailModel {
         dialog.set_body_use_markup(false);
         dialog.set_heading(Some(first.heading()));
         dialog.set_body(&body);
-        dialog.add_response("cancel", "Keep Editing");
-        dialog.add_response("send", "Send Anyway");
+        dialog.add_response("cancel", &tr!("Keep Editing"));
+        dialog.add_response("send", &tr!("Send Anyway"));
         dialog.set_response_appearance("send", adw::ResponseAppearance::Suggested);
         dialog.set_default_response(Some("cancel"));
         dialog.set_close_response("cancel");
@@ -68,7 +69,7 @@ impl MailModel {
         });
         let toast =
             crate::toast::plain_with_timeout(&delayed_send_toast_title(delay_secs), delay_secs);
-        toast.set_button_label(Some("Undo"));
+        toast.set_button_label(Some(&tr!("Undo")));
         let sender = self.mail_sender.clone();
         toast.connect_button_clicked(move |_| {
             sender.send(MailMsg::UndoSend).ok();

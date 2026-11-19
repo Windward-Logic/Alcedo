@@ -1,5 +1,6 @@
 //! Flag changes: single and batched STORE, and mark folder read.
 
+use alcedo_i18n::trf;
 use alcedo_store::{FlagMirrorSource, MirroredCopy, MirroredFlags};
 
 use super::flag_copies::{FlagScope, mirror_flags, restore_mirrored_flags};
@@ -367,7 +368,7 @@ pub(super) async fn mark_folder_read(
     emit_status(
         events,
         account,
-        format!("Marking {} read…", folder.imap_name),
+        trf!("Marking {folder} read…", folder = folder.imap_name),
     );
 
     ensure_selected(state, &folder.imap_name).await?;

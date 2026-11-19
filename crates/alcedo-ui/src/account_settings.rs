@@ -1,5 +1,7 @@
 //! Preferences → Accounts page (list, add, edit, remove).
 
+use crate::account_validation::validation_text;
+use alcedo_i18n::{tr, trf, trm, trs};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -117,13 +119,13 @@ struct SubpageWidgets {
 /// Build the Accounts preferences page and its list group handle.
 pub fn build_accounts_page(sender: Sender<MailMsg>) -> (adw::PreferencesPage, AccountsPage) {
     let list_group = adw::PreferencesGroup::builder()
-        .title("Accounts")
-        .description("Add an email account to send and receive mail.")
+        .title(tr!("Accounts"))
+        .description(tr!("Add an email account to send and receive mail."))
         .build();
     help::attach_group_help(&list_group, TOPIC_ACCOUNTS);
 
     let add_row = adw::ActionRow::builder()
-        .title("Add Account")
+        .title(tr!("Add Account"))
         .activatable(true)
         .build();
     let add_icon = gtk::Image::from_icon_name("list-add-symbolic");
@@ -139,7 +141,7 @@ pub fn build_accounts_page(sender: Sender<MailMsg>) -> (adw::PreferencesPage, Ac
     add_group.add(&add_row);
 
     let page = adw::PreferencesPage::builder()
-        .title("Accounts")
+        .title(tr!("Accounts"))
         .icon_name("avatar-default-symbolic")
         .build();
     page.add(&list_group);
@@ -166,7 +168,7 @@ pub fn refresh_account_rows(
 ) {
     if accounts.is_empty() {
         page.group
-            .set_description(Some("Add an email account to send and receive mail."));
+            .set_description(Some(&tr!("Add an email account to send and receive mail.")));
     } else {
         page.group.set_description(None::<&str>);
     }
@@ -177,7 +179,7 @@ pub fn refresh_account_rows(
 
     for account in accounts {
         let subtitle = if auth_required.contains_key(&account.id) {
-            "Sign-in required".to_string()
+            tr!("Sign-in required")
         } else {
             account.email.clone()
         };
@@ -303,15 +305,15 @@ pub fn refresh_pgp_subpage(page: &AccountsPage, state: Option<&PgpAccountState>)
     let has_key = state.and_then(|s| s.own.as_ref()).is_some();
     if let Some(own) = state.and_then(|s| s.own.as_ref()) {
         let grouped = format_fingerprint_display(&own.fingerprint);
-        widgets.pgp_key_row.set_title("OpenPGP key");
+        widgets.pgp_key_row.set_title(&tr!("OpenPGP key"));
         widgets
             .pgp_key_row
-            .set_subtitle(&format!("Fingerprint {grouped}"));
+            .set_subtitle(&trf!("Fingerprint {fingerprint}", fingerprint = grouped));
     } else {
-        widgets.pgp_key_row.set_title("OpenPGP key");
+        widgets.pgp_key_row.set_title(&tr!("OpenPGP key"));
         widgets
             .pgp_key_row
-            .set_subtitle("No key configured for this account");
+            .set_subtitle(&tr!("No key configured for this account"));
     }
 
     let sign_outgoing = state.map(|s| s.sign_outgoing).unwrap_or(false);
@@ -438,50 +440,50 @@ fn push_account_subpage(
     hero_group.add(&hero_box);
 
     let name_row = adw::EntryRow::builder()
-        .title("Account name")
+        .title(tr!("Account name"))
         .show_apply_button(false)
         .build();
     name_row.set_text(&account.display_name);
 
     let email_row = adw::EntryRow::builder()
-        .title("Email")
+        .title(tr!("Email"))
         .show_apply_button(false)
         .build();
     email_row.set_text(&account.email);
 
     let your_name_row = adw::EntryRow::builder()
-        .title("Your name")
+        .title(tr!("Your name"))
         .show_apply_button(false)
         .build();
     your_name_row.set_text(&account.sender_name);
 
     let chip_row = adw::EntryRow::builder()
-        .title("Chip")
+        .title(tr!("Chip"))
         .show_apply_button(false)
         .build();
     chip_row.set_text(&sanitize_avatar_text(&account.avatar_text));
 
     let color_dialog = gtk::ColorDialog::new();
-    color_dialog.set_title("Chip color");
+    color_dialog.set_title(&tr!("Chip color"));
     color_dialog.set_with_alpha(false);
     let color_button = gtk::ColorDialogButton::new(Some(color_dialog));
     color_button.set_rgba(&rgba_from_hex(&account.accent_color));
     color_button.set_valign(gtk::Align::Center);
     let color_row = adw::ActionRow::builder()
-        .title("Background")
-        .subtitle("Color behind the chip initials")
+        .title(tr!("Background"))
+        .subtitle(tr!("Color behind the chip initials"))
         .activatable(false)
         .build();
     color_row.add_suffix(&color_button);
 
     let pending_image = Rc::new(RefCell::new(account.avatar_image.clone()));
     let photo_row = adw::ActionRow::builder()
-        .title("Photo")
+        .title(tr!("Photo"))
         .activatable(true)
         .build();
     let photo_clear = gtk::Button::builder()
         .icon_name("edit-clear-symbolic")
-        .tooltip_text("Remove photo")
+        .tooltip_text(tr!("Remove photo"))
         .valign(gtk::Align::Center)
         .css_classes(["flat"])
         .build();
@@ -489,7 +491,7 @@ fn push_account_subpage(
     apply_photo_row(&photo_row, &photo_clear, &account.avatar_image);
 
     let username_row = adw::EntryRow::builder()
-        .title("Username")
+        .title(tr!("Username"))
         .show_apply_button(false)
         .build();
     username_row.set_text(account.login_name());
@@ -497,22 +499,22 @@ fn push_account_subpage(
     let sign_in_subtitle = match &account.auth {
         AuthMethod::OAuth2 {
             provider: OAuthProvider::Google,
-        } => "Google (browser sign-in)",
+        } => tr!("Google (browser sign-in)"),
         AuthMethod::OAuth2 {
             provider: OAuthProvider::Microsoft,
-        } => "Microsoft (browser sign-in)",
-        AuthMethod::Password => "Username and password (already saved)",
+        } => tr!("Microsoft (browser sign-in)"),
+        AuthMethod::Password => tr!("Username and password (already saved)"),
     };
     let sign_in_row = adw::ActionRow::builder()
-        .title("Sign-in method")
+        .title(tr!("Sign-in method"))
         .subtitle(sign_in_subtitle)
         .activatable(false)
         .build();
 
     let identity_group = adw::PreferencesGroup::builder()
-        .title("Identity")
+        .title(tr!("Identity"))
         .description(
-            "Account name is only a label inside Alcedo. Email is the mailbox address and the default From. Your name is what people see when you react. Leave Chip blank to use initials from the account name.",
+            tr!("Account name is only a label inside Alcedo. Email is the mailbox address and the default From. Your name is what people see when you react. Leave Chip blank to use initials from the account name."),
         )
         .build();
     identity_group.add(&name_row);
@@ -525,30 +527,30 @@ fn push_account_subpage(
 
     let signature_row = adw::ActionRow::builder()
         .use_markup(false)
-        .title("Signature")
-        .subtitle("None")
+        .title(tr!("Signature"))
+        .subtitle(tr!("None"))
         .activatable(true)
         .build();
     let signature_edit_btn = gtk::Button::builder()
         .icon_name("document-edit-symbolic")
-        .tooltip_text("Edit")
+        .tooltip_text(tr!("Edit"))
         .css_classes(["flat"])
         .build();
     signature_row.add_suffix(&signature_edit_btn);
     identity_group.add(&signature_row);
 
     let from_addresses_group = adw::PreferencesGroup::builder()
-        .title("From addresses")
+        .title(tr!("From addresses"))
         .description(from_addresses_helper(&account.auth))
         .build();
     help::attach_group_help(&from_addresses_group, TOPIC_IDENTITIES);
     let envelope_policy_row = adw::SwitchRow::builder()
-        .title("Send from the saved address itself")
-        .subtitle("When you send from a saved address on this account’s domain, the mail server also treats that address as the sender, and failed-delivery notices come back to it. Turn off if your provider rejects those messages. Press Save to apply.")
+        .title(tr!("Send from the saved address itself"))
+        .subtitle(tr!("When you send from a saved address on this account’s domain, the mail server also treats that address as the sender, and failed-delivery notices come back to it. Turn off if your provider rejects those messages. Press Save to apply."))
         .active(false)
         .build();
     let add_identity_row = adw::ButtonRow::builder()
-        .title("Add Address")
+        .title(tr!("Add Address"))
         .start_icon_name("list-add-symbolic")
         .build();
     let catch_all_row = catch_all_domains_row();
@@ -557,7 +559,7 @@ fn push_account_subpage(
     from_addresses_group.add(&add_identity_row);
 
     let imap_host_row = adw::EntryRow::builder()
-        .title("IMAP host")
+        .title(tr!("IMAP host"))
         .show_apply_button(false)
         .build();
     imap_host_row.set_text(&account.imap_host);
@@ -565,17 +567,17 @@ fn push_account_subpage(
         imap_host_row.set_sensitive(false);
     }
     let imap_port_row = adw::SpinRow::with_range(1.0, 65535.0, 1.0);
-    imap_port_row.set_title("IMAP port");
+    imap_port_row.set_title(&tr!("IMAP port"));
     imap_port_row.set_value(f64::from(account.imap_port));
 
     let incoming_group = adw::PreferencesGroup::builder()
-        .title("Incoming mail")
+        .title(tr!("Incoming mail"))
         .build();
     incoming_group.add(&imap_host_row);
     incoming_group.add(&imap_port_row);
 
     let smtp_host_row = adw::EntryRow::builder()
-        .title("SMTP host")
+        .title(tr!("SMTP host"))
         .show_apply_button(false)
         .build();
     smtp_host_row.set_text(&account.smtp_host);
@@ -583,13 +585,15 @@ fn push_account_subpage(
         smtp_host_row.set_sensitive(false);
     }
     let smtp_port_row = adw::SpinRow::with_range(1.0, 65535.0, 1.0);
-    smtp_port_row.set_title("SMTP port");
+    smtp_port_row.set_title(&tr!("SMTP port"));
     smtp_port_row.set_value(f64::from(account.smtp_port));
 
     let security_model = gtk::StringList::new(&["SSL/TLS", "STARTTLS"]);
     let smtp_security_row = adw::ComboRow::builder()
-        .title("SMTP security")
-        .subtitle("SSL/TLS (port 465) or STARTTLS (port 587). Unencrypted SMTP is not supported.")
+        .title(tr!("SMTP security"))
+        .subtitle(tr!(
+            "SSL/TLS (port 465) or STARTTLS (port 587). Unencrypted SMTP is not supported."
+        ))
         .model(&security_model)
         .expression(gtk::PropertyExpression::new(
             gtk::StringObject::static_type(),
@@ -604,32 +608,34 @@ fn push_account_subpage(
     });
 
     let outgoing_group = adw::PreferencesGroup::builder()
-        .title("Outgoing mail")
+        .title(tr!("Outgoing mail"))
         .build();
     outgoing_group.add(&smtp_host_row);
     outgoing_group.add(&smtp_port_row);
     outgoing_group.add(&smtp_security_row);
 
     let split_row = adw::SwitchRow::builder()
-        .title("Different SMTP sign-in")
-        .subtitle("Use a separate username and password for outgoing mail.")
+        .title(tr!("Different SMTP sign-in"))
+        .subtitle(tr!(
+            "Use a separate username and password for outgoing mail."
+        ))
         .active(account.uses_split_credentials())
         .build();
     let password_row = adw::PasswordEntryRow::builder()
-        .title("Password")
+        .title(tr!("Password"))
         .show_apply_button(false)
         .build();
     let smtp_username_row = adw::EntryRow::builder()
-        .title("SMTP username")
+        .title(tr!("SMTP username"))
         .show_apply_button(false)
         .build();
     let smtp_password_row = adw::PasswordEntryRow::builder()
-        .title("SMTP password")
+        .title(tr!("SMTP password"))
         .show_apply_button(false)
         .build();
     let oauth_row = adw::ActionRow::builder()
-        .title("Sign in again")
-        .subtitle("Opens the browser to refresh this account.")
+        .title(tr!("Sign in again"))
+        .subtitle(tr!("Opens the browser to refresh this account."))
         .activatable(true)
         .build();
     let oauth_spinner = adw::Spinner::new();
@@ -637,11 +643,13 @@ fn push_account_subpage(
 
     let auth_group = match &account.auth {
         AuthMethod::Password => adw::PreferencesGroup::builder()
-            .title("Authentication")
-            .description("The saved password appears as dots. Replace the dots only to change it.")
+            .title(tr!("Authentication"))
+            .description(tr!(
+                "The saved password appears as dots. Replace the dots only to change it."
+            ))
             .build(),
         AuthMethod::OAuth2 { .. } => adw::PreferencesGroup::builder()
-            .title("Authentication")
+            .title(tr!("Authentication"))
             .build(),
     };
     match &account.auth {
@@ -661,55 +669,55 @@ fn push_account_subpage(
         }
     }
 
-    let save_row = adw::ButtonRow::builder().title("Save").build();
+    let save_row = adw::ButtonRow::builder().title(tr!("Save")).build();
     save_row.add_css_class("suggested-action");
     let save_group = adw::PreferencesGroup::new();
     save_group.add(&save_row);
 
     let pgp_key_row = adw::ActionRow::builder()
-        .title("OpenPGP key")
-        .subtitle("No key configured for this account")
+        .title(tr!("OpenPGP key"))
+        .subtitle(tr!("No key configured for this account"))
         .activatable(false)
         .build();
 
     let pgp_sign_outgoing_row = adw::SwitchRow::builder()
-        .title("Sign outgoing mail")
-        .subtitle("Attach an OpenPGP signature to messages you send")
+        .title(tr!("Sign outgoing mail"))
+        .subtitle(tr!("Attach an OpenPGP signature to messages you send"))
         .sensitive(false)
         .build();
 
     let pgp_generate_row = adw::ActionRow::builder()
-        .title("Generate key")
-        .subtitle("Create a new OpenPGP key for this account")
+        .title(tr!("Generate key"))
+        .subtitle(tr!("Create a new OpenPGP key for this account"))
         .activatable(true)
         .build();
     let pgp_generate_icon = gtk::Image::from_icon_name("system-run-symbolic");
     pgp_generate_row.add_prefix(&pgp_generate_icon);
 
     let pgp_import_row = adw::ActionRow::builder()
-        .title("Import key")
-        .subtitle("Import an existing secret key from a file")
+        .title(tr!("Import key"))
+        .subtitle(tr!("Import an existing secret key from a file"))
         .activatable(true)
         .build();
     let pgp_import_icon = gtk::Image::from_icon_name("document-open-symbolic");
     pgp_import_row.add_prefix(&pgp_import_icon);
 
     let pgp_export_row = adw::ActionRow::builder()
-        .title("Export public key")
-        .subtitle("Copy your public key to the clipboard")
+        .title(tr!("Export public key"))
+        .subtitle(tr!("Copy your public key to the clipboard"))
         .activatable(true)
         .build();
     let pgp_export_icon = gtk::Image::from_icon_name("edit-copy-symbolic");
     pgp_export_row.add_prefix(&pgp_export_icon);
 
     let pgp_remove_row = adw::ButtonRow::builder()
-        .title("Remove OpenPGP key")
+        .title(tr!("Remove OpenPGP key"))
         .build();
     pgp_remove_row.add_css_class("destructive-action");
 
     let openpgp_group = adw::PreferencesGroup::builder()
-        .title("OpenPGP")
-        .description("Sign and encrypt mail with OpenPGP.")
+        .title(tr!("OpenPGP"))
+        .description(tr!("Sign and encrypt mail with OpenPGP."))
         .build();
     help::attach_group_help(&openpgp_group, TOPIC_OPENPGP);
     openpgp_group.add(&pgp_key_row);
@@ -719,7 +727,9 @@ fn push_account_subpage(
     openpgp_group.add(&pgp_export_row);
     openpgp_group.add(&pgp_remove_row);
 
-    let remove_row = adw::ButtonRow::builder().title("Remove Account").build();
+    let remove_row = adw::ButtonRow::builder()
+        .title(tr!("Remove Account"))
+        .build();
     remove_row.add_css_class("destructive-action");
     let remove_group = adw::PreferencesGroup::new();
     remove_group.add(&remove_row);
@@ -744,7 +754,7 @@ fn push_account_subpage(
         .icon_name("go-previous-symbolic")
         .css_classes(["back", "flat"])
         .build();
-    crate::a11y::name_icon_control(&back_btn, "Back", "Back");
+    crate::a11y::name_icon_control(&back_btn, &tr!("Back"), &tr!("Back"));
     header.pack_start(&back_btn);
     let toolbar = adw::ToolbarView::new();
     toolbar.add_top_bar(&header);
@@ -1127,7 +1137,7 @@ fn push_account_subpage(
             let update = build_settings_update(&widgets, &account, &state.borrow());
             if let Err(message) = update.validate_for_auth(&account.auth) {
                 apply_subpage_validation_error(&widgets, message);
-                dialog.add_toast(crate::toast::plain(message));
+                dialog.add_toast(crate::toast::plain(&validation_text(message)));
                 return false;
             }
             let envelope_on = widgets.envelope_policy_row.is_active();
@@ -1316,7 +1326,7 @@ fn push_account_subpage(
                     }
                 };
 
-                dialog.add_toast(crate::toast::plain("Opening browser for sign-in…"));
+                dialog.add_toast(crate::toast::plain(&tr!("Opening browser for sign-in…")));
 
                 let oauth_generation = {
                     let mut st = state.borrow_mut();
@@ -1339,9 +1349,9 @@ fn push_account_subpage(
                 let update_dirty = update_dirty.clone();
                 let oauth_spinner = oauth_spinner.clone();
                 glib::spawn_future_local(async move {
-                    let auth_result = rx.await.unwrap_or_else(|_| {
-                        Err(Error::Auth("OAuth sign-in was interrupted".to_string()))
-                    });
+                    let auth_result = rx
+                        .await
+                        .unwrap_or_else(|_| Err(Error::Auth(tr!("OAuth sign-in was interrupted"))));
 
                     let cancelled = {
                         let mut st = state.borrow_mut();
@@ -1364,7 +1374,7 @@ fn push_account_subpage(
                             update.oauth_tokens = Some(tokens);
                             if let Err(message) = update.validate_for_auth(&saved.auth) {
                                 apply_subpage_validation_error(&widgets, message);
-                                dialog.add_toast(crate::toast::plain(message));
+                                dialog.add_toast(crate::toast::plain(&validation_text(message)));
                                 return;
                             }
                             sender
@@ -1422,7 +1432,7 @@ fn push_account_subpage(
         let sender = sender.clone();
         move |_| {
             let sender = sender.clone();
-            prompt_pgp_passphrase(&dialog, "Choose a passphrase", move |passphrase| {
+            prompt_pgp_passphrase(&dialog, &tr!("Choose a passphrase"), move |passphrase| {
                 sender
                     .send(MailMsg::PgpGenerate {
                         account: account_id,
@@ -1466,11 +1476,13 @@ fn push_account_subpage(
         let sender = sender.clone();
         move |_| {
             let alert = adw::AlertDialog::builder()
-                .heading("Remove OpenPGP key?")
-                .body("The secret key will be deleted from this device. Sent mail is not affected.")
+                .heading(tr!("Remove OpenPGP key?"))
+                .body(tr!(
+                    "The secret key will be deleted from this device. Sent mail is not affected."
+                ))
                 .build();
-            alert.add_response("cancel", "Cancel");
-            alert.add_response("remove", "Remove");
+            alert.add_response("cancel", &tr!("Cancel"));
+            alert.add_response("remove", &tr!("Remove"));
             alert.set_response_appearance("remove", adw::ResponseAppearance::Destructive);
             alert.set_default_response(Some("cancel"));
             alert.set_close_response("cancel");
@@ -1493,13 +1505,14 @@ fn push_account_subpage(
         let email = account.email.clone();
         move |_| {
             let alert = adw::AlertDialog::builder()
-                .heading("Remove account?")
-                .body(format!(
-                    "Mail for {email} will be deleted from this computer. The mailbox on the server is not deleted."
+                .heading(tr!("Remove account?"))
+                .body(trf!(
+                    "Mail for {email} will be deleted from this computer. The mailbox on the server is not deleted.",
+                    email = email
                 ))
                 .build();
-            alert.add_response("cancel", "Cancel");
-            alert.add_response("remove", "Remove");
+            alert.add_response("cancel", &tr!("Cancel"));
+            alert.add_response("remove", &tr!("Remove"));
             alert.set_response_appearance("remove", adw::ResponseAppearance::Destructive);
             alert.set_default_response(Some("cancel"));
             alert.set_close_response("cancel");
@@ -1560,7 +1573,11 @@ fn refresh_hero_from_rows(widgets: &SubpageWidgets) {
     widgets.hero_email.set_text(email);
     let name = widgets.name_row.text();
     let label = if name.trim().is_empty() {
-        if email.is_empty() { "Account" } else { email }
+        if email.is_empty() {
+            trs!("Account")
+        } else {
+            email
+        }
     } else {
         name.trim()
     };
@@ -1817,15 +1834,15 @@ fn present_unsaved_account_changes(
     let heading = alcedo_core::compose_status::unsaved_account_heading(account_label);
     let alert = adw::AlertDialog::new(
         Some(&heading),
-        Some(alcedo_core::compose_status::UNSAVED_ACCOUNT_BODY),
+        Some(trm!(alcedo_core::compose_status::UNSAVED_ACCOUNT_BODY)),
     );
     alert.set_heading_use_markup(false);
     alert.set_body_use_markup(false);
     alert.set_heading(Some(&heading));
-    alert.set_body(alcedo_core::compose_status::UNSAVED_ACCOUNT_BODY);
-    alert.add_response("cancel", "Cancel");
-    alert.add_response("discard", "Discard");
-    alert.add_response("save", "Save");
+    alert.set_body(trm!(alcedo_core::compose_status::UNSAVED_ACCOUNT_BODY));
+    alert.add_response("cancel", &tr!("Cancel"));
+    alert.add_response("discard", &tr!("Discard"));
+    alert.add_response("save", &tr!("Save"));
     alert.set_response_appearance("discard", adw::ResponseAppearance::Destructive);
     alert.set_response_appearance("save", adw::ResponseAppearance::Suggested);
     alert.set_default_response(Some("cancel"));
@@ -1962,19 +1979,17 @@ fn apply_credential_mode(widgets: &SubpageWidgets, account: &Account) {
     widgets.smtp_username_row.set_visible(split);
     widgets.smtp_password_row.set_visible(split);
     if split {
-        widgets.username_row.set_title("IMAP username");
-        widgets.password_row.set_title("IMAP password");
-        widgets.smtp_username_row.set_title("SMTP username");
-        widgets.smtp_password_row.set_title("SMTP password");
-        widgets.auth_group.set_description(Some(
-            "Each saved password appears as dots. Replace the dots only to change that password. Mail filters keep using the incoming sign-in.",
-        ));
+        widgets.username_row.set_title(&tr!("IMAP username"));
+        widgets.password_row.set_title(&tr!("IMAP password"));
+        widgets.smtp_username_row.set_title(&tr!("SMTP username"));
+        widgets.smtp_password_row.set_title(&tr!("SMTP password"));
+        widgets.auth_group.set_description(Some(&tr!("Each saved password appears as dots. Replace the dots only to change that password. Mail filters keep using the incoming sign-in.")));
     } else {
-        widgets.username_row.set_title("Username");
-        widgets.password_row.set_title("Password");
-        widgets.auth_group.set_description(Some(
-            "The saved password appears as dots. Replace the dots only to change it.",
-        ));
+        widgets.username_row.set_title(&tr!("Username"));
+        widgets.password_row.set_title(&tr!("Password"));
+        widgets.auth_group.set_description(Some(&tr!(
+            "The saved password appears as dots. Replace the dots only to change it."
+        )));
     }
 }
 
@@ -1984,11 +1999,11 @@ fn prompt_pgp_passphrase(
     on_ok: impl FnOnce(String) + 'static,
 ) {
     let pass_row = adw::PasswordEntryRow::builder()
-        .title("Passphrase")
+        .title(tr!("Passphrase"))
         .show_apply_button(false)
         .build();
     let confirm_row = adw::PasswordEntryRow::builder()
-        .title("Confirm passphrase")
+        .title(tr!("Confirm passphrase"))
         .show_apply_button(false)
         .build();
     let box_ = gtk::Box::builder()
@@ -2002,11 +2017,13 @@ fn prompt_pgp_passphrase(
 
     let dialog = adw::AlertDialog::builder()
         .heading(heading)
-        .body("Use a strong passphrase. Alcedo stores it in your system keyring.")
+        .body(tr!(
+            "Use a strong passphrase. Alcedo stores it in your system keyring."
+        ))
         .extra_child(&box_)
         .build();
-    dialog.add_response("cancel", "Cancel");
-    dialog.add_response("ok", "Continue");
+    dialog.add_response("cancel", &tr!("Cancel"));
+    dialog.add_response("ok", &tr!("Continue"));
     dialog.set_response_appearance("ok", adw::ResponseAppearance::Suggested);
     dialog.set_default_response(Some("ok"));
     dialog.set_close_response("cancel");
@@ -2036,16 +2053,18 @@ fn prompt_pgp_import_passphrase(
     on_ok: impl FnOnce(Option<String>) + 'static,
 ) {
     let pass_row = adw::PasswordEntryRow::builder()
-        .title("Passphrase")
+        .title(tr!("Passphrase"))
         .show_apply_button(false)
         .build();
     let dialog = adw::AlertDialog::builder()
-        .heading("Import OpenPGP key")
-        .body("Leave the passphrase blank if the key is not encrypted.")
+        .heading(tr!("Import OpenPGP key"))
+        .body(tr!(
+            "Leave the passphrase blank if the key is not encrypted."
+        ))
         .extra_child(&pass_row)
         .build();
-    dialog.add_response("cancel", "Cancel");
-    dialog.add_response("import", "Import");
+    dialog.add_response("cancel", &tr!("Cancel"));
+    dialog.add_response("import", &tr!("Import"));
     dialog.set_response_appearance("import", adw::ResponseAppearance::Suggested);
     dialog.set_default_response(Some("import"));
     dialog.set_close_response("cancel");
@@ -2066,10 +2085,10 @@ fn prompt_pgp_import_passphrase(
 
 fn apply_photo_row(row: &adw::ActionRow, clear: &gtk::Button, image: &[u8]) {
     if image.is_empty() {
-        row.set_subtitle("None");
+        row.set_subtitle(&tr!("None"));
         clear.set_visible(false);
     } else {
-        row.set_subtitle("Cropped to a circle");
+        row.set_subtitle(&tr!("Cropped to a circle"));
         clear.set_visible(true);
     }
 }
@@ -2079,9 +2098,9 @@ fn pick_chip_photo(
     on_picked: impl FnOnce(Result<Vec<u8>, &'static str>) + 'static,
 ) {
     let dialog = gtk::FileDialog::new();
-    dialog.set_title("Choose chip photo");
+    dialog.set_title(&tr!("Choose chip photo"));
     let filter = gtk::FileFilter::new();
-    filter.set_name(Some("Images"));
+    filter.set_name(Some(&tr!("Images")));
     filter.add_mime_type("image/*");
     filter.add_mime_type("image/jpeg");
     filter.add_mime_type("image/png");
@@ -2103,7 +2122,7 @@ fn pick_chip_photo(
             glib::spawn_future_local(async move {
                 match crate::blocking_io::run(move || std::fs::read(&path)).await {
                     Some(Ok(bytes)) => on_picked(crop_avatar_image(&bytes)),
-                    _ => on_picked(Err("Could not read image")),
+                    _ => on_picked(Err(trs!("Could not read image"))),
                 }
             });
         },
@@ -2112,9 +2131,9 @@ fn pick_chip_photo(
 
 fn pick_pgp_key_file(_parent: &adw::PreferencesDialog, on_picked: impl FnOnce(String) + 'static) {
     let dialog = gtk::FileDialog::new();
-    dialog.set_title("Import OpenPGP key");
+    dialog.set_title(&tr!("Import OpenPGP key"));
     let filter = gtk::FileFilter::new();
-    filter.set_name(Some("OpenPGP keys"));
+    filter.set_name(Some(&tr!("OpenPGP keys")));
     filter.add_mime_type("application/pgp-keys");
     filter.add_pattern("*.asc");
     filter.add_pattern("*.gpg");
@@ -2150,15 +2169,21 @@ fn from_addresses_helper(auth: &AuthMethod) -> &'static str {
         AuthMethod::OAuth2 {
             provider: OAuthProvider::Google,
         } => {
-            "Extra From addresses only work if you have added them in Gmail under Settings → Accounts → Send mail as. Plus-addresses of this account (like you+shop@gmail.com) usually work. Keep “Send from the saved address itself” off unless Gmail has accepted that address."
+            trs!(
+                "Extra From addresses only work if you have added them in Gmail under Settings → Accounts → Send mail as. Plus-addresses of this account (like you+shop@gmail.com) usually work. Keep “Send from the saved address itself” off unless Gmail has accepted that address."
+            )
         }
         AuthMethod::OAuth2 {
             provider: OAuthProvider::Microsoft,
         } => {
-            "Extra From addresses only work if Outlook allows this mailbox to send as them. Keep “Send from the saved address itself” off unless Outlook has accepted that address."
+            trs!(
+                "Extra From addresses only work if Outlook allows this mailbox to send as them. Keep “Send from the saved address itself” off unless Outlook has accepted that address."
+            )
         }
         AuthMethod::Password => {
-            "Add extra addresses you can choose as the From address when writing. Saved addresses on this account’s domain can be used as the real sender too (see the switch below). An address you type while writing, or one on another domain, is still sent through this account. Some mail servers reject mail sent from an address they don’t know."
+            trs!(
+                "Add extra addresses you can choose as the From address when writing. Saved addresses on this account’s domain can be used as the real sender too (see the switch below). An address you type while writing, or one on another domain, is still sent through this account. Some mail servers reject mail sent from an address they don’t know."
+            )
         }
     }
 }
@@ -2215,11 +2240,11 @@ pub fn refresh_identities_subpage(
         if !subtitle.is_empty() {
             row.set_subtitle(subtitle);
         }
-        let accessible_label = format!("From address {}", identity.email);
+        let accessible_label = trf!("From address {email}", email = identity.email);
         row.update_property(&[gtk::accessible::Property::Label(&accessible_label)]);
         let delete_btn = gtk::Button::builder()
             .icon_name("edit-delete-symbolic")
-            .tooltip_text("Delete")
+            .tooltip_text(tr!("Delete"))
             .css_classes(["flat"])
             .build();
         let identity_id = identity.id;
@@ -2247,12 +2272,12 @@ pub fn refresh_identities_subpage(
 /// Reply All never copies it back to the user.
 fn catch_all_domains_row() -> adw::EntryRow {
     let row = adw::EntryRow::builder()
-        .title("Catch-all domains (comma separated)")
+        .title(tr!("Catch-all domains (comma separated)"))
         .show_apply_button(false)
         .build();
-    row.set_tooltip_text(Some(
-        "Every address on these domains is yours. Replies use the address the mail was sent to.",
-    ));
+    row.set_tooltip_text(Some(&tr!(
+        "Every address on these domains is yours. Replies use the address the mail was sent to."
+    )));
     row
 }
 
@@ -2303,8 +2328,8 @@ pub fn open_add_identity_dialog(
     sender: &Sender<MailMsg>,
     existing: Option<&AccountIdentity>,
 ) {
-    let name_row = adw::EntryRow::builder().title("Name").build();
-    let email_row = adw::EntryRow::builder().title("Email").build();
+    let name_row = adw::EntryRow::builder().title(tr!("Name")).build();
+    let email_row = adw::EntryRow::builder().title(tr!("Email")).build();
     let identity_id = existing
         .map(|identity| identity.id)
         .unwrap_or_else(|| alcedo_core::IdentityId(Uuid::new_v4()));
@@ -2313,9 +2338,13 @@ pub fn open_add_identity_dialog(
         email_row.set_text(&identity.email);
     }
 
-    let cancel_btn = gtk::Button::builder().label("Cancel").build();
+    let cancel_btn = gtk::Button::builder().label(tr!("Cancel")).build();
     let add_btn = gtk::Button::builder()
-        .label(if existing.is_some() { "Save" } else { "Add" })
+        .label(if existing.is_some() {
+            tr!("Save")
+        } else {
+            tr!("Add")
+        })
         .css_classes(["suggested-action"])
         .build();
     let header = adw::HeaderBar::new();
@@ -2338,7 +2367,7 @@ pub fn open_add_identity_dialog(
     toolbar.set_content(Some(&content));
 
     let dialog = adw::Dialog::builder()
-        .title("From address")
+        .title(tr!("From address"))
         .content_width(480)
         .default_widget(&add_btn)
         .child(&toolbar)
@@ -2363,17 +2392,17 @@ pub fn open_add_identity_dialog(
         move |_| {
             let email = email_row.text().trim().to_string();
             if email.is_empty() {
-                toast_parent.add_toast(crate::toast::plain("Email is required"));
+                toast_parent.add_toast(crate::toast::plain(&tr!("Email is required")));
                 return;
             }
             if !email.contains('@') {
-                toast_parent.add_toast(crate::toast::plain("Email must contain @"));
+                toast_parent.add_toast(crate::toast::plain(&tr!("Email must contain @")));
                 return;
             }
             if email.eq_ignore_ascii_case(&account_email) {
-                toast_parent.add_toast(crate::toast::plain(
-                    "This address is already the account address",
-                ));
+                toast_parent.add_toast(crate::toast::plain(&tr!(
+                    "This address is already the account address"
+                )));
                 return;
             }
             let identity = AccountIdentity {
@@ -2383,7 +2412,7 @@ pub fn open_add_identity_dialog(
                 email: email.clone(),
             };
             if let Err(message) = identity.validate(&account_email) {
-                toast_parent.add_toast(crate::toast::plain(message));
+                toast_parent.add_toast(crate::toast::plain(&validation_text(message)));
                 return;
             }
             sender.send(MailMsg::UpsertIdentity(identity)).ok();

@@ -35,6 +35,7 @@ version = "1.0.8"
 dependencies = [
  "alcedo-core",
  "alcedo-html",
+ "alcedo-i18n",
  "alcedo-imap",
  "alcedo-oauth",
  "alcedo-smtp",
@@ -54,6 +55,7 @@ dependencies = [
 name = "alcedo-core"
 version = "1.0.8"
 dependencies = [
+ "alcedo-i18n",
  "chrono",
  "chrono-tz",
  "iana-time-zone",
@@ -85,6 +87,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "alcedo-i18n"
+version = "1.0.8"
+dependencies = [
+ "tempfile",
+ "thiserror 2.0.20",
+]
+
+[[package]]
 name = "alcedo-imap"
 version = "1.0.8"
 dependencies = [
@@ -111,6 +121,7 @@ name = "alcedo-oauth"
 version = "1.0.8"
 dependencies = [
  "alcedo-core",
+ "alcedo-i18n",
  "base64 0.22.1",
  "directories",
  "oauth2",
@@ -214,6 +225,7 @@ version = "1.0.8"
 dependencies = [
  "alcedo-core",
  "alcedo-html",
+ "alcedo-i18n",
  "alcedo-imap",
  "alcedo-oauth",
  "alcedo-pgp",
@@ -248,6 +260,7 @@ version = "1.0.8"
 dependencies = [
  "alcedo-core",
  "alcedo-html",
+ "alcedo-i18n",
  "alcedo-oauth",
  "alcedo-widgets",
  "chrono",

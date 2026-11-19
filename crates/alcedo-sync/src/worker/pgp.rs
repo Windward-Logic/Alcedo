@@ -119,7 +119,7 @@ pub(super) async fn process_incoming_pgp(
                             text: String::new(),
                             html: String::new(),
                             status: failed,
-                            snippet_override: Some("Encrypted message".into()),
+                            snippet_override: Some(alcedo_core::ENCRYPTED_SNIPPET.into()),
                             persist: true,
                         }));
                     }
@@ -154,7 +154,7 @@ pub(super) async fn process_incoming_pgp(
                     text: String::new(),
                     html: String::new(),
                     status: failed,
-                    snippet_override: Some("Encrypted message".into()),
+                    snippet_override: Some(alcedo_core::ENCRYPTED_SNIPPET.into()),
                     persist: backend_persistable,
                 })),
             }

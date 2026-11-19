@@ -2,6 +2,7 @@
 
 use super::reply::apply_reply_from;
 use super::*;
+use alcedo_i18n::{tr, trs};
 
 /// The stored message a reaction row points at.
 #[derive(Clone)]
@@ -200,7 +201,7 @@ impl MailModel {
         show_reaction_chips(widgets, &chips);
         let (enabled, tooltip) = match self.reaction_block_for(id, envelope) {
             Some(reason) => (false, reason),
-            None => (true, "Add reaction"),
+            None => (true, trs!("Add reaction")),
         };
         set_react_enabled(widgets, enabled, tooltip);
     }
@@ -240,7 +241,7 @@ impl MailModel {
         )
         .or({
             if !self.mock && !self.pgp_by_message.contains_key(&id) {
-                Some("Wait until the message finishes loading")
+                Some(trs!("Wait until the message finishes loading"))
             } else {
                 None
             }
@@ -268,15 +269,15 @@ impl MailModel {
 
     pub(super) fn send_reaction(&mut self, id: MessageId, emoji: String) {
         if self.send_in_flight.get() {
-            self.toasts.add_toast(crate::toast::plain(
-                "Wait until the current message finishes sending.",
-            ));
+            self.toasts.add_toast(crate::toast::plain(&tr!(
+                "Wait until the current message finishes sending."
+            )));
             return;
         }
         if !is_single_reaction_emoji(&emoji) {
-            self.toasts.add_toast(crate::toast::plain(
-                "That emoji can't be sent as a reaction.",
-            ));
+            self.toasts.add_toast(crate::toast::plain(&tr!(
+                "That emoji can't be sent as a reaction."
+            )));
             return;
         }
         let Some(envelope) = self.envelopes.iter().find(|env| env.id == id).cloned() else {
@@ -321,7 +322,7 @@ impl MailModel {
             .push(GroupedReaction {
                 emoji: emoji.clone(),
                 count: 1,
-                names: vec!["You".to_string()],
+                names: vec![alcedo_core::you_label()],
             });
         self.refresh_reaction_chips_for(id);
         self.pending_reaction_target = Some(id);
@@ -345,7 +346,7 @@ pub(super) fn build_reaction_draft(
 ) -> ComposeDraft {
     let decoded_subject = envelope.display_subject();
     let subject = if decoded_subject.is_empty() {
-        "Reaction".to_string()
+        tr!("Reaction")
     } else {
         decoded_subject
     };

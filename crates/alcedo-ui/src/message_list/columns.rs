@@ -1,6 +1,7 @@
 //! Message-list column layout: order, visibility, widths, expand column, saved sort, and header chrome.
 
 use super::*;
+use alcedo_i18n::trs;
 
 pub(super) fn apply_column_size_constraints(list: &MessageListView) {
     let columns = list.get_columns();
@@ -564,9 +565,9 @@ pub(super) fn apply_header_alignment(widget: &gtk::Widget, is_last: bool, is_dat
 
 pub(super) fn column_header_icon(id: &str) -> Option<(&'static str, &'static str)> {
     match id {
-        "unread" => Some(("mail-unread-symbolic", "Unread")),
-        "attachments" => Some(("mail-attachment-symbolic", "Attachments")),
-        "star" => Some(("non-starred-symbolic", "Starred")),
+        "unread" => Some(("mail-unread-symbolic", trs!("Unread"))),
+        "attachments" => Some(("mail-attachment-symbolic", trs!("Attachments"))),
+        "star" => Some(("non-starred-symbolic", trs!("Starred"))),
         _ => None,
     }
 }
@@ -638,26 +639,35 @@ pub(super) fn apply_header_chrome(widget: &gtk::Widget, id: &str, is_last: bool)
     apply_header_icon(widget, id);
 }
 
-pub(super) fn column_id_from_header_title(title: &str) -> Option<&'static str> {
-    match title {
-        "Unread" => Some("unread"),
-        "From" => Some("from"),
-        "Folder" => Some("folder"),
-        "Account" => Some("account"),
-        "Chip" => Some("account-chip"),
-        "Subject" => Some("subject"),
-        "Attachments" => Some("attachments"),
-        "Starred" => Some("star"),
-        "Size" => Some("size"),
-        "Date" => Some("date"),
-        "Deleted" => Some("deleted"),
-        _ => None,
+/// The id of the column whose (translated) title is `title`, from the view's
+/// own `(id, title)` pairs, so nothing depends on the English header text.
+pub(super) fn column_id_for_title<'a>(
+    columns: impl IntoIterator<Item = (&'a str, &'a str)>,
+    title: &str,
+) -> Option<&'a str> {
+    if title.is_empty() {
+        return None;
     }
+    columns
+        .into_iter()
+        .find(|(_, column_title)| *column_title == title)
+        .map(|(id, _)| id)
 }
 
-pub(super) fn header_id_from_title(widget: &gtk::Widget) -> Option<&'static str> {
+pub(super) fn header_id_from_title(view: &gtk::ColumnView, widget: &gtk::Widget) -> Option<String> {
     let label = header_title_label(widget)?;
-    column_id_from_header_title(label.label().as_str())
+    let cols = view.columns();
+    let pairs: Vec<(String, String)> = (0..cols.n_items())
+        .filter_map(|i| cols.item(i)?.downcast::<gtk::ColumnViewColumn>().ok())
+        .filter_map(|col| Some((col.id()?.to_string(), col.title()?.to_string())))
+        .collect();
+    column_id_for_title(
+        pairs
+            .iter()
+            .map(|(id, title)| (id.as_str(), title.as_str())),
+        label.label().as_str(),
+    )
+    .map(str::to_string)
 }
 
 pub(super) fn sync_header_alignment(view: &gtk::ColumnView) {
@@ -667,8 +677,8 @@ pub(super) fn sync_header_alignment(view: &gtk::ColumnView) {
     // an empty title and GTK may insert extra header widgets, so a zip against
     // visible column ids paints unread/attachment/star icons onto From/Deleted.
     for widget in column_header_widgets(view) {
-        let id = header_id_from_title(&widget).unwrap_or("");
-        apply_header_chrome(&widget, id, last == Some(id));
+        let id = header_id_from_title(view, &widget).unwrap_or_default();
+        apply_header_chrome(&widget, &id, last == Some(id.as_str()));
     }
 }
 

@@ -2,6 +2,7 @@
 
 use super::folder_ops::mock_folder_name_matches;
 use super::*;
+use alcedo_i18n::tr;
 
 impl MailModel {
     pub(super) fn update_search(&mut self, msg: MailMsg, sender: ComponentSender<MailModel>) {
@@ -279,7 +280,7 @@ impl MailModel {
     pub(super) fn current_view_scope_label(&self) -> String {
         let view = self.pre_search_mail_view.unwrap_or(self.mail_view);
         match view {
-            MailView::UnifiedInbox => UNIFIED_INBOX_TITLE.to_string(),
+            MailView::UnifiedInbox => everything_title(),
             MailView::Folder(id) => self
                 .folders
                 .values()
@@ -287,7 +288,7 @@ impl MailModel {
                 .find(|folder| folder.id == id)
                 .map(folder_display_name)
                 .unwrap_or_else(|| "Folder".to_string()),
-            MailView::Search => "All mail".to_string(),
+            MailView::Search => tr!("All mail"),
             MailView::Extension(id) => self
                 .extension_view_spec(id)
                 .map(|(_, spec)| spec.title)
@@ -297,9 +298,9 @@ impl MailModel {
 
     pub(super) fn search_status_scope(&self, parsed: &SearchQuery) -> String {
         match &parsed.folder {
-            Some(FolderToken::All) => "All mail".to_string(),
+            Some(FolderToken::All) => tr!("All mail"),
             Some(FolderToken::Name(name)) => name.clone(),
-            None if self.search_scope == SearchScopeKind::All => "All mail".to_string(),
+            None if self.search_scope == SearchScopeKind::All => tr!("All mail"),
             None => self.current_view_scope_label(),
         }
     }

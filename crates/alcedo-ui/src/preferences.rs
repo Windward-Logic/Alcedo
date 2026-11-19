@@ -15,6 +15,7 @@ use crate::settings::{
     bind_load_remote_images, bind_message_list_mode, bind_request_mdn, bind_show_message_preview,
     bind_show_verification_codes, bind_strv_as_csv, bind_tracking_pixel_url,
 };
+use alcedo_i18n::{ntr, tr, trs};
 use relm4::Sender;
 use relm4::adw;
 use relm4::adw::prelude::*;
@@ -97,37 +98,41 @@ fn string_combo_row(title: &str, subtitle: &str, labels: &[&str]) -> adw::ComboR
 /// General: how the app behaves on the desktop, the message list, and tools.
 fn build_general_page(mail_sender: &Sender<MailMsg>) -> adw::PreferencesPage {
     let close_to_tray_row = adw::SwitchRow::builder()
-        .title("Close to tray")
-        .subtitle("Window hides in the notification area instead of quitting")
+        .title(tr!("Close to tray"))
+        .subtitle(tr!(
+            "Window hides in the notification area instead of quitting"
+        ))
         .build();
     bind_close_to_tray(&close_to_tray_row);
 
-    let desktop_group = adw::PreferencesGroup::builder().title("Desktop").build();
+    let desktop_group = adw::PreferencesGroup::builder()
+        .title(tr!("Desktop"))
+        .build();
     crate::help::attach_group_help(&desktop_group, TOPIC_NOTIFICATIONS);
     desktop_group.add(&close_to_tray_row);
 
     let list_mode_row = string_combo_row(
-        "Grouping",
-        "Group replies into conversations, or show one row per message",
-        &["Conversations", "One message per row"],
+        &tr!("Grouping"),
+        &tr!("Group replies into conversations, or show one row per message"),
+        &[trs!("Conversations"), trs!("One message per row")],
     );
     bind_message_list_mode(&list_mode_row);
 
     let preview_row = adw::SwitchRow::builder()
-        .title("Show message previews")
-        .subtitle("A line of the message body under each subject")
+        .title(tr!("Show message previews"))
+        .subtitle(tr!("A line of the message body under each subject"))
         .build();
     bind_show_message_preview(&preview_row);
 
     let density_row = string_combo_row(
-        "List density",
-        "Spacing in the message list and reading pane",
-        &["Compact", "Comfortable", "Relaxed"],
+        &tr!("List density"),
+        &tr!("Spacing in the message list and reading pane"),
+        &[trs!("Compact"), trs!("Comfortable"), trs!("Relaxed")],
     );
     bind_list_density(&density_row);
 
     let list_group = adw::PreferencesGroup::builder()
-        .title("Message list")
+        .title(tr!("Message list"))
         .build();
     crate::help::attach_group_help(&list_group, TOPIC_READING);
     list_group.add(&list_mode_row);
@@ -135,28 +140,30 @@ fn build_general_page(mail_sender: &Sender<MailMsg>) -> adw::PreferencesPage {
     list_group.add(&density_row);
 
     let folder_pane_accounts_row = string_combo_row(
-        "Accounts",
-        "Show one account at a time, or every account with its folders",
-        &["Account picker", "All accounts stacked"],
+        &tr!("Accounts"),
+        &tr!("Show one account at a time, or every account with its folders"),
+        &[trs!("Account picker"), trs!("All accounts stacked")],
     );
     bind_folder_pane_accounts(&folder_pane_accounts_row);
 
     let folder_pane_group = adw::PreferencesGroup::builder()
-        .title("Folder pane")
+        .title(tr!("Folder pane"))
         .build();
     folder_pane_group.add(&folder_pane_accounts_row);
 
     let show_codes_row = adw::SwitchRow::builder()
-        .title("Show verification codes")
-        .subtitle(
-            "When a message includes a sign-in code, show it in the reader so you can copy it",
-        )
+        .title(tr!("Show verification codes"))
+        .subtitle(tr!(
+            "When a message includes a sign-in code, show it in the reader so you can copy it"
+        ))
         .build();
     bind_show_verification_codes(&show_codes_row);
 
     let cleanup_codes_row = adw::SwitchRow::builder()
-        .title("Clean up after copy")
-        .subtitle("Move that message to Trash after you copy the code. Undo from the toast.")
+        .title(tr!("Clean up after copy"))
+        .subtitle(tr!(
+            "Move that message to Trash after you copy the code. Undo from the toast."
+        ))
         .build();
     bind_cleanup_verification_codes(&cleanup_codes_row);
     show_codes_row
@@ -165,7 +172,7 @@ fn build_general_page(mail_sender: &Sender<MailMsg>) -> adw::PreferencesPage {
         .build();
 
     let codes_group = adw::PreferencesGroup::builder()
-        .title("Verification codes")
+        .title(tr!("Verification codes"))
         .build();
     codes_group.add(&show_codes_row);
     codes_group.add(&cleanup_codes_row);
@@ -173,8 +180,8 @@ fn build_general_page(mail_sender: &Sender<MailMsg>) -> adw::PreferencesPage {
     let rules_icon = gtk::Image::new();
     set_image(&rules_icon, RULES_SYMBOLIC, 16);
     let rules_row = adw::ActionRow::builder()
-        .title("Message rules")
-        .subtitle("Automatically file, star, or delete mail")
+        .title(tr!("Message rules"))
+        .subtitle(tr!("Automatically file, star, or delete mail"))
         .activatable(true)
         .build();
     rules_row.add_prefix(&rules_icon);
@@ -184,26 +191,28 @@ fn build_general_page(mail_sender: &Sender<MailMsg>) -> adw::PreferencesPage {
         mail_sender_rules.emit(MailMsg::OpenRules);
     });
 
-    let automation_group = adw::PreferencesGroup::builder().title("Automation").build();
+    let automation_group = adw::PreferencesGroup::builder()
+        .title(tr!("Automation"))
+        .build();
     crate::help::attach_group_help(&automation_group, TOPIC_RULES);
     automation_group.add(&rules_row);
 
     let activity_log_limit_row = adw::SpinRow::with_range(50.0, 2000.0, 10.0);
-    activity_log_limit_row.set_title("Maximum lines");
-    activity_log_limit_row.set_subtitle("Oldest entries are dropped when the log is full");
+    activity_log_limit_row.set_title(&tr!("Maximum lines"));
+    activity_log_limit_row.set_subtitle(&tr!("Oldest entries are dropped when the log is full"));
     activity_log_limit_row.set_digits(0);
     crate::settings::bind_activity_log_limit(&activity_log_limit_row);
 
     let activity_log_group = adw::PreferencesGroup::builder()
-        .title("Activity log")
+        .title(tr!("Activity log"))
         .description(
-            "Keeps a session history of sends, sync, and other actions. Open it from Idle on the status bar.",
+            tr!("Keeps a session history of sends, sync, and other actions. Open it from Idle on the status bar."),
         )
         .build();
     activity_log_group.add(&activity_log_limit_row);
 
     let page = adw::PreferencesPage::builder()
-        .title("General")
+        .title(tr!("General"))
         .icon_name("preferences-system-symbolic")
         .build();
     page.add(&desktop_group);
@@ -225,23 +234,25 @@ fn build_composing_page(
     dialog: &adw::PreferencesDialog,
 ) -> (adw::PreferencesPage, crate::compose_snippets::SnippetsPrefs) {
     let format_row = string_combo_row(
-        "Default format",
-        "Used for new messages and replies",
-        &["Plain text", "HTML", "Markdown"],
+        &tr!("Default format"),
+        &tr!("Used for new messages and replies"),
+        &[trs!("Plain text"), "HTML", trs!("Markdown")],
     );
     bind_compose_format(&format_row);
 
     let send_delay_row = build_send_delay_row();
 
     let typical_inline_row = adw::EntryRow::builder()
-        .title("Typical inline images")
-        .tooltip_text(
-            "Comma-separated extensions most email clients can display, for example png, jpeg",
-        )
+        .title(tr!("Typical inline images"))
+        .tooltip_text(tr!(
+            "Comma-separated extensions most email clients can display, for example png, jpeg"
+        ))
         .build();
     bind_strv_as_csv("typical-inline-image-extensions", &typical_inline_row);
 
-    let messages_group = adw::PreferencesGroup::builder().title("Messages").build();
+    let messages_group = adw::PreferencesGroup::builder()
+        .title(tr!("Messages"))
+        .build();
     crate::help::attach_group_help(&messages_group, TOPIC_COMPOSE);
     messages_group.add(&format_row);
     messages_group.add(&send_delay_row);
@@ -251,7 +262,7 @@ fn build_composing_page(
 
     let page = adw::PreferencesPage::builder()
         .name(COMPOSING_PAGE_NAME)
-        .title("Composing")
+        .title(tr!("Composing"))
         .icon_name("document-edit-symbolic")
         .build();
     page.add(&messages_group);
@@ -266,48 +277,48 @@ fn build_composing_page(
 /// what outgoing mail tells recipients.
 fn build_privacy_page() -> adw::PreferencesPage {
     let load_remote_row = adw::SwitchRow::builder()
-        .title("Load remote images")
+        .title(tr!("Load remote images"))
         .subtitle(
-            "HTML mail loads remote images automatically. You can still allow a message or sender from the reader.",
+            tr!("HTML mail loads remote images automatically. You can still allow a message or sender from the reader."),
         )
         .build();
     bind_load_remote_images(&load_remote_row);
 
     let remote_group = adw::PreferencesGroup::builder()
-        .title("Incoming mail")
+        .title(tr!("Incoming mail"))
         .build();
     crate::help::attach_group_help(&remote_group, TOPIC_PRIVACY);
     remote_group.add(&load_remote_row);
 
     let risky_ext_row = adw::EntryRow::builder()
-        .title("Risky extensions")
-        .tooltip_text("Comma-separated, for example exe, html, svg")
+        .title(tr!("Risky extensions"))
+        .tooltip_text(tr!("Comma-separated, for example exe, html, svg"))
         .build();
     bind_strv_as_csv("risky-attachment-extensions", &risky_ext_row);
 
     let risky_mime_row = adw::EntryRow::builder()
-        .title("Risky MIME types")
-        .tooltip_text("Comma-separated, for example text/html, image/svg+xml")
+        .title(tr!("Risky MIME types"))
+        .tooltip_text(tr!("Comma-separated, for example text/html, image/svg+xml"))
         .build();
     bind_strv_as_csv("risky-attachment-mime-types", &risky_mime_row);
 
     let attachments_group = adw::PreferencesGroup::builder()
-        .title("Attachments")
+        .title(tr!("Attachments"))
         .description(
-            "Risky types stay stored, but opening or saving them asks for confirmation. Edit the lists to match what you want flagged.",
+            tr!("Risky types stay stored, but opening or saving them asks for confirmation. Edit the lists to match what you want flagged."),
         )
         .build();
     attachments_group.add(&risky_ext_row);
     attachments_group.add(&risky_mime_row);
 
     let mdn_row = adw::SwitchRow::builder()
-        .title("Request read receipts")
-        .subtitle("Recipients may be notified when this is read.")
+        .title(tr!("Request read receipts"))
+        .subtitle(tr!("Recipients may be notified when this is read."))
         .build();
     bind_request_mdn(&mdn_row);
 
     let pixel_row = adw::SwitchRow::builder()
-        .title("Insert tracking pixel")
+        .title(tr!("Insert tracking pixel"))
         .subtitle(
             "Adds a hidden image from your URL to outgoing HTML mail so you can \
              see when it is opened. Recipients are tracked without being asked.",
@@ -316,8 +327,8 @@ fn build_privacy_page() -> adw::PreferencesPage {
     bind_insert_tracking_pixel(&pixel_row);
 
     let pixel_url_row = adw::EntryRow::builder()
-        .title("Tracking pixel URL")
-        .tooltip_text("Must start with https://")
+        .title(tr!("Tracking pixel URL"))
+        .tooltip_text(tr!("Must start with https://"))
         .build();
     bind_tracking_pixel_url(&pixel_url_row);
     pixel_row
@@ -326,21 +337,23 @@ fn build_privacy_page() -> adw::PreferencesPage {
         .build();
 
     let tracking_expander = adw::ExpanderRow::builder()
-        .title("Open tracking")
-        .subtitle("Know when recipients open your mail. Most people should leave this off.")
+        .title(tr!("Open tracking"))
+        .subtitle(tr!(
+            "Know when recipients open your mail. Most people should leave this off."
+        ))
         .expanded(false)
         .build();
     tracking_expander.add_row(&pixel_row);
     tracking_expander.add_row(&pixel_url_row);
 
     let outgoing_group = adw::PreferencesGroup::builder()
-        .title("Outgoing mail")
+        .title(tr!("Outgoing mail"))
         .build();
     outgoing_group.add(&mdn_row);
     outgoing_group.add(&tracking_expander);
 
     let page = adw::PreferencesPage::builder()
-        .title("Privacy")
+        .title(tr!("Privacy"))
         .icon_name("channel-secure-symbolic")
         .build();
     page.add(&remote_group);
@@ -382,9 +395,9 @@ const SEND_DELAY_CHOICES: [u32; 4] = [0, 5, 10, 20];
 
 fn send_delay_label(seconds: u32) -> String {
     if seconds == 0 {
-        "Off".to_string()
+        tr!("Off")
     } else {
-        format!("{seconds} seconds")
+        ntr!("{n} second", "{n} seconds", seconds)
     }
 }
 
@@ -404,8 +417,8 @@ fn build_send_delay_row() -> adw::ComboRow {
     let label_refs: Vec<&str> = labels.iter().map(String::as_str).collect();
     let model = gtk::StringList::new(&label_refs);
     let row = adw::ComboRow::builder()
-        .title("Undo send")
-        .subtitle("Wait before sending so you can take a message back")
+        .title(tr!("Undo send"))
+        .subtitle(tr!("Wait before sending so you can take a message back"))
         .model(&model)
         .build();
     row.set_selected(send_delay_index(crate::settings::send_delay_seconds()));

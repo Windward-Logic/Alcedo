@@ -9,6 +9,7 @@ use alcedo_core::{
     ReplyFrom, ReplyPlan, apply_participation, build_ics, build_reply_ics,
     calendar_invite_reply_subject, parse_ics_with_method, rsvp_responder_email,
 };
+use alcedo_i18n::{tr, trs};
 
 #[derive(Clone, Debug)]
 pub struct InviteResponsePayload {
@@ -20,9 +21,9 @@ pub struct InviteResponsePayload {
 impl MailModel {
     pub(super) fn send_invite_response(&mut self, payload: InviteResponsePayload) {
         if self.send_in_flight.get() {
-            self.toasts.add_toast(crate::toast::plain(
-                "Wait until the current message finishes sending.",
-            ));
+            self.toasts.add_toast(crate::toast::plain(&tr!(
+                "Wait until the current message finishes sending."
+            )));
             return;
         }
         let InviteResponsePayload {
@@ -31,9 +32,9 @@ impl MailModel {
             ics,
         } = payload;
         let Some(envelope) = self.envelope_for(message_id).cloned() else {
-            self.toasts.add_toast(crate::toast::plain(
-                "Couldn't send a response to this invitation",
-            ));
+            self.toasts.add_toast(crate::toast::plain(&tr!(
+                "Couldn't send a response to this invitation"
+            )));
             return;
         };
         let Some(account) = self
@@ -42,25 +43,25 @@ impl MailModel {
             .find(|a| a.id == envelope.account_id)
             .cloned()
         else {
-            self.toasts.add_toast(crate::toast::plain(
-                "Couldn't send a response to this invitation",
-            ));
+            self.toasts.add_toast(crate::toast::plain(&tr!(
+                "Couldn't send a response to this invitation"
+            )));
             return;
         };
         let parsed = match parse_ics_with_method(ics.as_bytes()) {
             Ok(p) => p,
             Err(_) => {
-                self.toasts.add_toast(crate::toast::plain(
-                    "Could not read this calendar invitation",
-                ));
+                self.toasts.add_toast(crate::toast::plain(&tr!(
+                    "Could not read this calendar invitation"
+                )));
                 return;
             }
         };
         let mut drafts = parsed.drafts;
         if drafts.is_empty() {
-            self.toasts.add_toast(crate::toast::plain(
-                "Could not read this calendar invitation",
-            ));
+            self.toasts.add_toast(crate::toast::plain(&tr!(
+                "Could not read this calendar invitation"
+            )));
             return;
         }
 
@@ -207,7 +208,7 @@ fn build_invite_reply_draft(
         .first()
         .map(|d| d.summary.as_str())
         .filter(|s| !s.trim().is_empty())
-        .unwrap_or("Meeting");
+        .unwrap_or_else(|| trs!("Meeting"));
     let subject = calendar_invite_reply_subject(status, summary);
     let organizer = drafts.iter().find_map(|d| d.details.organizer.as_ref());
     let to: Vec<String> = organizer

@@ -1,5 +1,6 @@
 //! SyncRuntime command dispatch and worker registry (P7).
 
+use alcedo_i18n::tr;
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, Mutex, OnceLock, RwLock};
 
@@ -339,7 +340,7 @@ async fn dispatch_command(
             {
                 let _ = events.send(SyncEvent::SendProgress {
                     id: MessageId(0),
-                    state: SendState::Failed("Could not queue message for sending".to_string()),
+                    state: SendState::Failed(tr!("Could not queue message for sending")),
                 });
             }
         }
@@ -364,11 +365,7 @@ async fn dispatch_command(
         }
         UiCommand::DeleteGroup(id) => {
             if id == UNAPPROVED_GROUP_ID {
-                emit_error(
-                    events,
-                    None,
-                    "Cannot delete the Unapproved group".to_string(),
-                );
+                emit_error(events, None, tr!("Cannot delete the Unapproved group"));
             } else if let Err(err) = delete_group(id, store, events).await {
                 emit_error(events, None, err.to_string());
             }
@@ -931,16 +928,16 @@ fn route_delete_folder_on_or_before(
                     emit_error(
                         &events,
                         Some(f.account_id),
-                        "Mail account is not connected".to_string(),
+                        tr!("Mail account is not connected"),
                     );
                 }
             }
             Ok(Some(f)) => emit_error(
                 &events,
                 Some(f.account_id),
-                "This folder cannot be modified".to_string(),
+                tr!("This folder cannot be modified"),
             ),
-            Ok(None) => emit_error(&events, None, "Folder not found".to_string()),
+            Ok(None) => emit_error(&events, None, tr!("Folder not found")),
             Err(err) => emit_error(&events, None, err.to_string()),
         }
     });
@@ -961,10 +958,10 @@ async fn route_mutable_folder(
             emit_error(
                 events,
                 Some(folder.account_id),
-                "This folder cannot be modified".to_string(),
+                tr!("This folder cannot be modified"),
             );
         }
-        Ok(None) => emit_error(events, None, "Folder not found".to_string()),
+        Ok(None) => emit_error(events, None, tr!("Folder not found")),
         Err(err) => emit_error(events, None, err.to_string()),
     }
 }
@@ -1001,11 +998,7 @@ fn route_open_thread(
                         .send(account_id, WorkerCommand::OpenMessage(id))
                         .await
                     {
-                        emit_error(
-                            &events,
-                            Some(account_id),
-                            "Account is not connected".to_string(),
-                        );
+                        emit_error(&events, Some(account_id), tr!("Account is not connected"));
                     }
                 }
             }
@@ -1058,7 +1051,7 @@ async fn route_open_message(
                 emit_error(
                     events,
                     Some(msg.account_id),
-                    "Account is not connected".to_string(),
+                    tr!("Account is not connected"),
                 );
             }
         }
@@ -1155,16 +1148,12 @@ async fn route_message_command(
         Ok(Some(msg)) => {
             let account_id = msg.account_id;
             if !workers.send(account_id, command).await {
-                emit_error(
-                    events,
-                    Some(account_id),
-                    "Account is not connected".to_string(),
-                );
+                emit_error(events, Some(account_id), tr!("Account is not connected"));
             }
         }
         Ok(None) => {
             warn!(?id, "open/set_flag/delete/move: message not in store");
-            emit_error(events, None, "Message not found".to_string());
+            emit_error(events, None, tr!("Message not found"));
         }
         Err(err) => {
             warn!(?id, error = %err, "store get_message failed");
@@ -1303,9 +1292,7 @@ async fn update_account(
         .iter()
         .any(|other| other.id != id && other.email.eq_ignore_ascii_case(&email))
     {
-        return Err(Error::Other(
-            "Another account already uses this email".into(),
-        ));
+        return Err(Error::Other(tr!("Another account already uses this email")));
     }
     let mut account = accounts
         .into_iter()
@@ -1320,9 +1307,9 @@ async fn update_account(
         .iter()
         .any(|identity| identity.email.eq_ignore_ascii_case(&email))
     {
-        return Err(Error::Other(
-            "This address is already a From address on this account".into(),
-        ));
+        return Err(Error::Other(tr!(
+            "This address is already a From address on this account"
+        )));
     }
     let email_changed = account.email != email;
 
@@ -1518,7 +1505,7 @@ async fn route_delete_messages(
         if !ids.is_empty() {
             let _ = events.send(SyncEvent::MessageDeleteFailed {
                 ids,
-                reason: "Couldn't find messages to delete".to_string(),
+                reason: tr!("Couldn't find messages to delete"),
             });
         }
         return;
@@ -1535,7 +1522,7 @@ async fn route_delete_messages(
         {
             let _ = events.send(SyncEvent::MessageDeleteFailed {
                 ids: message_ids,
-                reason: "Account is not connected".to_string(),
+                reason: tr!("Account is not connected"),
             });
         }
     }
@@ -1552,7 +1539,7 @@ async fn route_expunge_messages(
         if !ids.is_empty() {
             let _ = events.send(SyncEvent::MessageDeleteFailed {
                 ids,
-                reason: "Couldn't find messages to delete".to_string(),
+                reason: tr!("Couldn't find messages to delete"),
             });
         }
         return;
@@ -1569,7 +1556,7 @@ async fn route_expunge_messages(
         {
             let _ = events.send(SyncEvent::MessageDeleteFailed {
                 ids: message_ids,
-                reason: "Account is not connected".to_string(),
+                reason: tr!("Account is not connected"),
             });
         }
     }
@@ -1596,11 +1583,7 @@ async fn route_set_flags(
             )
             .await
         {
-            emit_error(
-                events,
-                Some(account_id),
-                "Account is not connected".to_string(),
-            );
+            emit_error(events, Some(account_id), tr!("Account is not connected"));
         }
     }
 }
@@ -1624,11 +1607,7 @@ async fn route_move_messages(
             )
             .await
         {
-            emit_error(
-                events,
-                Some(account_id),
-                "Account is not connected".to_string(),
-            );
+            emit_error(events, Some(account_id), tr!("Account is not connected"));
         }
     }
 }
@@ -1652,11 +1631,7 @@ async fn route_move_messages_to_folder(
             )
             .await
         {
-            emit_error(
-                events,
-                Some(account_id),
-                "Account is not connected".to_string(),
-            );
+            emit_error(events, Some(account_id), tr!("Account is not connected"));
         }
     }
 }

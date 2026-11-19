@@ -1,6 +1,7 @@
 //! Send pipeline: validation, queueing and the sent toast.
 
 use alcedo_core::QueuedSendId;
+use alcedo_i18n::{tr, trf, trs};
 
 use super::*;
 
@@ -126,7 +127,7 @@ impl MailModel {
         self.send_in_flight.set(false);
         if !compose_draft_has_recipients(&draft) {
             self.toasts
-                .add_toast(crate::toast::plain("Add at least one recipient"));
+                .add_toast(crate::toast::plain(&tr!("Add at least one recipient")));
             return;
         }
         let Some(menu) = crate::extension::registered()
@@ -215,11 +216,11 @@ impl MailModel {
             self.record(
                 activity_log::KIND_MAIL,
                 ActivityOutcome::Success,
-                "Message sent (mock)",
+                tr!("Message sent (mock)"),
                 self.send_detail_from_draft(&draft, None),
             );
             self.toasts
-                .add_toast(crate::toast::plain("Message sent (mock)"));
+                .add_toast(crate::toast::plain(&tr!("Message sent (mock)")));
             self.show_reader();
         } else if self.bind_resolved_composer_from(&self.composer).is_none() {
         } else {
@@ -250,11 +251,11 @@ impl MailModel {
             self.record(
                 activity_log::KIND_MAIL,
                 ActivityOutcome::Success,
-                "Message sent (mock)",
+                tr!("Message sent (mock)"),
                 self.send_detail_from_draft(&draft, None),
             );
             self.toasts
-                .add_toast(crate::toast::plain("Message sent (mock)"));
+                .add_toast(crate::toast::plain(&tr!("Message sent (mock)")));
             if let Some(window) = self.composer_windows.remove(&id) {
                 window.close_after_send();
             }
@@ -329,9 +330,9 @@ impl MailModel {
             }
             UnsentDraftRestore::NewWindow => {
                 let title = if draft.in_reply_to.is_some() {
-                    "Reply"
+                    trs!("Reply")
                 } else {
-                    "Compose"
+                    trs!("Compose")
                 };
                 let focus = if draft.in_reply_to.is_some() {
                     DetachedComposerFocus::Body
@@ -379,12 +380,12 @@ impl MailModel {
     ) -> bool {
         if self.pending_send_draft.is_some() {
             self.toasts
-                .add_toast(crate::toast::plain("A message is already sending"));
+                .add_toast(crate::toast::plain(&tr!("A message is already sending")));
             return false;
         }
         if !compose_draft_has_recipients(&draft) {
             self.toasts
-                .add_toast(crate::toast::plain("Add at least one recipient"));
+                .add_toast(crate::toast::plain(&tr!("Add at least one recipient")));
             return false;
         }
         self.pending_send_draft = Some(draft.clone());
@@ -485,8 +486,8 @@ pub(super) fn reader_after_inline_send(reopen: bool, has_selection: bool) -> Rea
 
 pub(super) fn sent_toast_title(from_email: Option<&str>) -> String {
     match from_email {
-        Some(email) if !email.is_empty() => format!("Message sent from {email}"),
-        _ => "Message sent".to_string(),
+        Some(email) if !email.is_empty() => trf!("Message sent from {email}", email = email),
+        _ => tr!("Message sent"),
     }
 }
 

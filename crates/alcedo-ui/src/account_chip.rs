@@ -1,5 +1,6 @@
 //! Account chip appearance (initials, background color, cropped photo).
 
+use alcedo_i18n::trs;
 use std::f64::consts::TAU;
 use std::io::Cursor;
 
@@ -62,10 +63,10 @@ pub fn hex_from_rgba(rgba: &gdk::RGBA) -> String {
 /// Center-crop to a square, scale, and clip to a circle for `AdwAvatar`.
 pub fn crop_avatar_image(bytes: &[u8]) -> Result<Vec<u8>, &'static str> {
     if bytes.is_empty() {
-        return Err("Could not read image");
+        return Err(trs!("Could not read image"));
     }
     if bytes.len() > MAX_AVATAR_SOURCE_BYTES {
-        return Err("Image is too large (max 10 MB)");
+        return Err(trs!("Image is too large (max 10 MB)"));
     }
     let pixbuf = gdk_pixbuf::Pixbuf::from_read(Cursor::new(bytes.to_vec()))
         .map_err(|_| "Could not read image")?;
@@ -73,14 +74,14 @@ pub fn crop_avatar_image(bytes: &[u8]) -> Result<Vec<u8>, &'static str> {
     let width = pixbuf.width();
     let height = pixbuf.height();
     if width < 1 || height < 1 {
-        return Err("Could not read image");
+        return Err(trs!("Could not read image"));
     }
     let side = width.min(height);
     let x = (width - side) / 2;
     let y = (height - side) / 2;
     let square = pixbuf.new_subpixbuf(x, y, side, side);
     let sized = if side == AVATAR_IMAGE_SIZE {
-        square.copy().ok_or("Could not crop image")?
+        square.copy().ok_or_else(|| trs!("Could not crop image"))?
     } else {
         square
             .scale_simple(
@@ -88,7 +89,7 @@ pub fn crop_avatar_image(bytes: &[u8]) -> Result<Vec<u8>, &'static str> {
                 AVATAR_IMAGE_SIZE,
                 gdk_pixbuf::InterpType::Bilinear,
             )
-            .ok_or("Could not crop image")?
+            .ok_or_else(|| trs!("Could not crop image"))?
     };
     let sized = if sized.has_alpha() {
         sized

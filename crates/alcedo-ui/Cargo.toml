@@ -13,6 +13,7 @@ test-support = []
 [dependencies]
 alcedo-core = { workspace = true }
 alcedo-html = { workspace = true }
+alcedo-i18n = { workspace = true }
 alcedo-oauth = { workspace = true }
 alcedo-widgets = { workspace = true }
 chrono = { workspace = true }

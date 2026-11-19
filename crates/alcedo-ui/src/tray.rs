@@ -2,6 +2,7 @@
 
 #[cfg(target_os = "linux")]
 mod imp {
+    use alcedo_i18n::{ntr, trs};
     use std::sync::Arc;
     use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 
@@ -65,7 +66,8 @@ mod imp {
         fn title(&self) -> String {
             let unread = self.unread_count.load(Ordering::Relaxed);
             if unread > 0 {
-                format!("Alcedo ({unread} unread)")
+                // TRANSLATORS: tray icon title.
+                ntr!("Alcedo ({n} unread)", "Alcedo ({n} unread)", unread)
             } else {
                 "Alcedo".into()
             }
@@ -100,7 +102,7 @@ mod imp {
             let quit = self.quit.clone();
             vec![
                 StandardItem {
-                    label: "Show Alcedo".into(),
+                    label: trs!("Show Alcedo").into(),
                     activate: Box::new(move |_| {
                         marshal_to_main_loop(show.clone());
                     }),
@@ -108,7 +110,7 @@ mod imp {
                 }
                 .into(),
                 StandardItem {
-                    label: "Quit".into(),
+                    label: trs!("Quit").into(),
                     activate: Box::new(move |_| {
                         marshal_to_main_loop(quit.clone());
                     }),

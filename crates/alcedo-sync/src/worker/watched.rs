@@ -15,6 +15,7 @@ use super::reactions::peek_reaction_bodies;
 use super::sent_copy::maybe_dedupe_message_ids;
 use super::session::is_recoverable_disconnect;
 use super::*;
+use alcedo_i18n::trf;
 
 pub(super) fn watched_poll_delay(watched: &WatchedFolders) -> Duration {
     let remaining = match watched.last_poll {
@@ -344,7 +345,7 @@ pub(super) async fn sync_folder_recent(
     emit_status(
         events,
         account,
-        format!("Syncing {}…", folder_display_name(&folder)),
+        trf!("Syncing {folder}…", folder = folder_display_name(&folder)),
     );
     sync_selected_mailbox(state, account, &folder, store, events, server_rules, true).await?;
     emit_unread_counts(store, events).await?;
@@ -398,7 +399,11 @@ pub(super) async fn backfill_folder_page(
         return Ok(None);
     };
 
-    emit_status(events, account, format!("Loading {}…", folder.imap_name));
+    emit_status(
+        events,
+        account,
+        trf!("Loading {folder}…", folder = folder_display_name(&folder)),
+    );
 
     let seq_set = imap_seq_set(start, end);
     debug!(

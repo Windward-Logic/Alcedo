@@ -1,5 +1,6 @@
 //! OpenPGP status banner for the message reader.
 
+use alcedo_i18n::{tr, trf};
 use std::cell::RefCell;
 
 use alcedo_core::pgp_copy::{PgpDetails, pgp_banner_copy};
@@ -32,14 +33,14 @@ pub fn build_pgp_banner() -> PgpBanner {
         .build();
 
     let details_btn = gtk::Button::builder()
-        .label("Show details")
+        .label(tr!("Show details"))
         .css_classes(["flat"])
         .halign(gtk::Align::End)
         .valign(gtk::Align::Center)
         .build();
 
     let accept_btn = gtk::Button::builder()
-        .label("Use key")
+        .label(tr!("Use key"))
         .css_classes(["suggested-action", "pill"])
         .halign(gtk::Align::End)
         .valign(gtk::Align::Center)
@@ -78,7 +79,10 @@ pub fn update_autocrypt_offer_banner(
     email: &str,
     on_accept: impl FnOnce() + 'static,
 ) {
-    let title = format!("{email} shared an OpenPGP key via Autocrypt.");
+    let title = trf!(
+        "{email} shared an OpenPGP key via Autocrypt.",
+        email = email
+    );
     banner.title.set_label(&title);
     banner
         .root
@@ -164,15 +168,19 @@ fn show_details_dialog(details: &PgpDetails) {
         .selection_mode(gtk::SelectionMode::None)
         .css_classes(["boxed-list"])
         .build();
-    rows.append(&details_row("Verdict", details.verdict, false));
-    rows.append(&details_row("Signer", &details.signer, false));
-    rows.append(&details_row("Fingerprint", &details.fingerprint, true));
+    rows.append(&details_row(&tr!("Verdict"), details.verdict, false));
+    rows.append(&details_row(&tr!("Signer"), &details.signer, false));
+    rows.append(&details_row(
+        &tr!("Fingerprint"),
+        &details.fingerprint,
+        true,
+    ));
     let dialog = adw::AlertDialog::builder()
-        .heading("OpenPGP Details")
+        .heading(tr!("OpenPGP Details"))
         .extra_child(&rows)
         .close_response("close")
         .build();
-    dialog.add_response("close", "Close");
+    dialog.add_response("close", &tr!("Close"));
     if let Some(root) = relm4::main_application().active_window() {
         dialog.choose(Some(&root), None::<&gtk::gio::Cancellable>, |_| {});
     }

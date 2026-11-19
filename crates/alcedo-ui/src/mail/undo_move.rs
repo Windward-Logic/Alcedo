@@ -4,6 +4,7 @@
 //! is just another move back to each message's source folder.
 
 use alcedo_core::mail_feedback::{MoveFeedback, move_toast_title, undo_move_toast_title};
+use alcedo_i18n::tr;
 
 use super::*;
 
@@ -58,7 +59,7 @@ impl MailModel {
         }
         let title = move_toast_title(feedback, sources.len());
         let toast = crate::toast::plain_with_timeout(&title, UNDO_MOVE_TOAST_SECS);
-        toast.set_button_label(Some("Undo"));
+        toast.set_button_label(Some(&tr!("Undo")));
         let sender = self.mail_sender.clone();
         toast.connect_button_clicked(move |_| {
             sender.send(MailMsg::UndoMove).ok();

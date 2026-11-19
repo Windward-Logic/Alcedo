@@ -9,6 +9,7 @@ use super::mailbox_sync::{
 use super::moves::resolve_moved_uid;
 use super::send::{envelope_email_for_compose, resolve_compose_from, validate_compose_draft};
 use super::*;
+use alcedo_i18n::tr;
 
 /// A freshly APPENDed draft row carries the bracketed header we sent, while
 /// synced rows carry the parsed (unbracketed) form. Compare on this key.
@@ -629,7 +630,7 @@ pub(super) async fn save_imap_draft(
     let folders = store.list_folders(account.id).await?;
     let Some(drafts) = drafts_folder(&folders) else {
         let _ = events.send(SyncEvent::ImapDraftSaveFailed {
-            message: "This account has no Drafts folder".to_string(),
+            message: tr!("This account has no Drafts folder"),
         });
         return Ok(());
     };

@@ -2,6 +2,7 @@
 //! Pure so the security-sensitive copy is unit tested.
 
 use crate::pgp::{PgpSignatureState, PgpStatus, format_fingerprint_display};
+use alcedo_i18n::{n_, tr, trf, trm};
 
 /// Banner text plus what the details dialog shows.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -22,48 +23,43 @@ pub struct PgpDetails {
     pub fingerprint: String,
 }
 
-const VERDICT_VALID: &str = "Valid signature";
-const VERDICT_UNKNOWN_KEY: &str = "Key not in your keyring";
-const SIGNER_NOT_STATED: &str = "Not stated by the key";
-const SIGNER_UNKNOWN_KEY: &str = "Unknown \u{2014} import the sender\u{2019}s key to verify";
+const VERDICT_VALID: &str = n_!("Valid signature");
+const VERDICT_UNKNOWN_KEY: &str = n_!("Key not in your keyring");
+const SIGNER_NOT_STATED: &str = n_!("Not stated by the key");
+const SIGNER_UNKNOWN_KEY: &str = n_!("Unknown — import the sender’s key to verify");
 
 /// Copy for `status`, or `None` when there is nothing to say (plain mail).
 pub fn pgp_banner_copy(status: &PgpStatus) -> Option<PgpBannerCopy> {
     let sig = &status.signature;
     let (title, warning) = match (status.encrypted, status.decrypted, sig) {
         (true, false, _) => (
-            "This message is encrypted, and Alcedo could not decrypt it.".to_string(),
+            tr!("This message is encrypted, and Alcedo could not decrypt it."),
             true,
         ),
         (false, _, PgpSignatureState::None) => return None,
         (true, true, PgpSignatureState::None) => (
-            "This message is encrypted, but it is not signed, so you cannot be sure who sent it."
-                .to_string(),
+            tr!(
+                "This message is encrypted, but it is not signed, so you cannot be sure who sent it."
+            ),
             true,
         ),
         (encrypted, _, PgpSignatureState::Valid { signer_email, .. }) => {
             (valid_title(encrypted, signer_email.as_deref()), false)
         }
         (encrypted, _, PgpSignatureState::Invalid { .. }) => (
-            format!(
-                "This message is {}, but the signature is not valid.",
-                if encrypted {
-                    "encrypted and signed"
-                } else {
-                    "signed"
-                }
-            ),
+            if encrypted {
+                tr!("This message is encrypted and signed, but the signature is not valid.")
+            } else {
+                tr!("This message is signed, but the signature is not valid.")
+            },
             true,
         ),
         (encrypted, _, PgpSignatureState::UnknownKey { .. }) => (
-            format!(
-                "This message is {} with a key that is not in your keyring.",
-                if encrypted {
-                    "encrypted and signed"
-                } else {
-                    "signed"
-                }
-            ),
+            if encrypted {
+                tr!("This message is encrypted and signed with a key that is not in your keyring.")
+            } else {
+                tr!("This message is signed with a key that is not in your keyring.")
+            },
             true,
         ),
     };
@@ -77,12 +73,13 @@ pub fn pgp_banner_copy(status: &PgpStatus) -> Option<PgpBannerCopy> {
 fn valid_title(encrypted: bool, signer: Option<&str>) -> String {
     let signer = signer.map(str::trim).filter(|email| !email.is_empty());
     match (encrypted, signer) {
-        (false, Some(email)) => format!("Signed by {email}. The signature is valid."),
-        (false, None) => "This message is signed, and the signature is valid.".to_string(),
-        (true, Some(email)) => {
-            format!("This message is encrypted and signed by {email}. The signature is valid.")
-        }
-        (true, None) => "This message is encrypted, and the signature is valid.".to_string(),
+        (false, Some(email)) => trf!("Signed by {email}. The signature is valid.", email = email),
+        (false, None) => tr!("This message is signed, and the signature is valid."),
+        (true, Some(email)) => trf!(
+            "This message is encrypted and signed by {email}. The signature is valid.",
+            email = email
+        ),
+        (true, None) => tr!("This message is encrypted, and the signature is valid."),
     }
 }
 
@@ -92,18 +89,18 @@ fn details_for(sig: &PgpSignatureState) -> Option<PgpDetails> {
             fingerprint,
             signer_email,
         } => Some(PgpDetails {
-            verdict: VERDICT_VALID,
+            verdict: trm!(VERDICT_VALID),
             signer: signer_email
                 .as_deref()
                 .map(str::trim)
                 .filter(|email| !email.is_empty())
-                .unwrap_or(SIGNER_NOT_STATED)
+                .unwrap_or(trm!(SIGNER_NOT_STATED))
                 .to_string(),
             fingerprint: format_fingerprint_display(fingerprint),
         }),
         PgpSignatureState::UnknownKey { fingerprint } => Some(PgpDetails {
-            verdict: VERDICT_UNKNOWN_KEY,
-            signer: SIGNER_UNKNOWN_KEY.to_string(),
+            verdict: trm!(VERDICT_UNKNOWN_KEY),
+            signer: trm!(SIGNER_UNKNOWN_KEY).to_string(),
             fingerprint: format_fingerprint_display(fingerprint),
         }),
         PgpSignatureState::None | PgpSignatureState::Invalid { .. } => None,

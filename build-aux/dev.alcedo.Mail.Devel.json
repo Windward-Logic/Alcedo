@@ -21,7 +21,8 @@
   "build-options": {
     "append-path": "/usr/lib/sdk/rust-stable/bin",
     "env": {
-      "RUST_BACKTRACE": "1"
+      "RUST_BACKTRACE": "1",
+      "ALCEDO_INSTALL_LOCALEDIR": "/app/share/locale"
     }
   },
   "modules": [
@@ -29,7 +30,9 @@
       "name": "alcedo",
       "buildsystem": "simple",
       "build-commands": [
+        "python3 -I scripts/i18n.py check",
         "cargo build --release -p alcedo",
+        "python3 -I scripts/i18n.py compile /app/share/locale",
         "install -Dm755 target/release/alcedo /app/bin/alcedo",
         "install -Dm644 data/dev.alcedo.Mail.desktop /app/share/applications/dev.alcedo.Mail.desktop",
         "bash scripts/render-metainfo.sh dev.alcedo.Mail.metainfo.xml",

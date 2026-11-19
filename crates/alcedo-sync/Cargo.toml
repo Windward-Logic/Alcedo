@@ -8,6 +8,7 @@ description = "Sync runtime and account workers for Alcedo"
 
 [dependencies]
 alcedo-core = { workspace = true }
+alcedo-i18n = { workspace = true }
 alcedo-store = { workspace = true }
 alcedo-imap = { workspace = true }
 alcedo-smtp = { workspace = true }

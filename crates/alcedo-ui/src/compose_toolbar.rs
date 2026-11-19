@@ -1,5 +1,6 @@
 //! Compose formatting toolbar (plain / HTML / Markdown).
 
+use alcedo_i18n::{tr, trs};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -189,12 +190,12 @@ impl ComposeToolbar {
         };
         self.preview_btn.set_visible(show);
         if fmt == ComposeFormat::Plain && show {
-            self.preview_btn.set_tooltip_text(Some(
-                "Preview only. Switch the format dropdown to Markdown to send a formatted message.",
-            ));
+            self.preview_btn.set_tooltip_text(Some(&tr!(
+                "Preview only. Switch the format dropdown to Markdown to send a formatted message."
+            )));
         } else if show {
             self.preview_btn
-                .set_tooltip_text(Some("Preview (Ctrl+Shift+P)"));
+                .set_tooltip_text(Some(&tr!("Preview (Ctrl+Shift+P)")));
         }
     }
 
@@ -301,24 +302,27 @@ impl Clone for HtmlFormatHandles {
 
 pub(crate) fn build_html_format_handles() -> HtmlFormatHandles {
     HtmlFormatHandles {
-        bold_btn: style_toggle("format-text-bold-symbolic", "Bold (Ctrl+B)"),
-        italic_btn: style_toggle("format-text-italic-symbolic", "Italic (Ctrl+I)"),
-        underline_btn: style_toggle("format-text-underline-symbolic", "Underline (Ctrl+U)"),
-        strike_btn: style_toggle("format-text-strikethrough-symbolic", "Strikethrough"),
+        bold_btn: style_toggle("format-text-bold-symbolic", &tr!("Bold (Ctrl+B)")),
+        italic_btn: style_toggle("format-text-italic-symbolic", &tr!("Italic (Ctrl+I)")),
+        underline_btn: style_toggle("format-text-underline-symbolic", &tr!("Underline (Ctrl+U)")),
+        strike_btn: style_toggle("format-text-strikethrough-symbolic", &tr!("Strikethrough")),
         style_sep: gtk::Separator::new(gtk::Orientation::Vertical),
-        bullet_btn: style_button("view-list-symbolic", "Bulleted list (Ctrl+Shift+8)"),
-        number_btn: style_button("view-list-ordered-symbolic", "Numbered list (Ctrl+Shift+7)"),
-        quote_btn: style_button("format-indent-more-symbolic", "Quote (Ctrl+Shift+9)"),
+        bullet_btn: style_button("view-list-symbolic", &tr!("Bulleted list (Ctrl+Shift+8)")),
+        number_btn: style_button(
+            "view-list-ordered-symbolic",
+            &tr!("Numbered list (Ctrl+Shift+7)"),
+        ),
+        quote_btn: style_button("format-indent-more-symbolic", &tr!("Quote (Ctrl+Shift+9)")),
         heading_btn: build_heading_menu_button(),
         spacing_btn: build_line_spacing_button(),
         block_sep: gtk::Separator::new(gtk::Orientation::Vertical),
-        link_btn: style_button("insert-link-symbolic", "Insert link (Ctrl+K)"),
-        insert_image_btn: style_button("insert-image-symbolic", "Insert image"),
-        table_btn: style_button("x-office-spreadsheet-symbolic", "Insert table"),
-        hr_btn: style_button("list-remove-symbolic", "Horizontal rule"),
-        code_btn: style_button("insert-text-symbolic", "Inline code"),
-        clear_btn: style_button("edit-clear-symbolic", "Clear formatting"),
-        source_btn: style_toggle("document-edit-symbolic", "HTML source (Ctrl+Shift+H)"),
+        link_btn: style_button("insert-link-symbolic", &tr!("Insert link (Ctrl+K)")),
+        insert_image_btn: style_button("insert-image-symbolic", &tr!("Insert image")),
+        table_btn: style_button("x-office-spreadsheet-symbolic", &tr!("Insert table")),
+        hr_btn: style_button("list-remove-symbolic", &tr!("Horizontal rule")),
+        code_btn: style_button("insert-text-symbolic", &tr!("Inline code")),
+        clear_btn: style_button("edit-clear-symbolic", &tr!("Clear formatting")),
+        source_btn: style_toggle("document-edit-symbolic", &tr!("HTML source (Ctrl+Shift+H)")),
     }
 }
 
@@ -701,20 +705,21 @@ pub fn build_compose_toolbar(
         .build();
     // AdwWrapBox bindings omit Accessible; the GtkWidget parent implements it.
     root.upcast_ref::<gtk::Widget>()
-        .update_property(&[gtk::accessible::Property::Label("Formatting toolbar")]);
+        .update_property(&[gtk::accessible::Property::Label(&tr!("Formatting toolbar"))]);
 
     let handles = build_html_format_handles();
     handles.source_btn.set_visible(false);
 
-    let attach_btn = style_button("mail-attachment-symbolic", "Attach files");
+    let attach_btn = style_button("mail-attachment-symbolic", &tr!("Attach files"));
     let tool_buttons: Vec<gtk::Button> = tools
         .iter()
         .map(|tool| style_button(tool.icon_name, &tool.tooltip))
         .collect();
     let signature_sep = gtk::Separator::new(gtk::Orientation::Vertical);
-    let include_signature = style_toggle("user-info-symbolic", "Include signature");
+    let include_signature = style_toggle("user-info-symbolic", &tr!("Include signature"));
     include_signature.set_active(true);
-    include_signature.update_property(&[gtk::accessible::Property::Label("Include signature")]);
+    include_signature
+        .update_property(&[gtk::accessible::Property::Label(&tr!("Include signature"))]);
 
     let snippets_popover = build_snippets_popover(
         initial_snippets,
@@ -724,19 +729,19 @@ pub fn build_compose_toolbar(
     let snippets_btn = snippets_popover.button;
     let snippets_refresh = Rc::new(RefCell::new(Some(snippets_popover.refresh)));
 
-    let md_quote_btn = md_button("format-indent-more-symbolic", "Quote");
-    let md_bullet_btn = md_button("view-list-symbolic", "Bulleted list");
-    let md_number_btn = md_button("view-list-ordered-symbolic", "Numbered list");
-    let md_code_btn = md_button("insert-text-symbolic", "Inline code");
+    let md_quote_btn = md_button("format-indent-more-symbolic", &tr!("Quote"));
+    let md_bullet_btn = md_button("view-list-symbolic", &tr!("Bulleted list"));
+    let md_number_btn = md_button("view-list-ordered-symbolic", &tr!("Numbered list"));
+    let md_code_btn = md_button("insert-text-symbolic", &tr!("Inline code"));
 
     let source_btn = handles.source_btn.clone();
-    let preview_btn = style_toggle("view-reveal-symbolic", "Preview (Ctrl+Shift+P)");
+    let preview_btn = style_toggle("view-reveal-symbolic", &tr!("Preview (Ctrl+Shift+P)"));
     preview_btn.set_visible(false);
 
-    let format_model = gtk::StringList::new(&["Plain text", "HTML", "Markdown"]);
+    let format_model = gtk::StringList::new(&[trs!("Plain text"), "HTML", trs!("Markdown")]);
     let format_dropdown = gtk::DropDown::builder()
         .model(&format_model)
-        .tooltip_text("Message format")
+        .tooltip_text(tr!("Message format"))
         .can_focus(false)
         .build();
     format_dropdown.set_selected(settings::compose_format().dropdown_index());
@@ -1001,14 +1006,14 @@ pub fn build_compose_toolbar(
 
 fn build_heading_menu_button() -> gtk::MenuButton {
     let menu = gtk::gio::Menu::new();
-    menu.append(Some("Paragraph"), Some("heading.p"));
-    menu.append(Some("Heading 1"), Some("heading.h1"));
-    menu.append(Some("Heading 2"), Some("heading.h2"));
-    menu.append(Some("Heading 3"), Some("heading.h3"));
+    menu.append(Some(&tr!("Paragraph")), Some("heading.p"));
+    menu.append(Some(&tr!("Heading 1")), Some("heading.h1"));
+    menu.append(Some(&tr!("Heading 2")), Some("heading.h2"));
+    menu.append(Some(&tr!("Heading 3")), Some("heading.h3"));
 
     gtk::MenuButton::builder()
         .icon_name("format-text-rich-symbolic")
-        .tooltip_text("Heading")
+        .tooltip_text(tr!("Heading"))
         .css_classes(["flat"])
         .can_focus(false)
         .focus_on_click(false)
@@ -1033,20 +1038,20 @@ fn wire_heading_actions(heading_btn: &gtk::MenuButton, html_editor: Rc<ComposeHt
 
 fn build_line_spacing_button() -> gtk::MenuButton {
     let menu = gtk::gio::Menu::new();
-    menu.append(Some("Single"), Some("linespacing.single"));
+    menu.append(Some(&tr!("Single")), Some("linespacing.single"));
     menu.append(Some("1.15"), Some("linespacing.one"));
     menu.append(Some("1.5"), Some("linespacing.onehalf"));
-    menu.append(Some("Double"), Some("linespacing.double"));
+    menu.append(Some(&tr!("Double")), Some("linespacing.double"));
 
     let btn = gtk::MenuButton::builder()
         .label("1.5")
-        .tooltip_text("Line spacing")
+        .tooltip_text(tr!("Line spacing"))
         .css_classes(["flat", "alcedo-compose-line-spacing"])
         .can_focus(false)
         .focus_on_click(false)
         .menu_model(&menu)
         .build();
-    btn.update_property(&[gtk::accessible::Property::Label("Line spacing")]);
+    btn.update_property(&[gtk::accessible::Property::Label(&tr!("Line spacing"))]);
 
     btn
 }
@@ -1305,11 +1310,11 @@ fn prompt_link_url(parent: &gtk::TextView, on_insert: impl Fn(String) + 'static)
         .activates_default(true)
         .build();
     let dialog = adw::AlertDialog::builder()
-        .heading("Insert link")
+        .heading(tr!("Insert link"))
         .extra_child(&entry)
         .build();
-    dialog.add_response("cancel", "Cancel");
-    dialog.add_response("insert", "Insert");
+    dialog.add_response("cancel", &tr!("Cancel"));
+    dialog.add_response("insert", &tr!("Insert"));
     dialog.set_response_appearance("insert", adw::ResponseAppearance::Suggested);
     dialog.set_default_response(Some("insert"));
     dialog.set_close_response("cancel");
@@ -1355,15 +1360,15 @@ fn prompt_insert_table(parent: &gtk::TextView, on_insert: impl Fn(String) + 'sta
     let cols = gtk::SpinButton::with_range(1.0, 8.0, 1.0);
     cols.set_value(3.0);
     let header = gtk::CheckButton::builder()
-        .label("Header row")
+        .label(tr!("Header row"))
         .active(true)
         .build();
 
     let rows_box = gtk::Box::new(gtk::Orientation::Horizontal, 8);
-    rows_box.append(&gtk::Label::new(Some("Rows")));
+    rows_box.append(&gtk::Label::new(Some(&tr!("Rows"))));
     rows_box.append(&rows);
     let cols_box = gtk::Box::new(gtk::Orientation::Horizontal, 8);
-    cols_box.append(&gtk::Label::new(Some("Columns")));
+    cols_box.append(&gtk::Label::new(Some(&tr!("Columns"))));
     cols_box.append(&cols);
 
     let content = gtk::Box::new(gtk::Orientation::Vertical, 12);
@@ -1372,11 +1377,11 @@ fn prompt_insert_table(parent: &gtk::TextView, on_insert: impl Fn(String) + 'sta
     content.append(&header);
 
     let dialog = adw::AlertDialog::builder()
-        .heading("Insert table")
+        .heading(tr!("Insert table"))
         .extra_child(&content)
         .build();
-    dialog.add_response("cancel", "Cancel");
-    dialog.add_response("insert", "Insert");
+    dialog.add_response("cancel", &tr!("Cancel"));
+    dialog.add_response("insert", &tr!("Insert"));
     dialog.set_response_appearance("insert", adw::ResponseAppearance::Suggested);
     dialog.set_default_response(Some("insert"));
     dialog.set_close_response("cancel");
@@ -1404,15 +1409,15 @@ fn prompt_insert_markdown_table(body_view: &gtk::TextView) {
     let cols = gtk::SpinButton::with_range(1.0, 8.0, 1.0);
     cols.set_value(3.0);
     let header = gtk::CheckButton::builder()
-        .label("Header row")
+        .label(tr!("Header row"))
         .active(true)
         .build();
 
     let rows_box = gtk::Box::new(gtk::Orientation::Horizontal, 8);
-    rows_box.append(&gtk::Label::new(Some("Rows")));
+    rows_box.append(&gtk::Label::new(Some(&tr!("Rows"))));
     rows_box.append(&rows);
     let cols_box = gtk::Box::new(gtk::Orientation::Horizontal, 8);
-    cols_box.append(&gtk::Label::new(Some("Columns")));
+    cols_box.append(&gtk::Label::new(Some(&tr!("Columns"))));
     cols_box.append(&cols);
 
     let content = gtk::Box::new(gtk::Orientation::Vertical, 12);
@@ -1421,11 +1426,11 @@ fn prompt_insert_markdown_table(body_view: &gtk::TextView) {
     content.append(&header);
 
     let dialog = adw::AlertDialog::builder()
-        .heading("Insert table")
+        .heading(tr!("Insert table"))
         .extra_child(&content)
         .build();
-    dialog.add_response("cancel", "Cancel");
-    dialog.add_response("insert", "Insert");
+    dialog.add_response("cancel", &tr!("Cancel"));
+    dialog.add_response("insert", &tr!("Insert"));
     dialog.set_response_appearance("insert", adw::ResponseAppearance::Suggested);
     dialog.set_default_response(Some("insert"));
     dialog.set_close_response("cancel");

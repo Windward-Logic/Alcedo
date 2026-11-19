@@ -1,5 +1,6 @@
 //! Compose To/Cc/Bcc recipient chips with autocomplete.
 
+use alcedo_i18n::{n_, ntr, tr, trf, trm, trs};
 use std::cell::{Cell, RefCell};
 use std::cmp::Ordering;
 use std::collections::HashSet;
@@ -20,7 +21,7 @@ use crate::recipient_picker::{present_recipient_picker, sent_person_matches};
 use crate::search_autocomplete::highlight_query;
 
 const MAX_AUTOCOMPLETE: usize = 8;
-const RECIPIENT_HINT: &str = "Name or email";
+const RECIPIENT_HINT: &str = n_!("Name or email");
 /// Long enough to read a name or local-part; wrap instead of shrinking further.
 const CHIP_MAX_CHARS: i32 = 20;
 
@@ -149,7 +150,7 @@ impl RecipientField {
             .has_frame(false)
             .valign(gtk::Align::Center)
             .width_chars(8)
-            .placeholder_text(RECIPIENT_HINT)
+            .placeholder_text(trm!(RECIPIENT_HINT))
             .css_classes(["alcedo-recipient-entry"])
             .build();
 
@@ -192,7 +193,7 @@ impl RecipientField {
 
         let picker_btn = gtk::Button::builder()
             .icon_name("avatar-default-symbolic")
-            .tooltip_text("Choose recipients")
+            .tooltip_text(tr!("Choose recipients"))
             .valign(gtk::Align::Start)
             .css_classes(["flat", "alcedo-recipient-picker-btn"])
             .build();
@@ -536,7 +537,7 @@ impl RecipientField {
 
     fn sync_entry_hint(&self) {
         if self.tokens.borrow().is_empty() {
-            self.entry.set_placeholder_text(Some(RECIPIENT_HINT));
+            self.entry.set_placeholder_text(Some(trm!(RECIPIENT_HINT)));
         } else {
             self.entry.set_placeholder_text(None);
         }
@@ -693,11 +694,7 @@ impl RecipientField {
                 .css_classes(["alcedo-autocomplete-label"])
                 .build();
             if let AutocompleteItem::Group { members, .. } = item {
-                let tooltip = if *members == 1 {
-                    "1 member".to_string()
-                } else {
-                    format!("{members} members")
-                };
+                let tooltip = ntr!("{n} member", "{n} members", *members);
                 label.set_tooltip_text(Some(&tooltip));
             }
             box_.append(&label);
@@ -857,9 +854,14 @@ fn build_chip(
                 .map(|g| g.member_ids.len())
                 .unwrap_or(0);
             let tooltip = if members == 1 {
-                format!("{name} — 1 member — click to expand")
+                trf!("{name} — 1 member — click to expand", name = name)
             } else {
-                format!("{name} — {members} members — click to expand")
+                ntr!(
+                    "{name} — {n} member — click to expand",
+                    "{name} — {n} members — click to expand",
+                    members,
+                    name = name
+                )
             };
             (name.clone(), Some(tooltip), true, None)
         }
@@ -893,9 +895,9 @@ fn build_chip(
     crate::a11y::set_label(
         &name_btn,
         &if is_group {
-            format!("{label}, group, press Enter to expand")
+            trf!("{label}, group, press Enter to expand", label = label)
         } else {
-            format!("{label}, recipient")
+            trf!("{label}, recipient", label = label)
         },
     );
 
@@ -944,7 +946,7 @@ fn build_chip(
         .valign(gtk::Align::Center)
         .css_classes(["flat", "circular", "alcedo-recipient-chip-remove"])
         .build();
-    crate::a11y::label_icon_control(&close_btn, &format!("Remove {label}"));
+    crate::a11y::label_icon_control(&close_btn, &trf!("Remove {recipient}", recipient = label));
     let remove_chip: Rc<dyn Fn()> = {
         let tokens = tokens.clone();
         let field = field.clone();
@@ -1056,7 +1058,7 @@ fn expand_group_chip(
         return;
     };
     if group.member_ids.is_empty() {
-        show_composer_toast(toast_host, "This group has no members");
+        show_composer_toast(toast_host, &tr!("This group has no members"));
         return;
     }
 
@@ -1204,7 +1206,7 @@ fn commit_text(
             continue;
         }
         let Some(addr) = parse_address_token(part) else {
-            return Err("Invalid address");
+            return Err(trs!("Invalid address"));
         };
         insert_person_token(tokens, &addr.email, addr.name.as_deref());
     }

@@ -2,6 +2,7 @@
 //!
 //! Accent color stays in Preferences → Appearance.
 
+use alcedo_i18n::tr;
 use relm4::adw;
 use relm4::adw::prelude::*;
 
@@ -15,13 +16,23 @@ pub fn build_scheme_toggle() -> adw::ToggleGroup {
     scheme_group.add(
         adw::Toggle::builder()
             .name("system")
-            .label("System")
+            .label(tr!("System"))
             .build(),
     );
-    scheme_group.add(adw::Toggle::builder().name("light").label("Light").build());
-    scheme_group.add(adw::Toggle::builder().name("dark").label("Dark").build());
+    scheme_group.add(
+        adw::Toggle::builder()
+            .name("light")
+            .label(tr!("Light"))
+            .build(),
+    );
+    scheme_group.add(
+        adw::Toggle::builder()
+            .name("dark")
+            .label(tr!("Dark"))
+            .build(),
+    );
     scheme_group.set_active(settings::color_scheme().dropdown_index());
-    a11y::set_label(&scheme_group, "Theme");
+    a11y::set_label(&scheme_group, &tr!("Theme"));
     scheme_group.connect_notify_local(Some("active"), |group, _| {
         let scheme = ColorScheme::from_dropdown_index(group.active());
         settings::set_color_scheme(scheme);

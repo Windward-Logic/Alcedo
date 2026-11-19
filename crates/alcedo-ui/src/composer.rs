@@ -1,5 +1,6 @@
 //! Compose view (P4 + P9 disclosure).
 
+use alcedo_i18n::{n_, tr, trf, trm, trs};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -39,8 +40,8 @@ use crate::recipient_row::{ContactBook, RecipientField};
 use crate::settings;
 use uuid::Uuid;
 
-const MDN_DISCLOSURE: &str = "Recipients may be notified when this is read.";
-const PIXEL_DISCLOSURE: &str = "A tracking image will be inserted.";
+const MDN_DISCLOSURE: &str = n_!("Recipients may be notified when this is read.");
+const PIXEL_DISCLOSURE: &str = n_!("A tracking image will be inserted.");
 
 /// Parsed `mailto:` launch parameters.
 #[derive(Clone, Debug, Default)]
@@ -414,12 +415,12 @@ fn build_composer_overflow(
     header.insert_action_group("composer", Some(&actions));
 
     let fields = gtk::gio::Menu::new();
-    fields.append(Some("Cc"), Some("composer.show-cc"));
-    fields.append(Some("Bcc"), Some("composer.show-bcc"));
+    fields.append(Some(&tr!("Cc")), Some("composer.show-cc"));
+    fields.append(Some(&tr!("Bcc")), Some("composer.show-bcc"));
     let menu = gtk::gio::Menu::new();
     menu.append_section(None, &fields);
-    menu.append(Some("Open in New Window"), Some(ACTION_POP_OUT));
-    let help_item = gtk::gio::MenuItem::new(Some("Help"), None);
+    menu.append(Some(&tr!("Open in New Window")), Some(ACTION_POP_OUT));
+    let help_item = gtk::gio::MenuItem::new(Some(&tr!("Help")), None);
     help_item.set_action_and_target_value(
         Some(crate::menu::ACTION_HELP_TOPIC),
         Some(&TOPIC_COMPOSE.to_variant()),
@@ -433,7 +434,7 @@ fn build_composer_overflow(
         .valign(gtk::Align::Center)
         .visible(false)
         .build();
-    crate::a11y::name_icon_control(&button, "Compose Options", "Compose Options");
+    crate::a11y::name_icon_control(&button, &tr!("Compose Options"), &tr!("Compose Options"));
     button
 }
 
@@ -490,15 +491,15 @@ fn build_send_chrome(
         .height_request(16)
         .visible(false)
         .build();
-    crate::a11y::set_label(&send_spinner, "Sending");
-    let send_label = gtk::Label::builder().label("Send").build();
+    crate::a11y::set_label(&send_spinner, &tr!("Sending"));
+    let send_label = gtk::Label::builder().label(tr!("Send")).build();
     let inner = gtk::Box::new(gtk::Orientation::Horizontal, 6);
     inner.append(&send_icon);
     inner.append(&send_spinner);
     inner.append(&send_label);
 
     let tooltip = commands::tooltip_with_shortcut(
-        "Send",
+        &tr!("Send"),
         Some(&commands::format_accel_for_display(SEND_ACCEL)),
     );
     // An extension may add a menu of other ways to send.
@@ -530,7 +531,7 @@ fn build_send_chrome(
     };
     send_button.set_valign(gtk::Align::Center);
     // The label hides on narrow windows; keep the accessible name.
-    crate::a11y::set_label(&send_button, "Send");
+    crate::a11y::set_label(&send_button, &tr!("Send"));
 
     let chrome = ComposeSendChrome {
         send_button: send_button.clone(),
@@ -547,11 +548,11 @@ pub fn set_composer_sending(widgets: &ComposerWidgets, chrome: &ComposeSendChrom
     if sending {
         chrome.send_icon.set_visible(false);
         chrome.send_spinner.set_visible(true);
-        chrome.send_label.set_label("Sending…");
+        chrome.send_label.set_label(&tr!("Sending…"));
     } else {
         chrome.send_spinner.set_visible(false);
         chrome.send_icon.set_visible(true);
-        chrome.send_label.set_label("Send");
+        chrome.send_label.set_label(&tr!("Send"));
     }
     set_composer_editable(widgets, !sending);
 }
@@ -604,7 +605,7 @@ pub fn build_composer_page(
 ) -> ComposerPage {
     let form = build_composer_form(book, sent, runtime, hooks);
 
-    form.widgets.header_title.set_title("Compose");
+    form.widgets.header_title.set_title(&tr!("Compose"));
     let header = adw::HeaderBar::builder()
         .title_widget(&form.widgets.header_title)
         .build();
@@ -613,7 +614,7 @@ pub fn build_composer_page(
     header.set_show_start_title_buttons(false);
     header.set_show_end_title_buttons(false);
 
-    let back_btn = composer_icon_button("go-previous-symbolic", "Back", "Back (Esc)");
+    let back_btn = composer_icon_button("go-previous-symbolic", &tr!("Back"), &tr!("Back (Esc)"));
     back_btn.connect_clicked(move |_| on_cancel());
     header.pack_start(&back_btn);
 
@@ -623,8 +624,8 @@ pub fn build_composer_page(
     let overflow_btn = build_composer_overflow(&header, &form.widgets, on_pop_out);
     let pop_out_btn = composer_icon_button(
         "window-new-symbolic",
-        "Open in New Window",
-        "Open in New Window",
+        &tr!("Open in New Window"),
+        &tr!("Open in New Window"),
     );
     pop_out_btn.set_action_name(Some(ACTION_POP_OUT));
     header.pack_end(&pop_out_btn);
@@ -820,13 +821,13 @@ fn build_account_field() -> (gtk::Box, gtk::DropDown) {
     let dropdown = gtk::DropDown::builder()
         .model(&model)
         .hexpand(true)
-        .tooltip_text("Sending account")
+        .tooltip_text(tr!("Sending account"))
         .css_classes(["alcedo-composer-from-dropdown"])
         .build();
-    dropdown.update_property(&[gtk::accessible::Property::Label("Account")]);
+    dropdown.update_property(&[gtk::accessible::Property::Label(&tr!("Account"))]);
 
     let label = gtk::Label::builder()
-        .label("Account")
+        .label(tr!("Account"))
         .xalign(0.0)
         .valign(gtk::Align::Center)
         .css_classes(["alcedo-recipient-label"])
@@ -855,17 +856,17 @@ fn build_from_field() -> (
     let entry = gtk::Entry::builder()
         .hexpand(true)
         .has_frame(false)
-        .tooltip_text("From address")
+        .tooltip_text(tr!("From address"))
         .css_classes(["alcedo-composer-from-entry"])
         .build();
-    entry.update_property(&[gtk::accessible::Property::Label("From")]);
+    entry.update_property(&[gtk::accessible::Property::Label(&tr!("From"))]);
 
     let listbox = gtk::ListBox::builder()
         .selection_mode(gtk::SelectionMode::Single)
         .can_focus(true)
         .css_classes(["alcedo-autocomplete"])
         .build();
-    listbox.update_property(&[gtk::accessible::Property::Label("From addresses")]);
+    listbox.update_property(&[gtk::accessible::Property::Label(&tr!("From addresses"))]);
 
     let popover = gtk::Popover::builder()
         .autohide(false)
@@ -879,15 +880,17 @@ fn build_from_field() -> (
 
     let from_button = gtk::Button::builder()
         .icon_name("pan-down-symbolic")
-        .tooltip_text("Choose a From address")
+        .tooltip_text(tr!("Choose a From address"))
         .valign(gtk::Align::Center)
         .css_classes(["flat", "alcedo-recipient-picker-btn"])
         .focus_on_click(false)
         .build();
-    from_button.update_property(&[gtk::accessible::Property::Label("Choose a From address")]);
+    from_button.update_property(&[gtk::accessible::Property::Label(&tr!(
+        "Choose a From address"
+    ))]);
 
     let label = gtk::Label::builder()
-        .label("From")
+        .label(tr!("From"))
         .xalign(0.0)
         .valign(gtk::Align::Center)
         .css_classes(["alcedo-recipient-label"])
@@ -1166,7 +1169,7 @@ fn select_from_popup_index(
 /// finished loading and the From field holds a usable address.
 pub(crate) fn ready_to_send(widgets: &ComposerWidgets) -> Result<(), &'static str> {
     if widgets.parts.is_reading_files() {
-        return Err("Still attaching files. Try again in a moment.");
+        return Err(trs!("Still attaching files. Try again in a moment."));
     }
     commit_composer_from(widgets)
 }
@@ -1180,7 +1183,7 @@ pub(crate) fn commit_composer_from(widgets: &ComposerWidgets) -> Result<(), &'st
     let account = accounts
         .iter()
         .find(|account| account.id == account_id)
-        .ok_or("Email is invalid")?;
+        .ok_or_else(|| trs!("Email is invalid"))?;
     let identities_map = widgets.composer_identities.borrow();
     let identities = identities_map
         .get(&account_id)
@@ -1212,7 +1215,7 @@ fn build_subject_field() -> (gtk::Box, gtk::Entry) {
         .build();
 
     let label = gtk::Label::builder()
-        .label("Subject")
+        .label(tr!("Subject"))
         .xalign(0.0)
         .valign(gtk::Align::Center)
         .css_classes(["alcedo-recipient-label"])
@@ -1239,7 +1242,7 @@ fn build_composer_form(
 ) -> ComposerForm {
     let sending_banner = adw::Banner::builder()
         .use_markup(false)
-        .title("Sending message…")
+        .title(tr!("Sending message…"))
         .revealed(false)
         .build();
     sending_banner.add_css_class("alcedo-composer-sending-banner");
@@ -1253,14 +1256,18 @@ fn build_composer_form(
 
     let sign_toggle = gtk::ToggleButton::builder()
         .icon_name("application-certificate-symbolic")
-        .tooltip_text("Sign this message")
+        .tooltip_text(tr!("Sign this message"))
         .build();
-    sign_toggle.update_property(&[gtk::accessible::Property::Label("Sign outgoing message")]);
+    sign_toggle.update_property(&[gtk::accessible::Property::Label(&tr!(
+        "Sign outgoing message"
+    ))]);
     let encrypt_toggle = gtk::ToggleButton::builder()
         .icon_name("channel-secure-symbolic")
-        .tooltip_text("Encrypt this message")
+        .tooltip_text(tr!("Encrypt this message"))
         .build();
-    encrypt_toggle.update_property(&[gtk::accessible::Property::Label("Encrypt outgoing message")]);
+    encrypt_toggle.update_property(&[gtk::accessible::Property::Label(&tr!(
+        "Encrypt outgoing message"
+    ))]);
     let pgp_explanation = gtk::Label::builder()
         .xalign(0.0)
         .hexpand(true)
@@ -1308,9 +1315,11 @@ fn build_composer_form(
     toast_host_box.append(&toast_anchor);
     let toast_widget: gtk::Widget = toast_anchor.upcast();
 
-    let to_field = RecipientField::new("To", book.clone(), sent.clone(), toast_widget.clone());
-    let cc_field = RecipientField::new("Cc", book.clone(), sent.clone(), toast_widget.clone());
-    let bcc_field = RecipientField::new("Bcc", book, sent, toast_widget.clone());
+    let to_field =
+        RecipientField::new(&tr!("To"), book.clone(), sent.clone(), toast_widget.clone());
+    let cc_field =
+        RecipientField::new(&tr!("Cc"), book.clone(), sent.clone(), toast_widget.clone());
+    let bcc_field = RecipientField::new(&tr!("Bcc"), book, sent, toast_widget.clone());
 
     let cc_revealer = gtk::Revealer::builder()
         .transition_type(gtk::RevealerTransitionType::SlideDown)
@@ -1325,8 +1334,8 @@ fn build_composer_form(
         .child(bcc_field.widget())
         .build();
 
-    let cc_toggle = cc_bcc_toggle("Cc", "Show Cc");
-    let bcc_toggle = cc_bcc_toggle("Bcc", "Show Bcc");
+    let cc_toggle = cc_bcc_toggle(&tr!("Cc"), &tr!("Show Cc"));
+    let bcc_toggle = cc_bcc_toggle(&tr!("Bcc"), &tr!("Show Bcc"));
     let cc_bcc_syncing = Rc::new(Cell::new(false));
     let (account_field, account_dropdown) = build_account_field();
     let account_switchable = Rc::new(Cell::new(false));
@@ -1348,7 +1357,7 @@ fn build_composer_form(
         .wrap_mode(gtk::WrapMode::Word)
         .build();
     apply_compose_plain_spacing(&body_view, settings::editor_font_size());
-    body_view.update_property(&[gtk::accessible::Property::Label("Message body")]);
+    body_view.update_property(&[gtk::accessible::Property::Label(&tr!("Message body"))]);
 
     let html_editor = Rc::new(ComposeHtmlEditor::new(&body_view));
     html_editor.set_on_input(hooks.on_compose_changed.clone());
@@ -1451,7 +1460,7 @@ fn build_composer_form(
                         if format == ComposeFormat::Html {
                             if !insert_html_inline_at_cursor(&html_editor, &inline) {
                                 parts.inlines.borrow_mut().remove(&inline.content_id);
-                                show_composer_toast(&toast_widget, "Could not read file");
+                                show_composer_toast(&toast_widget, &tr!("Could not read file"));
                             } else if let Some(warning) =
                                 inline_image_client_warning(&inline.filename)
                             {
@@ -1867,7 +1876,7 @@ fn build_composer_form(
 
     let draft_slot = Rc::new(Cell::new(DraftSlot::INLINE));
     let autosave_suspended = Rc::new(Cell::new(false));
-    let header_title = adw::WindowTitle::new("Compose", "");
+    let header_title = adw::WindowTitle::new(&tr!("Compose"), "");
     header_title.add_css_class("alcedo-composer-title");
     let widgets_for_cc = ComposerWidgets {
         account_dropdown: account_dropdown.clone(),
@@ -1928,9 +1937,9 @@ fn build_composer_form(
             let active = btn.is_active();
             widgets.cc_revealer.set_reveal_child(active);
             btn.set_tooltip_text(if active {
-                Some("Hide Cc")
+                Some(trs!("Hide Cc"))
             } else {
-                Some("Show Cc")
+                Some(trs!("Show Cc"))
             });
             if active {
                 widgets.cc_field.focus_entry();
@@ -1950,9 +1959,9 @@ fn build_composer_form(
             let active = btn.is_active();
             widgets.bcc_revealer.set_reveal_child(active);
             btn.set_tooltip_text(if active {
-                Some("Hide Bcc")
+                Some(trs!("Hide Bcc"))
             } else {
-                Some("Show Bcc")
+                Some(trs!("Show Bcc"))
             });
             if active {
                 widgets.bcc_field.focus_entry();
@@ -2063,16 +2072,17 @@ pub fn refresh_pgp_disclosure(widgets: &ComposerWidgets, state: Option<&PgpAccou
             widgets.encrypt_toggle.set_active(false);
             widgets
                 .pgp_explanation
-                .set_label("Add an OpenPGP key to encrypt messages.");
+                .set_label(&tr!("Add an OpenPGP key to encrypt messages."));
             widgets.pgp_explanation.set_visible(true);
         }
         EncryptReadiness::Missing(emails) => {
             widgets.encrypt_toggle.set_sensitive(false);
             widgets.encrypt_toggle.set_active(false);
             let list = emails.join(", ");
-            widgets
-                .pgp_explanation
-                .set_label(&format!("Missing public keys for: {list}"));
+            widgets.pgp_explanation.set_label(&trf!(
+                "Missing public keys for: {recipients}",
+                recipients = list
+            ));
             widgets.pgp_explanation.set_visible(true);
         }
     }
@@ -2083,9 +2093,9 @@ pub fn refresh_disclosure_banner(banner: &adw::Banner) {
     let pixel_on = settings::insert_tracking_pixel();
 
     let title = match (mdn_on, pixel_on) {
-        (true, true) => format!("{MDN_DISCLOSURE} {PIXEL_DISCLOSURE}"),
-        (true, false) => MDN_DISCLOSURE.to_string(),
-        (false, true) => PIXEL_DISCLOSURE.to_string(),
+        (true, true) => format!("{} {}", trm!(MDN_DISCLOSURE), trm!(PIXEL_DISCLOSURE)),
+        (true, false) => trm!(MDN_DISCLOSURE).to_string(),
+        (false, true) => trm!(PIXEL_DISCLOSURE).to_string(),
         (false, false) => String::new(),
     };
 
@@ -2424,18 +2434,18 @@ fn sync_cc_bcc_visibility(widgets: &ComposerWidgets) {
     widgets.cc_toggle.set_active(cc_active);
     widgets.cc_revealer.set_reveal_child(cc_active);
     widgets.cc_toggle.set_tooltip_text(if cc_active {
-        Some("Hide Cc")
+        Some(trs!("Hide Cc"))
     } else {
-        Some("Show Cc")
+        Some(trs!("Show Cc"))
     });
 
     let bcc_active = widgets.bcc_field.has_typed_or_chips();
     widgets.bcc_toggle.set_active(bcc_active);
     widgets.bcc_revealer.set_reveal_child(bcc_active);
     widgets.bcc_toggle.set_tooltip_text(if bcc_active {
-        Some("Hide Bcc")
+        Some(trs!("Hide Bcc"))
     } else {
-        Some("Show Bcc")
+        Some(trs!("Show Bcc"))
     });
 
     widgets.cc_bcc_syncing.set(false);
@@ -2477,15 +2487,15 @@ pub fn confirm_discard_composer(
         .as_ref()
         .is_some_and(imap_draft_has_server_uid);
     let dialog = adw::AlertDialog::builder()
-        .heading("Discard draft?")
+        .heading(tr!("Discard draft?"))
         .body(if has_server_draft {
-            "This will also delete the copy saved in Drafts on the server."
+            trs!("This will also delete the copy saved in Drafts on the server.")
         } else {
-            "Your message has not been sent."
+            trs!("Your message has not been sent.")
         })
         .build();
-    dialog.add_response("cancel", "Keep editing");
-    dialog.add_response("discard", "Discard");
+    dialog.add_response("cancel", &tr!("Keep editing"));
+    dialog.add_response("discard", &tr!("Discard"));
     dialog.set_response_appearance("discard", adw::ResponseAppearance::Destructive);
     dialog.set_default_response(Some("cancel"));
     dialog.set_close_response("cancel");
