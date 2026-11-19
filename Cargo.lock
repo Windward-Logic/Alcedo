@@ -31,7 +31,7 @@ dependencies = [
 
 [[package]]
 name = "alcedo"
-version = "1.0.8"
+version = "1.0.9"
 dependencies = [
  "alcedo-core",
  "alcedo-html",
@@ -53,7 +53,7 @@ dependencies = [
 
 [[package]]
 name = "alcedo-core"
-version = "1.0.8"
+version = "1.0.9"
 dependencies = [
  "alcedo-i18n",
  "chrono",
@@ -73,7 +73,7 @@ dependencies = [
 
 [[package]]
 name = "alcedo-html"
-version = "1.0.8"
+version = "1.0.9"
 dependencies = [
  "alcedo-core",
  "ammonia",
@@ -88,7 +88,7 @@ dependencies = [
 
 [[package]]
 name = "alcedo-i18n"
-version = "1.0.8"
+version = "1.0.9"
 dependencies = [
  "tempfile",
  "thiserror 2.0.20",
@@ -96,7 +96,7 @@ dependencies = [
 
 [[package]]
 name = "alcedo-imap"
-version = "1.0.8"
+version = "1.0.9"
 dependencies = [
  "alcedo-core",
  "alcedo-html",
@@ -118,7 +118,7 @@ dependencies = [
 
 [[package]]
 name = "alcedo-oauth"
-version = "1.0.8"
+version = "1.0.9"
 dependencies = [
  "alcedo-core",
  "alcedo-i18n",
@@ -139,7 +139,7 @@ dependencies = [
 
 [[package]]
 name = "alcedo-pgp"
-version = "1.0.8"
+version = "1.0.9"
 dependencies = [
  "alcedo-core",
  "alcedo-pgp-api",
@@ -154,7 +154,7 @@ dependencies = [
 
 [[package]]
 name = "alcedo-pgp-api"
-version = "1.0.8"
+version = "1.0.9"
 dependencies = [
  "alcedo-core",
  "base64 0.22.1",
@@ -165,7 +165,7 @@ dependencies = [
 
 [[package]]
 name = "alcedo-pgp-ffi"
-version = "1.0.8"
+version = "1.0.9"
 dependencies = [
  "alcedo-core",
  "alcedo-pgp",
@@ -175,7 +175,7 @@ dependencies = [
 
 [[package]]
 name = "alcedo-pgp-shared"
-version = "1.0.8"
+version = "1.0.9"
 dependencies = [
  "alcedo-core",
  "alcedo-pgp",
@@ -188,7 +188,7 @@ dependencies = [
 
 [[package]]
 name = "alcedo-smtp"
-version = "1.0.8"
+version = "1.0.9"
 dependencies = [
  "alcedo-core",
  "alcedo-tls",
@@ -202,7 +202,7 @@ dependencies = [
 
 [[package]]
 name = "alcedo-store"
-version = "1.0.8"
+version = "1.0.9"
 dependencies = [
  "alcedo-core",
  "chrono",
@@ -221,7 +221,7 @@ dependencies = [
 
 [[package]]
 name = "alcedo-sync"
-version = "1.0.8"
+version = "1.0.9"
 dependencies = [
  "alcedo-core",
  "alcedo-html",
@@ -246,7 +246,7 @@ dependencies = [
 
 [[package]]
 name = "alcedo-tls"
-version = "1.0.8"
+version = "1.0.9"
 dependencies = [
  "rustls",
  "rustls-native-certs",
@@ -256,7 +256,7 @@ dependencies = [
 
 [[package]]
 name = "alcedo-ui"
-version = "1.0.8"
+version = "1.0.9"
 dependencies = [
  "alcedo-core",
  "alcedo-html",
@@ -283,7 +283,7 @@ dependencies = [
 
 [[package]]
 name = "alcedo-widgets"
-version = "1.0.8"
+version = "1.0.9"
 dependencies = [
  "alcedo-core",
  "gtk4",

@@ -1,3 +1,11 @@
+alcedo (1.0.9-1) resolute; urgency=medium
+
+  * Alcedo is now available in French, Spanish, German and Italian, matching
+    your desktop's language. English stays the default when no translation
+    is installed.
+
+ -- Windward Logic LLC <alcedo@windwardlogic.com>  Thu, 19 Nov 2026 12:40:00 +0000
+
 alcedo (1.0.8-1) resolute; urgency=medium
 
   * No changes to the free app. Released to keep Alcedo and Alcedo Pro on the
