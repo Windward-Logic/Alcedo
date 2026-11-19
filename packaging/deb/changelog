@@ -1,3 +1,10 @@
+alcedo (1.0.10-1) resolute; urgency=medium
+
+  * Reader: Reply and Forward keep their icons on compact layouts instead of
+    disappearing when the toolbar drops button labels.
+
+ -- Windward Logic LLC <alcedo@windwardlogic.com>  Thu, 19 Nov 2026 18:20:00 +0000
+
 alcedo (1.0.9-1) resolute; urgency=medium
 
   * Alcedo is now available in French, Spanish, German and Italian, matching
