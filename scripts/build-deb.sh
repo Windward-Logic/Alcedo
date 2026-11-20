@@ -74,7 +74,9 @@ mkdir -p "$CARGO_TARGET_DIR"
 [[ -O "$CARGO_TARGET_DIR" ]] || die "$CARGO_TARGET_DIR is not owned by $(id -un)"
 CARGO_TARGET_DIR="$(cd "$CARGO_TARGET_DIR" && pwd -P)"
 # rustc applies the last matching prefix; the target dir sits inside $ROOT by default.
-export RUSTFLAGS="--remap-path-prefix=$ROOT=/usr/src/alcedo-$VERSION --remap-path-prefix=${CARGO_HOME:-$HOME/.cargo}=/cargo --remap-path-prefix=$CARGO_TARGET_DIR=/target"
+# Keep the version out of these paths: RUSTFLAGS is part of cargo's cache key, so a
+# versioned path would rebuild every dependency on each release.
+export RUSTFLAGS="--remap-path-prefix=$ROOT=/usr/src/alcedo --remap-path-prefix=${CARGO_HOME:-$HOME/.cargo}=/cargo --remap-path-prefix=$CARGO_TARGET_DIR=/target"
 ensure_c_include_path
 
 echo "Building alcedo $VERSION (release, locked)…"
