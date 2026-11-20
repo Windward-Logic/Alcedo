@@ -13,7 +13,7 @@ impl MailModel {
                     return;
                 }
                 self.pending_virtual_sync = None;
-                self.leave_extension_views(ViewLeave::OtherList);
+                self.leave_extension_views(ViewLeave::OtherList, None);
                 self.mail_view = MailView::Folder(folder_id);
                 self.sync_column_layout();
                 if let Some(account_id) = self.folder(folder_id).and_then(|folder| {

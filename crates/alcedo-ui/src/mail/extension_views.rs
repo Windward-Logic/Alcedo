@@ -310,19 +310,22 @@ impl MailModel {
             .collect()
     }
 
-    /// Tell extensions the user is leaving their views.
-    pub(super) fn leave_extension_views(&mut self, leave: ViewLeave) {
+    /// Tell extensions the user is leaving their views. `opening` is the view
+    /// about to be shown, if any; it is not told it was left, since an
+    /// extension may have just primed it (see `views_to_notify`).
+    pub(super) fn leave_extension_views(
+        &mut self,
+        leave: ViewLeave,
+        opening: Option<ExtensionListId>,
+    ) {
         let current = match self.mail_view {
             MailView::Extension(id) => Some(id),
             _ => None,
         };
         for extension in crate::extension::registered() {
-            for spec in extension.mail_views() {
-                // A search only interrupts the view being shown.
-                if leave == ViewLeave::Search && current != Some(spec.id) {
-                    continue;
-                }
-                extension.mail_view_left(spec.id, leave, &self.ext_ctx);
+            let ids: Vec<_> = extension.mail_views().iter().map(|spec| spec.id).collect();
+            for id in views_to_notify(&ids, current, opening, leave) {
+                extension.mail_view_left(id, leave, &self.ext_ctx);
             }
         }
     }
@@ -341,7 +344,7 @@ impl MailModel {
         self.pending_folder_sync = None;
         self.pending_virtual_sync = None;
         if self.mail_view != MailView::Extension(id) {
-            self.leave_extension_views(ViewLeave::OtherList);
+            self.leave_extension_views(ViewLeave::OtherList, Some(id));
         }
         self.mail_view = MailView::Extension(id);
         self.sync_column_layout();
@@ -372,7 +375,7 @@ impl MailModel {
         self.pending_folder_sync = None;
         self.pending_virtual_sync = None;
         if self.mail_view != MailView::Extension(id) {
-            self.leave_extension_views(ViewLeave::OtherList);
+            self.leave_extension_views(ViewLeave::OtherList, Some(id));
         }
         self.pre_search_mail_view = None;
         self.mail_view = MailView::Extension(id);
@@ -440,5 +443,56 @@ impl MailModel {
         } else {
             self.view_toggle.remove_css_class("alcedo-sync-spinning");
         }
+    }
+}
+
+/// Which of an extension's views to tell "left". A search only interrupts the
+/// view being shown; the view being opened is never told it was left, or an
+/// extension that set up state before `show_view` would lose it.
+fn views_to_notify(
+    ids: &[ExtensionListId],
+    current: Option<ExtensionListId>,
+    opening: Option<ExtensionListId>,
+    leave: ViewLeave,
+) -> Vec<ExtensionListId> {
+    ids.iter()
+        .copied()
+        .filter(|id| Some(*id) != opening)
+        .filter(|id| leave != ViewLeave::Search || current == Some(*id))
+        .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const A: ExtensionListId = ExtensionListId(uuid::Uuid::from_u128(1));
+    const B: ExtensionListId = ExtensionListId(uuid::Uuid::from_u128(2));
+
+    #[test]
+    fn opening_view_is_not_told_it_was_left() {
+        let ids = [A, B];
+        assert_eq!(
+            views_to_notify(&ids, None, Some(A), ViewLeave::OtherList),
+            vec![B]
+        );
+    }
+
+    #[test]
+    fn other_list_notifies_every_view_when_nothing_is_opening() {
+        let ids = [A, B];
+        assert_eq!(
+            views_to_notify(&ids, None, None, ViewLeave::OtherList),
+            vec![A, B]
+        );
+    }
+
+    #[test]
+    fn search_only_interrupts_the_current_view() {
+        let ids = [A, B];
+        assert_eq!(
+            views_to_notify(&ids, Some(B), None, ViewLeave::Search),
+            vec![B]
+        );
     }
 }

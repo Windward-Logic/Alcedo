@@ -31,7 +31,7 @@ impl MailModel {
         self.clear_search();
         self.pending_account_folder_select = None;
         self.pending_folder_sync = None;
-        self.leave_extension_views(ViewLeave::OtherList);
+        self.leave_extension_views(ViewLeave::OtherList, None);
         let already = self.mail_view == view;
         self.mail_view = view;
         self.sync_column_layout();

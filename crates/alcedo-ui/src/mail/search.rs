@@ -46,7 +46,7 @@ impl MailModel {
                         self.pre_search_mail_view = Some(self.mail_view);
                         self.search_scope = SearchScopeKind::Current;
                         if leaving_extension_for_search {
-                            self.leave_extension_views(ViewLeave::Search);
+                            self.leave_extension_views(ViewLeave::Search, None);
                         }
                     }
                     self.mail_view = MailView::Search;
