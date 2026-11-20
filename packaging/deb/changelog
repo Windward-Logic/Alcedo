@@ -1,3 +1,10 @@
+alcedo (1.0.11-1) resolute; urgency=medium
+
+  * Fixed opening a view from an extension, such as Find all messages for an
+    address, which could land on Everything instead of the results.
+
+ -- Windward Logic LLC <alcedo@windwardlogic.com>  Fri, 20 Nov 2026 18:00:00 +0000
+
 alcedo (1.0.10-1) resolute; urgency=medium
 
   * Reader: Reply and Forward keep their icons on compact layouts instead of
