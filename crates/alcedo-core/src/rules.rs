@@ -4,7 +4,7 @@ use alcedo_i18n::{tr, trs};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-use crate::account::Folder;
+use crate::account::{Folder, SpecialUse};
 use crate::envelope::{Address, Envelope};
 use crate::ids::{AccountId, FolderId, MessageId, RuleId};
 
@@ -422,6 +422,26 @@ pub fn rule_has_server_capable_conditions(rule: &MessageRule) -> bool {
         .any(|c| c.field == RuleField::HasAttachment)
 }
 
+/// Whether `rule` can run on the mail server with the account's `folders`: no
+/// condition the server cannot test, and every folder an action names exists
+/// (Trash for "Move to Trash"). The default for
+/// `alcedo_sync::server_rules::ServerRulesBackend::can_publish`.
+pub fn rule_can_run_on_server(rule: &MessageRule, folders: &[Folder]) -> bool {
+    rule_has_server_capable_conditions(rule)
+        && rule.actions.iter().all(|action| match action {
+            RuleAction::MoveToFolder(id) | RuleAction::CopyToFolder(id) => {
+                folders.iter().any(|folder| folder.id == *id)
+            }
+            RuleAction::MoveToTrash => folders
+                .iter()
+                .any(|folder| folder.special == SpecialUse::Trash),
+            RuleAction::MarkRead
+            | RuleAction::MarkUnread
+            | RuleAction::Star
+            | RuleAction::Unstar => true,
+        })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -743,5 +763,78 @@ mod tests {
         let json = serde_json::to_string(&id).expect("serialize");
         let back: RuleId = serde_json::from_str(&json).expect("deserialize");
         assert_eq!(id, back);
+    }
+    fn folder(id: i64, special: SpecialUse) -> Folder {
+        Folder {
+            id: FolderId(id),
+            account_id: sample_account(),
+            imap_name: format!("Folder {id}"),
+            delimiter: "/".to_string(),
+            special,
+            selectable: true,
+            uidvalidity: None,
+            uidnext: None,
+            highest_modseq: None,
+            unread: 0,
+            total: 0,
+        }
+    }
+
+    fn from_contains(value: &str) -> Vec<RuleCondition> {
+        vec![RuleCondition {
+            field: RuleField::From,
+            op: RuleOp::Contains,
+            value: value.to_string(),
+        }]
+    }
+
+    #[test]
+    fn server_rule_needs_every_folder_its_actions_name() {
+        let folders = [folder(1, SpecialUse::Inbox), folder(2, SpecialUse::Other)];
+        let files_into_existing = sample_rule(
+            from_contains("news"),
+            vec![RuleAction::MoveToFolder(FolderId(2)), RuleAction::MarkRead],
+            RuleMatchMode::All,
+        );
+        assert!(rule_can_run_on_server(&files_into_existing, &folders));
+
+        let copies_into_missing = sample_rule(
+            from_contains("news"),
+            vec![RuleAction::CopyToFolder(FolderId(9))],
+            RuleMatchMode::All,
+        );
+        assert!(!rule_can_run_on_server(&copies_into_missing, &folders));
+    }
+
+    #[test]
+    fn server_rule_moving_to_trash_needs_a_trash_folder() {
+        let rule = sample_rule(
+            from_contains("spam"),
+            vec![RuleAction::MoveToTrash],
+            RuleMatchMode::All,
+        );
+        assert!(!rule_can_run_on_server(
+            &rule,
+            &[folder(1, SpecialUse::Inbox)]
+        ));
+        assert!(rule_can_run_on_server(
+            &rule,
+            &[folder(1, SpecialUse::Inbox), folder(3, SpecialUse::Trash)]
+        ));
+    }
+
+    #[test]
+    fn server_rule_cannot_test_for_attachments() {
+        let mut conditions = from_contains("news");
+        conditions.push(RuleCondition {
+            field: RuleField::HasAttachment,
+            op: RuleOp::Is,
+            value: String::new(),
+        });
+        let rule = sample_rule(conditions, vec![RuleAction::Star], RuleMatchMode::Any);
+        assert!(!rule_can_run_on_server(
+            &rule,
+            &[folder(1, SpecialUse::Inbox)]
+        ));
     }
 }

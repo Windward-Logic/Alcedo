@@ -3,13 +3,16 @@
 //! With no backend registered every rule runs in Alcedo as mail arrives. A
 //! backend can report that the server is ready, publish the rules it can run,
 //! and preview a server script Alcedo did not write. Rules the backend accepts
-//! are marked [`RuleExecution::Server`] and skipped by the client-side pass.
+//! ([`ServerRulesBackend::can_publish`]) are marked
+//! [`RuleExecution::Server`](alcedo_core::RuleExecution::Server) and skipped by
+//! the client-side pass.
 
 use std::future::Future;
 use std::pin::Pin;
 
 use alcedo_core::{
     Account, AuthMethod, Error, Folder, MessageRule, Result, ServerRulesPreview, ServerRulesStatus,
+    rule_can_run_on_server,
 };
 use alcedo_oauth::{SecretKind, get_secret};
 
@@ -73,6 +76,18 @@ pub trait ServerRulesBackend: Send + Sync + 'static {
         rules: &'a [MessageRule],
         folders: &'a [Folder],
     ) -> BoxFuture<'a, Result<()>>;
+
+    /// Whether `publish` puts `rule` on the server, given the account's
+    /// `folders`. The worker asks after each successful publish: a rule this
+    /// accepts is marked [`RuleExecution::Server`] and Alcedo no longer runs
+    /// it, so answer `true` only for rules `publish` really sends. The default
+    /// is [`rule_can_run_on_server`]; a backend with narrower support should
+    /// call it and add its own checks.
+    ///
+    /// [`RuleExecution::Server`]: alcedo_core::RuleExecution::Server
+    fn can_publish(&self, rule: &MessageRule, folders: &[Folder]) -> bool {
+        rule_can_run_on_server(rule, folders)
+    }
 
     /// Read the active server script named `name` (one Alcedo did not write)
     /// so the rules dialog can show what it does.

@@ -53,23 +53,22 @@ async fn probe_server_rules(account: &Account, server_rules: &mut ServerRulesSes
     server_rules.probed = true;
 }
 
-/// Mark each rule Server when the server is ready and the rule can run there.
+/// Mark each rule Server when `published_to` (the backend that just published
+/// the rules) says it put the rule on the server; with `None`, every rule runs
+/// in Alcedo.
 pub(super) async fn refresh_rule_executions(
     store: &StoreHandle,
     account_id: AccountId,
-    server_rules_status: &ServerRulesStatus,
+    published_to: Option<&dyn ServerRulesBackend>,
 ) -> Result<()> {
     let rules = store.list_rules(account_id).await?;
-    let folders = store.list_folders(account_id).await?;
-    let trash_exists = folders.iter().any(|f| f.special == SpecialUse::Trash);
+    let folders = match published_to {
+        Some(_) => store.list_folders(account_id).await?,
+        None => Vec::new(),
+    };
     for rule in rules {
-        let execution = match server_rules_status {
-            ServerRulesStatus::Ready
-                if rule_has_server_capable_conditions(&rule)
-                    && rule_actions_compileable(&rule.actions, &folders, trash_exists) =>
-            {
-                RuleExecution::Server
-            }
+        let execution = match published_to {
+            Some(backend) if backend.can_publish(&rule, &folders) => RuleExecution::Server,
             _ => RuleExecution::Client,
         };
         if rule.execution != execution {
@@ -77,20 +76,6 @@ pub(super) async fn refresh_rule_executions(
         }
     }
     Ok(())
-}
-
-pub(super) fn rule_actions_compileable(
-    actions: &[RuleAction],
-    folders: &[Folder],
-    trash_exists: bool,
-) -> bool {
-    actions.iter().all(|action| match action {
-        RuleAction::MoveToFolder(id) | RuleAction::CopyToFolder(id) => {
-            folders.iter().any(|f| f.id == *id)
-        }
-        RuleAction::MoveToTrash => trash_exists,
-        _ => true,
-    })
 }
 
 async fn publish_server_rules(
@@ -170,18 +155,18 @@ pub(super) async fn sync_server_rules(
     let backend = match (&server_rules.status, &server_rules.backend) {
         (ServerRulesStatus::Ready, Some(backend)) => backend.clone(),
         _ => {
-            refresh_rule_executions(store, account.id, &server_rules.status).await?;
+            refresh_rule_executions(store, account.id, None).await?;
             return Ok(());
         }
     };
     match publish_server_rules(account, store, backend.as_ref()).await {
         Ok(()) => {
-            refresh_rule_executions(store, account.id, &ServerRulesStatus::Ready).await?;
+            refresh_rule_executions(store, account.id, Some(backend.as_ref())).await?;
         }
         Err(err) => {
             warn!(account = %account.email, error = %err, "failed to publish server rules");
             server_rules.status = ServerRulesStatus::Unavailable;
-            refresh_rule_executions(store, account.id, &ServerRulesStatus::Unavailable).await?;
+            refresh_rule_executions(store, account.id, None).await?;
         }
     }
     Ok(())
@@ -213,7 +198,7 @@ pub(super) async fn adopt_server_rules(
         ));
     };
     publish_server_rules(account, store, backend.as_ref()).await?;
-    refresh_rule_executions(store, account.id, &ServerRulesStatus::Ready).await?;
+    refresh_rule_executions(store, account.id, Some(backend.as_ref())).await?;
     server_rules.status = ServerRulesStatus::Ready;
     Ok(())
 }
@@ -407,7 +392,7 @@ pub(super) async fn run_message_rules(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use alcedo_core::{FolderId, MessageId, RulePlan};
+    use alcedo_core::{FolderId, MessageId, RuleAction, RulePlan};
 
     struct FixedBackend(ServerRulesStatus);
 
@@ -436,6 +421,170 @@ mod tests {
         ) -> crate::server_rules::BoxFuture<'a, Option<ServerRulesPreview>> {
             Box::pin(std::future::ready(None))
         }
+    }
+
+    /// Accepts what the default accepts, except rules with this name.
+    struct RefusesByName(&'static str);
+
+    impl ServerRulesBackend for RefusesByName {
+        fn probe<'a>(
+            &'a self,
+            account: &'a Account,
+        ) -> crate::server_rules::BoxFuture<'a, ServerRulesStatus> {
+            FixedBackend(ServerRulesStatus::Ready).probe(account)
+        }
+
+        fn publish<'a>(
+            &'a self,
+            _account: &'a Account,
+            _rules: &'a [MessageRule],
+            _folders: &'a [Folder],
+        ) -> crate::server_rules::BoxFuture<'a, Result<()>> {
+            Box::pin(std::future::ready(Ok(())))
+        }
+
+        fn preview<'a>(
+            &'a self,
+            _account: &'a Account,
+            _name: &'a str,
+            _folders: &'a [Folder],
+        ) -> crate::server_rules::BoxFuture<'a, Option<ServerRulesPreview>> {
+            Box::pin(std::future::ready(None))
+        }
+
+        fn can_publish(&self, rule: &MessageRule, folders: &[Folder]) -> bool {
+            rule.name != self.0 && alcedo_core::rule_can_run_on_server(rule, folders)
+        }
+    }
+
+    /// A store with Inbox and Newsletters (no Trash) and one rule per action.
+    struct RulesFixture {
+        _dir: tempfile::TempDir,
+        store: StoreHandle,
+        account: Account,
+    }
+
+    impl RulesFixture {
+        async fn new(rules: &[(&str, RuleAction)]) -> Self {
+            use super::super::test_support::{account_with_imap_host, folder_named};
+            let dir = tempfile::tempdir().expect("temp dir");
+            let store = StoreHandle::open_path(&dir.path().join("mail.db")).expect("store");
+            let account = account_with_imap_host("imap.example.com");
+            store.upsert_account(&account).await.expect("account");
+            let folders = store
+                .replace_folders(
+                    account.id,
+                    &[
+                        folder_named(0, SpecialUse::Inbox, "INBOX", true),
+                        folder_named(0, SpecialUse::Other, "Newsletters", true),
+                    ],
+                )
+                .await
+                .expect("folders");
+            let newsletters = folders[1].id;
+            for (position, (name, action)) in rules.iter().enumerate() {
+                let action = match action {
+                    RuleAction::MoveToFolder(_) => RuleAction::MoveToFolder(newsletters),
+                    other => other.clone(),
+                };
+                let now = chrono::Utc::now();
+                store
+                    .upsert_rule(&MessageRule {
+                        id: RuleId(uuid::Uuid::new_v4()),
+                        account_id: account.id,
+                        name: (*name).to_string(),
+                        enabled: true,
+                        position: position as i32,
+                        match_mode: alcedo_core::RuleMatchMode::All,
+                        stop_processing: true,
+                        conditions: vec![alcedo_core::RuleCondition {
+                            field: alcedo_core::RuleField::From,
+                            op: alcedo_core::RuleOp::Contains,
+                            value: "news".to_string(),
+                        }],
+                        actions: vec![action],
+                        execution: RuleExecution::Client,
+                        created_at: now,
+                        updated_at: now,
+                    })
+                    .await
+                    .expect("rule");
+            }
+            Self {
+                _dir: dir,
+                store,
+                account,
+            }
+        }
+
+        async fn executions(&self) -> Vec<(String, RuleExecution)> {
+            let mut rules = self.store.list_rules(self.account.id).await.expect("rules");
+            rules.sort_by_key(|rule| rule.position);
+            rules
+                .into_iter()
+                .map(|rule| (rule.name, rule.execution))
+                .collect()
+        }
+    }
+
+    #[tokio::test]
+    async fn published_rules_run_on_the_server_unless_a_folder_is_missing() {
+        let fixture = RulesFixture::new(&[
+            ("file", RuleAction::MoveToFolder(FolderId(0))),
+            ("trash", RuleAction::MoveToTrash),
+        ])
+        .await;
+        let backend = FixedBackend(ServerRulesStatus::Ready);
+        refresh_rule_executions(&fixture.store, fixture.account.id, Some(&backend))
+            .await
+            .expect("refresh");
+        assert_eq!(
+            fixture.executions().await,
+            vec![
+                ("file".to_string(), RuleExecution::Server),
+                ("trash".to_string(), RuleExecution::Client),
+            ]
+        );
+    }
+
+    #[tokio::test]
+    async fn a_rule_the_backend_does_not_publish_keeps_running_in_alcedo() {
+        let fixture = RulesFixture::new(&[
+            ("file", RuleAction::MoveToFolder(FolderId(0))),
+            ("local only", RuleAction::Star),
+        ])
+        .await;
+        let mut session =
+            ServerRulesSession::new(Some(std::sync::Arc::new(RefusesByName("local only"))));
+        session.status = ServerRulesStatus::Ready;
+        sync_server_rules(&fixture.account, &fixture.store, &mut session)
+            .await
+            .expect("sync");
+        assert_eq!(
+            fixture.executions().await,
+            vec![
+                ("file".to_string(), RuleExecution::Server),
+                ("local only".to_string(), RuleExecution::Client),
+            ]
+        );
+    }
+
+    #[tokio::test]
+    async fn without_a_ready_backend_every_rule_runs_in_alcedo() {
+        let fixture = RulesFixture::new(&[("file", RuleAction::MoveToFolder(FolderId(0)))]).await;
+        let backend = FixedBackend(ServerRulesStatus::Ready);
+        refresh_rule_executions(&fixture.store, fixture.account.id, Some(&backend))
+            .await
+            .expect("refresh");
+        let mut session = ServerRulesSession::new(Some(std::sync::Arc::new(backend)));
+        session.status = ServerRulesStatus::Unavailable;
+        sync_server_rules(&fixture.account, &fixture.store, &mut session)
+            .await
+            .expect("sync");
+        assert_eq!(
+            fixture.executions().await,
+            vec![("file".to_string(), RuleExecution::Client)]
+        );
     }
 
     #[tokio::test]

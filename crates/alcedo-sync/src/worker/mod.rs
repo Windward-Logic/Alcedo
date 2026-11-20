@@ -10,15 +10,14 @@ use alcedo_core::{
     Account, AccountId, AccountIdentity, AccountSignature, Address, AttachmentLists, AuthMethod,
     BodyAttachment, CidInline, ComposeAttachment, ComposeDraft, ComposeFormat, ComposeInline,
     Error, Folder, FolderId, IdentityId, ImapDraftRef, ListUnsubscribe, MessageId, MessageListMode,
-    MessageRule, OAuthProvider, PgpKeySource, PgpStatus, Result, RuleAction, RuleExecution, RuleId,
-    RulePlan, SendState, ServerFlags, ServerRulesPreview, ServerRulesStatus, SpecialUse, SyncEvent,
+    MessageRule, OAuthProvider, PgpKeySource, PgpStatus, Result, RuleExecution, RuleId, RulePlan,
+    SendState, ServerFlags, ServerRulesPreview, ServerRulesStatus, SpecialUse, SyncEvent,
     attachment_is_downloadable, auth_retry_delay, descendant_imap_names,
     effective_mailbox_delimiter, email_from_address_token, folder_delimiter_for_parent,
     folder_display_name, folder_is_mutable, imap_name_exists, is_auth_failure,
     is_keyring_auth_message, is_single_reaction_emoji, join_mailbox_path, nested_imap_names,
     parse_address_token, part_is_file_attachment, plan_rules, preview_snippet,
-    reaction_from_display_name, rename_imap_map, rule_has_server_capable_conditions,
-    smtp_mail_from, validate_folder_leaf,
+    reaction_from_display_name, rename_imap_map, smtp_mail_from, validate_folder_leaf,
 };
 use alcedo_html::{
     html_to_snippet, looks_like_escaped_html, looks_like_html, render_outbound, rewrite_cids,

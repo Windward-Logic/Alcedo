@@ -152,8 +152,9 @@ pub use row_summary::{RowSummary, row_accessible_summary};
 pub use rules::{
     MessageRule, RuleAction, RuleCondition, RuleExecution, RuleField, RuleMatchMode, RuleOp,
     RulePlan, ServerRuleAction, ServerRuleView, ServerRulesPreview, ServerRulesStatus,
-    default_stop_processing, plan_rules, rule_has_server_capable_conditions, rule_matches,
-    rule_summary, server_rule_summary, validate_rule,
+    default_stop_processing, plan_rules, rule_can_run_on_server,
+    rule_has_server_capable_conditions, rule_matches, rule_summary, server_rule_summary,
+    validate_rule,
 };
 pub use search_query::{
     FolderToken, ScopeBake, SearchQuery, apply_is_token, ensure_scope_in_query, fts_match_clause,
