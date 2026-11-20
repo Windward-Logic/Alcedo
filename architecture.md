@@ -128,10 +128,43 @@ has a do-nothing default, so the app runs unchanged with none.
   carry a JSON payload addressed to one extension by name.
 - **Sync** (`alcedo-sync::extension`): `SyncExtension` handles that extension's commands with a `SyncContext`
   (store, events, a cross-folder IMAP search import). `ServerRulesBackend` lets rules run on the server; without
-  one, every rule runs client-side.
+  one, every rule runs client-side. Its `can_publish` says which rules a publish really sends; only those are
+  marked `RuleExecution::Server` and skipped by the client-side pass.
+- **Store** (`alcedo-store`): an extension keeps its own tables, created with
+  `schema::apply_extension_migrations`, and reads or writes them on the store's threads with
+  `StoreHandle::extension_read` / `extension_write`.
+- **Text** (`alcedo-i18n`): an extension names its own gettext domain in a crate-root `I18N_DOMAIN`, calls
+  `alcedo_i18n::init(domain)` before `alcedo::run`, and runs `scripts/i18n.py` with its own `Project`.
 - **Shared helpers:** extensions reuse `alcedo_core::redact_url_userinfo`, `alcedo_widgets::css_color`,
-  `alcedo_imap::{connect_tcp, upgrade_to_tls}`, `alcedo_ui::test_support` (behind the `test-support` feature) and
-  `scripts/lib/deb-common.sh` instead of keeping their own copies.
+  `alcedo_widgets::unparent_popover_on_destroy`, `alcedo_imap::{connect_tcp, upgrade_to_tls}`,
+  `alcedo_oauth::http_client`, `alcedo_ui::{toast, local_time, calendar_clock, calendar_day_select}`,
+  `alcedo_ui::help::{help_button, attach_group_help, guide_text}`, `alcedo_ui::test_support` (behind the
+  `test-support` feature), `scripts/lib/deb-common.sh`, `scripts/i18n.py` and `scripts/flatpak-cargo-sources.py`
+  instead of keeping their own copies.
+
+### Supported extension surface
+
+Most modules are `pub` only because the app is split into crates, so `pub` alone does not make something part of
+the extension API. **Stable** items keep their meaning and signatures across 1.x releases: additions come as new
+items or as trait methods with a default, and a removal or breaking change is called out in the release notes.
+**Incidental** items may change in any release; an extension that uses one pins the exact tag, and the need is a
+reason to add a stable hook instead.
+
+| Area | Stable | Incidental |
+|---|---|---|
+| Start-up | `alcedo::{run, Extensions}` | everything else in `alcedo` |
+| UI | `alcedo_ui::extension` (`UiExtension`, `MailContext`, `AppContext`, help and view types); the shared helpers above | `add_account::{launch_auth_url, oauth_provider_config}`, `reader::open_attachment_file`, `composer::{build_composer_page, ComposerHooks, ComposerWidgets}`, `compose_html`, `menu` (`build_primary_menu_button`, action names), `settings` (`wire_paned_persist`, `reader_font_size`), `activity_log`, `notifications`, `recipient_row`, and every other module |
+| Messages | `alcedo_core::ExtensionMessage`, `UiCommand::Extension`, `SyncEvent::Extension`, and the domain types they carry | |
+| Sync | `alcedo_sync::extension`, `alcedo_sync::server_rules`, `alcedo_sync::oauth_token_cache` | `alcedo_sync::pgp` and the worker |
+| Store | `StoreHandle` and its typed methods, `extension_read` / `extension_write`, `schema::apply_extension_migrations`; `schema::{open_connection, migrate}` for tests that need the app's schema | the per-table functions on a `Connection` (`messages`, `search`, `accounts`, `folders`, ...), `schema::{apply_pragmas, migrate_to_version}`, and table layouts |
+| Protocols | `alcedo_imap::{connect_tcp, upgrade_to_tls}`, `alcedo_oauth::http_client` | other `alcedo_imap` and `alcedo_oauth` items (for example `imap_quoted_astring`) |
+| Text | `alcedo_i18n`, `alcedo_ui::local_time`, `scripts/i18n.py` (`Project`, `main`) | |
+
+The per-table store functions are the most likely to break an extension, because they follow the app's schema:
+an extension that calls them inside `extension_read` / `extension_write` must be rebuilt and retested against
+every new tag. The incidental UI items above are candidates for stable hooks: OAuth sign-in for non-mail
+accounts (`launch_auth_url`, `oauth_provider_config`) belongs in `alcedo-oauth`, and opening an attachment, the
+activity log and desktop notifications fit on `AppContext` / `MailContext`.
 
 ## v1 non-goals
 
