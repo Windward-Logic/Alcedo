@@ -876,7 +876,7 @@ fn build_from_field() -> (
         .child(&listbox)
         .build();
     popover.set_parent(&entry);
-    crate::widget_lifetime::unparent_popover_on_destroy(&entry, &popover);
+    alcedo_widgets::unparent_popover_on_destroy(&entry, &popover);
 
     let from_button = gtk::Button::builder()
         .icon_name("pan-down-symbolic")

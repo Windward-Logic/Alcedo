@@ -80,7 +80,7 @@ pub fn attach_address_copy_context_menu(
     let popover = gtk::PopoverMenu::from_model(Some(&menu));
     popover.set_has_arrow(false);
     popover.set_parent(anchor);
-    crate::widget_lifetime::unparent_popover_on_destroy(anchor, &popover);
+    alcedo_widgets::unparent_popover_on_destroy(anchor, &popover);
 
     let gesture = gtk::GestureClick::new();
     gesture.set_button(3);

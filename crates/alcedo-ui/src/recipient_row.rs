@@ -170,7 +170,7 @@ impl RecipientField {
             .child(&listbox)
             .build();
         popover.set_parent(&entry);
-        crate::widget_lifetime::unparent_popover_on_destroy(&entry, &popover);
+        alcedo_widgets::unparent_popover_on_destroy(&entry, &popover);
 
         chip_box.append(&entry);
 

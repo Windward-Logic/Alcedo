@@ -53,7 +53,7 @@ use alcedo_widgets::sandbox::{
 use chrono::{DateTime, Local, Utc};
 use relm4::Sender;
 
-use crate::widget_lifetime::unparent_popover_on_destroy;
+use alcedo_widgets::unparent_popover_on_destroy;
 use relm4::adw;
 use relm4::adw::prelude::*;
 use relm4::gtk;
