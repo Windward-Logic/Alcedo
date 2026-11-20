@@ -1,3 +1,11 @@
+alcedo (1.0.12-1) resolute; urgency=medium
+
+  * No visible changes. Apps built on Alcedo's crates get better support for
+    running rules on the mail server, translating their own text and cleaning
+    up popovers.
+
+ -- Windward Logic LLC <alcedo@windwardlogic.com>  Fri, 20 Nov 2026 20:30:00 +0000
+
 alcedo (1.0.11-1) resolute; urgency=medium
 
   * Fixed opening a view from an extension, such as Find all messages for an
