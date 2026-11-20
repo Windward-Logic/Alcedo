@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 """Translation tooling for Alcedo (standard library only).
 
-  i18n.py extract            scan crates/*/src for tr!/trs!/trc!/trf!/ntr!/n_! and write po/alcedo.pot
+  i18n.py extract            scan the sources for tr!/trs!/trc!/trf!/ntr!/n_! and write po/<domain>.pot
   i18n.py update             merge the .pot into every po/*.po (adds new, drops obsolete)
-  i18n.py compile [OUT_DIR]  build OUT_DIR/<lang>/LC_MESSAGES/alcedo.mo (default target/locale)
+  i18n.py compile [OUT_DIR]  build OUT_DIR/<lang>/LC_MESSAGES/<domain>.mo (default target/locale)
   i18n.py check              fail on untranslated, fuzzy or stale entries, mismatched
                              placeholders, wrong plural counts, or strftime patterns GLib
                              cannot format
+
+Run directly, it works on this repository (domain `alcedo`, every crate's src/).
+Another repository that uses the alcedo-i18n crate can run the same rules on its
+own text without a copy of this file: load it with importlib and call
+`main(sys.argv, Project.for_repository(...))` with its own root, domain and sources.
 
 xgettext and msgfmt are not required, so this works in the Flatpak sandbox
 and on a bare development machine. Extraction only sees plain string
@@ -18,14 +23,46 @@ never wrapped, so review new user-visible text by eye.
 import re
 import struct
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-# Every crate's sources except the macros' own crate (its docs and tests).
-SOURCES = [src for src in sorted((ROOT / "crates").glob("*/src")) if src.parent.name != "alcedo-i18n"]
-PO_DIR = ROOT / "po"
-POT = PO_DIR / "alcedo.pot"
-DOMAIN = "alcedo"
+
+@dataclass(frozen=True)
+class Project:
+    """One repository's translations: where its sources and catalogues live,
+    its gettext domain, and how catalogue headers name it."""
+
+    root: Path
+    domain: str
+    sources: tuple
+    po_dir: Path
+    out_dir: Path
+    name: str
+    licence: str
+
+    @classmethod
+    def for_repository(cls, root, domain, sources, name, licence):
+        """The usual layout: catalogues in `root/po`, compiled into `root/target/locale`."""
+        root = Path(root)
+        return cls(root, domain, tuple(sources), root / "po", root / "target" / "locale", name, licence)
+
+    @property
+    def pot(self):
+        return self.po_dir / f"{self.domain}.pot"
+
+    def shown(self, path):
+        """`path` relative to the root for messages, or in full when outside it."""
+        return path.relative_to(self.root) if path.is_relative_to(self.root) else path
+
+
+def _alcedo_project():
+    root = Path(__file__).resolve().parent.parent
+    # Every crate's sources except the macros' own crate (its docs and tests).
+    sources = [src for src in sorted((root / "crates").glob("*/src")) if src.parent.name != "alcedo-i18n"]
+    return Project.for_repository(root, "alcedo", sources, "Alcedo", "GPL-3.0-or-later")
+
+
+ALCEDO = _alcedo_project()
 
 PLURAL_FORMS = {
     "fr": "nplurals=2; plural=(n > 1);",
@@ -75,9 +112,9 @@ def escape(text):
             .replace("\n", "\\n").replace("\t", "\\t"))
 
 
-def extract(sources=None, root=ROOT):
+def extract(sources, root):
     entries = {}
-    paths = sorted(path for src in (SOURCES if sources is None else sources) for path in src.rglob("*.rs"))
+    paths = sorted(path for src in sources for path in src.rglob("*.rs"))
     for path in paths:
         text = path.read_text(encoding="utf-8")
         try:
@@ -131,18 +168,18 @@ def translator_comments(lines, index):
     return []
 
 
-def header(lang):
+def header(lang, project):
     forms = PLURAL_FORMS.get(lang, "nplurals=2; plural=(n != 1);")
     name = LANGUAGE_NAMES.get(lang, lang)
-    title = "SOME DESCRIPTIVE TITLE." if lang is None else f"{name} translation of Alcedo."
+    title = "SOME DESCRIPTIVE TITLE." if lang is None else f"{name} translation of {project.name}."
     language = "" if lang is None else lang
     return (
         f"# {title}\n"
-        "# Copyright (C) Windward Logic. Same licence as Alcedo (GPL-3.0-or-later).\n"
+        f"# Copyright (C) Windward Logic. Same licence as {project.name} ({project.licence}).\n"
         "#\n"
         'msgid ""\n'
         'msgstr ""\n'
-        '"Project-Id-Version: alcedo\\n"\n'
+        f'"Project-Id-Version: {project.domain}\\n"\n'
         f'"Language: {language}\\n"\n'
         '"MIME-Version: 1.0\\n"\n'
         '"Content-Type: text/plain; charset=UTF-8\\n"\n'
@@ -172,10 +209,10 @@ def render_entry(entry):
     return "\n".join(out) + "\n"
 
 
-def write_po(path, lang, entries):
+def write_po(path, lang, entries, project):
     path.parent.mkdir(parents=True, exist_ok=True)
     body = "\n".join(render_entry(e) for e in sorted(entries, key=lambda e: e.refs[0] if e.refs else ""))
-    path.write_text(header(lang) + body, encoding="utf-8")
+    path.write_text(header(lang, project) + body, encoding="utf-8")
 
 
 def parse_po(path):
@@ -259,16 +296,16 @@ def parse_po(path):
     return result
 
 
-def cmd_extract():
-    entries = extract()
-    write_po(POT, None, entries)
-    print(f"wrote {POT.relative_to(ROOT)}: {len(entries)} strings")
+def cmd_extract(project):
+    entries = extract(project.sources, project.root)
+    write_po(project.pot, None, entries, project)
+    print(f"wrote {project.shown(project.pot)}: {len(entries)} strings")
 
 
-def cmd_update():
-    template = extract()
-    write_po(POT, None, template)
-    for po in sorted(PO_DIR.glob("*.po")):
+def cmd_update(project):
+    template = extract(project.sources, project.root)
+    write_po(project.pot, None, template, project)
+    for po in sorted(project.po_dir.glob("*.po")):
         lang = po.stem
         old = {e.key: e for e in parse_po(po)}
         merged, added = [], 0
@@ -280,7 +317,7 @@ def cmd_update():
                 entry.msgstr, entry.msgstr_plural, entry.fuzzy = (
                     previous.msgstr, previous.msgstr_plural, previous.fuzzy)
             merged.append(entry)
-        write_po(po, lang, merged)
+        write_po(po, lang, merged, project)
         dropped = len(set(old) - {e.key for e in template})
         print(f"{po.name}: {len(merged)} strings, {added} new, {dropped} obsolete dropped")
 
@@ -333,15 +370,16 @@ def strftime_problems(pattern):
     return found
 
 
-def cmd_check():
-    template = extract()
+def cmd_check(project):
+    template = extract(project.sources, project.root)
     keys = {e.key for e in template}
     failed = False
-    pot_entries = {e.key: e for e in parse_po(POT)} if POT.exists() else {}
+    pot = project.pot
+    pot_entries = {e.key: e for e in parse_po(pot)} if pot.exists() else {}
     if set(pot_entries) != keys:
-        print("po/alcedo.pot is out of date: run scripts/i18n.py update")
+        print(f"{project.shown(pot)} is out of date: run scripts/i18n.py update")
         failed = True
-    for po in sorted(PO_DIR.glob("*.po")):
+    for po in sorted(project.po_dir.glob("*.po")):
         entries = parse_po(po)
         have = {e.key for e in entries}
         for missing in sorted(keys - have, key=str):
@@ -357,7 +395,7 @@ def cmd_check():
     print("OK")
 
 
-def build_mo(entries, lang):
+def build_mo(entries, lang, domain):
     messages = {}
     for entry in entries:
         forms = entry.msgstr_plural if entry.plural is not None else [entry.msgstr]
@@ -369,7 +407,7 @@ def build_mo(entries, lang):
         messages[key] = "\x00".join(forms)
     forms_line = PLURAL_FORMS.get(lang, "nplurals=2; plural=(n != 1);")
     messages[""] = (
-        "Project-Id-Version: alcedo\nContent-Type: text/plain; charset=UTF-8\n"
+        f"Project-Id-Version: {domain}\nContent-Type: text/plain; charset=UTF-8\n"
         f"Content-Transfer-Encoding: 8bit\nLanguage: {lang}\nPlural-Forms: {forms_line}\n")
     keys = sorted(messages, key=lambda k: k.encode("utf-8"))
     ids, strs, offsets = b"", b"", []
@@ -391,25 +429,25 @@ def build_mo(entries, lang):
     return out + ids + strs
 
 
-def cmd_compile(out_dir):
+def cmd_compile(project, out_dir):
     out_dir = Path(out_dir)
-    for po in sorted(PO_DIR.glob("*.po")):
-        target = out_dir / po.stem / "LC_MESSAGES" / f"{DOMAIN}.mo"
+    for po in sorted(project.po_dir.glob("*.po")):
+        target = out_dir / po.stem / "LC_MESSAGES" / f"{project.domain}.mo"
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes(build_mo(parse_po(po), po.stem))
+        target.write_bytes(build_mo(parse_po(po), po.stem, project.domain))
         print(f"wrote {target}")
 
 
-def main(argv):
+def main(argv, project=ALCEDO):
     command = argv[1] if len(argv) > 1 else ""
     if command == "extract":
-        cmd_extract()
+        cmd_extract(project)
     elif command == "update":
-        cmd_update()
+        cmd_update(project)
     elif command == "compile":
-        cmd_compile(argv[2] if len(argv) > 2 else ROOT / "target" / "locale")
+        cmd_compile(project, argv[2] if len(argv) > 2 else project.out_dir)
     elif command == "check":
-        cmd_check()
+        cmd_check(project)
     else:
         print(__doc__)
         return 2

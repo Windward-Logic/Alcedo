@@ -86,6 +86,11 @@ LANGUAGE=fr ALCEDO_LOCALEDIR=$PWD/target/locale cargo run -p alcedo
 python3 -m unittest discover -s scripts/tests
 ```
 
+Another repository that builds on `alcedo-i18n` can run the same tool on its own text without copying it: load
+`scripts/i18n.py` with `importlib` and call `main(sys.argv, Project.for_repository(root, domain, sources, name,
+licence))`. Each domain compiles to its own `<domain>.mo`, so several can share one catalogue folder and one
+`ALCEDO_LOCALEDIR`.
+
 `build-deb.sh` and the Flatpak manifests run `check` before building and install the catalogues, so a release with
 an untranslated string fails. `ALCEDO_LOCALEDIR` points a run at another catalogue folder; packaging sets the
 installed location at build time with the separate `ALCEDO_INSTALL_LOCALEDIR` (default `/usr/share/locale`).

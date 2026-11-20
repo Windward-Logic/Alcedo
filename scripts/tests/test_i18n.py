@@ -3,7 +3,9 @@
 Usage: python3 -m unittest discover -s scripts/tests
 """
 
+import contextlib
 import importlib.util
+import io
 import tempfile
 import unittest
 from pathlib import Path
@@ -60,10 +62,82 @@ class FindMessages(unittest.TestCase):
             entries = i18n.extract([root / "src"], root)
         self.assertEqual([(e.msgid, e.refs) for e in entries], [("Hello", ["src/a.rs:1"])])
 
-
     def test_rejects_line_continuation_inside_a_translated_literal(self):
         with self.assertRaises(ValueError):
             messages('tr!("first part \\\n    second part")')
+
+
+def run(argv, project):
+    """Run the command line quietly; returns what it printed."""
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        i18n.main(["i18n.py", *argv], project)
+    return out.getvalue()
+
+
+class OtherRepository(unittest.TestCase):
+    """Another repository runs these rules on its own domain without a copy."""
+
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.root = Path(tmp.name)
+        (self.root / "src").mkdir()
+        (self.root / "src" / "a.rs").write_text(
+            'tr!("Hello"); ntr!("{n} file", "{n} files", n);\n', encoding="utf-8")
+        self.project = i18n.Project.for_repository(
+            self.root, "example-domain", [self.root / "src"], "Example App", "MIT")
+
+    def add_french(self, translated):
+        entries = i18n.parse_po(self.project.pot)
+        if translated:
+            for entry in entries:
+                entry.msgstr = "Bonjour"
+                entry.msgstr_plural = ["{n} fichier", "{n} fichiers"]
+        i18n.write_po(self.project.po_dir / "fr.po", "fr", entries, self.project)
+
+    def test_extract_names_the_template_and_header_after_the_project(self):
+        run(["extract"], self.project)
+        pot = (self.root / "po" / "example-domain.pot").read_text(encoding="utf-8")
+        self.assertIn('"Project-Id-Version: example-domain\\n"', pot)
+        self.add_french(translated=True)
+        french = (self.root / "po" / "fr.po").read_text(encoding="utf-8")
+        self.assertIn("# French translation of Example App.", french)
+        self.assertIn("Same licence as Example App (MIT).", french)
+
+    def test_compile_writes_the_domain_catalogue_to_the_default_folder(self):
+        run(["extract"], self.project)
+        self.add_french(translated=True)
+        run(["compile"], self.project)
+        mo = self.root / "target" / "locale" / "fr" / "LC_MESSAGES" / "example-domain.mo"
+        self.assertIn(b"Project-Id-Version: example-domain", mo.read_bytes())
+        self.assertIn(b"Bonjour", mo.read_bytes())
+
+    def test_check_passes_a_complete_catalogue_and_fails_an_untranslated_one(self):
+        run(["extract"], self.project)
+        self.add_french(translated=True)
+        self.assertIn("OK", run(["check"], self.project))
+        self.add_french(translated=False)
+        with self.assertRaises(SystemExit):
+            run(["check"], self.project)
+
+    def test_catalogues_may_live_outside_the_root(self):
+        with tempfile.TemporaryDirectory() as elsewhere:
+            project = i18n.Project(
+                self.root, "example-domain", (self.root / "src",), Path(elsewhere),
+                Path(elsewhere) / "out", "Example App", "MIT")
+            printed = run(["extract"], project)
+            self.assertIn(str(Path(elsewhere) / "example-domain.pot"), printed)
+            self.assertIn("OK", run(["check"], project))
+
+
+class AlcedoProject(unittest.TestCase):
+    def test_reads_every_crate_except_the_macros_own(self):
+        crates = {src.parent.name for src in i18n.ALCEDO.sources}
+        self.assertIn("alcedo-ui", crates)
+        self.assertNotIn("alcedo-i18n", crates)
+        self.assertEqual(i18n.ALCEDO.pot.name, "alcedo.pot")
+
 
 class StrftimeCheck(unittest.TestCase):
     def test_accepts_patterns_glib_can_format(self):
