@@ -1,3 +1,13 @@
+alcedo (1.0.13-1) resolute; urgency=medium
+
+  * Folders can be docked or undocked. Undocked, they slide out from the left
+    edge; narrow windows now open with the folder list closed.
+  * The composer's back arrow is a trash icon labelled Discard Draft.
+  * The reader has a Compose button next to Reply and Forward.
+  * Tab moves from the To field straight to the next field.
+
+ -- Windward Logic LLC <alcedo@windwardlogic.com>  Sat, 21 Nov 2026 12:00:00 +0000
+
 alcedo (1.0.12-1) resolute; urgency=medium
 
   * No visible changes. Apps built on Alcedo's crates get better support for

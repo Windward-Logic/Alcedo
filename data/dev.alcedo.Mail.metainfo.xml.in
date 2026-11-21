@@ -42,6 +42,11 @@
   </screenshots>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="1.0.13" date="2026-11-21">
+      <description>
+        <p>Folders now tuck away: the folder button docks or undocks the column, and an undocked folder list slides out when you rest the pointer at the left edge and closes again when you leave. Narrow windows open with the folder list closed, and Escape or picking a folder closes it. The composer's back arrow is now a trash icon labelled Discard Draft, because leaving the composer discards the draft. The reader has a Compose button next to Reply and Forward. Tab moves straight from the To field to the next field, and the recipient picker button is no longer a stop in the tab order.</p>
+      </description>
+    </release>
     <release version="1.0.12" date="2026-11-20">
       <description>
         <p>No visible changes. Apps built on Alcedo's crates get better support for running rules on the mail server, translating their own text and cleaning up popovers.</p>
