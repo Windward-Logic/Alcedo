@@ -2210,6 +2210,10 @@ msgstr "Clés publiques manquantes pour : {recipients}"
 msgid "Discard draft?"
 msgstr "Abandonner le brouillon ?"
 
+#: crates/alcedo-ui/src/composer.rs:620
+msgid "Discard Draft"
+msgstr "Abandonner le brouillon"
+
 #: crates/alcedo-ui/src/composer.rs:2492
 msgid "This will also delete the copy saved in Drafts on the server."
 msgstr "Cela supprimera aussi la copie enregistrée dans Brouillons sur le serveur."
@@ -2263,9 +2267,9 @@ msgstr "Envoyer"
 msgid "Sending…"
 msgstr "Envoi…"
 
-#: crates/alcedo-ui/src/composer.rs:617
-msgid "Back (Esc)"
-msgstr "Retour (Échap)"
+#: crates/alcedo-ui/src/composer.rs:621
+msgid "Discard Draft (Esc)"
+msgstr "Abandonner le brouillon (Échap)"
 
 #: crates/alcedo-ui/src/composer.rs:824
 msgid "Sending account"

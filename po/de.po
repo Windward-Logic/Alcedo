@@ -2210,6 +2210,10 @@ msgstr "Fehlende öffentliche Schlüssel für: {recipients}"
 msgid "Discard draft?"
 msgstr "Entwurf verwerfen?"
 
+#: crates/alcedo-ui/src/composer.rs:620
+msgid "Discard Draft"
+msgstr "Entwurf verwerfen"
+
 #: crates/alcedo-ui/src/composer.rs:2492
 msgid "This will also delete the copy saved in Drafts on the server."
 msgstr "Dadurch wird auch die in Entwürfe auf dem Server gespeicherte Kopie gelöscht."
@@ -2263,9 +2267,9 @@ msgstr "Senden"
 msgid "Sending…"
 msgstr "Wird gesendet …"
 
-#: crates/alcedo-ui/src/composer.rs:617
-msgid "Back (Esc)"
-msgstr "Zurück (Esc)"
+#: crates/alcedo-ui/src/composer.rs:621
+msgid "Discard Draft (Esc)"
+msgstr "Entwurf verwerfen (Esc)"
 
 #: crates/alcedo-ui/src/composer.rs:824
 msgid "Sending account"

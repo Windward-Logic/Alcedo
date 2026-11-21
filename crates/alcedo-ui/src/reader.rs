@@ -19,12 +19,14 @@ use crate::commands;
 use crate::compose_attachments::show_composer_toast;
 use crate::extension::CalendarInvite;
 use crate::folder_bar::archive_icon_name;
+use crate::icons;
 use crate::meeting_invite::{
     MeetingBanner, build_meeting_banner, hide_meeting_banner, update_meeting_banner,
 };
 use crate::meeting_rsvp::offer_add_to_calendar;
 use crate::menu::{
-    ACTION_ARCHIVE, ACTION_DELETE, ACTION_FORWARD, ACTION_REPLY, ACTION_STAR, ACTION_UNSTAR,
+    ACTION_ARCHIVE, ACTION_COMPOSE, ACTION_DELETE, ACTION_FORWARD, ACTION_REPLY, ACTION_STAR,
+    ACTION_UNSTAR,
 };
 
 use crate::message_list::ignore_focus_selection_briefly;
@@ -94,6 +96,9 @@ pub struct ReaderWidgets {
     pub date: gtk::Label,
     to: AddressField,
     cc: AddressField,
+    compose_btn: gtk::Button,
+    /// Hidden with the Reply and Forward text on compact layouts.
+    compose_label: gtk::Label,
     pub reply_btn: adw::SplitButton,
     /// Enabled only for mail with a List-Post address.
     reply_list_action: gtk::gio::SimpleAction,
@@ -361,6 +366,30 @@ pub fn build_reader_page(
     let to = build_recipient_row(true, &tr!("To:"));
     let cc = build_recipient_row(false, &tr!("Cc:"));
 
+    // Always enabled and independent of the selected message, so unlike Reply
+    // and Forward it drives the app-level action instead of a reader callback.
+    let compose_btn = gtk::Button::builder()
+        .action_name(ACTION_COMPOSE)
+        .valign(gtk::Align::Center)
+        .build();
+    // Icon theme lookup misses this bundled name, so paint it from gresource.
+    let compose_icon = gtk::Image::new();
+    icons::set_image(
+        &compose_icon,
+        icons::COMPOSE_SYMBOLIC,
+        icons::TOOLBAR_PIXEL_SIZE,
+    );
+    let compose_label = gtk::Label::new(Some(&tr!("Compose")));
+    let compose_content = gtk::Box::new(gtk::Orientation::Horizontal, 6);
+    compose_content.append(&compose_icon);
+    compose_content.append(&compose_label);
+    compose_btn.set_child(Some(&compose_content));
+    a11y::name_icon_control(
+        &compose_btn,
+        &tr!("New Message"),
+        &commands::command_tooltip(ACTION_COMPOSE, &tr!("New Message")),
+    );
+
     let reply_menu = gtk::gio::Menu::new();
     reply_menu.append(Some(&tr!("Reply All")), Some("reader.reply-all"));
     let reply_list_item =
@@ -575,6 +604,7 @@ pub fn build_reader_page(
     drag.set_hexpand(true);
     header_bar.set_title_widget(Some(&drag));
     header_bar.pack_start(&back_btn);
+    header_bar.pack_start(&compose_btn);
     header_bar.pack_start(&reply_btn);
     header_bar.pack_start(&forward_btn);
     header_bar.pack_end(&react_btn);
@@ -840,6 +870,8 @@ pub fn build_reader_page(
             date,
             to,
             cc,
+            compose_btn,
+            compose_label,
             reply_btn,
             reply_list_action,
             forward_btn,
@@ -1049,13 +1081,14 @@ pub fn sync_reader_star(widgets: &ReaderWidgets, flagged: bool) {
     widgets.star_syncing.set(false);
 }
 
-/// Drop Reply / Forward text on compact layouts. Accessible names stay.
+/// Drop Reply / Forward / Compose text on compact layouts. Accessible names stay.
 ///
 /// `label` and `icon-name` are mutually exclusive on `AdwSplitButton`
 /// (setting either one clears the other), so switching to icon-only mode
 /// must set `icon-name` rather than just clearing the label, or the button
 /// ends up with neither text nor icon.
 pub fn set_reader_reply_icon_only(widgets: &ReaderWidgets, icon_only: bool) {
+    widgets.compose_label.set_visible(!icon_only);
     if icon_only {
         widgets.reply_btn.set_icon_name(REPLY_ICON_NAME);
         widgets.forward_btn.set_icon_name(FORWARD_ICON_NAME);
@@ -1067,6 +1100,11 @@ pub fn set_reader_reply_icon_only(widgets: &ReaderWidgets, icon_only: bool) {
 
 /// Recompute shortcut hints after a keyboard-override change.
 pub fn refresh_reader_shortcut_tooltips(widgets: &ReaderWidgets) {
+    a11y::name_icon_control(
+        &widgets.compose_btn,
+        &tr!("New Message"),
+        &commands::command_tooltip(ACTION_COMPOSE, &tr!("New Message")),
+    );
     a11y::name_icon_control(
         &widgets.reply_btn,
         &tr!("Reply"),

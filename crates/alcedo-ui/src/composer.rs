@@ -614,9 +614,15 @@ pub fn build_composer_page(
     header.set_show_start_title_buttons(false);
     header.set_show_end_title_buttons(false);
 
-    let back_btn = composer_icon_button("go-previous-symbolic", &tr!("Back"), &tr!("Back (Esc)"));
-    back_btn.connect_clicked(move |_| on_cancel());
-    header.pack_start(&back_btn);
+    // This leaves the composer and discards the draft (after confirming when
+    // there is content), so a back chevron misleads; the trash can says what it does.
+    let discard_btn = composer_icon_button(
+        "user-trash-symbolic",
+        &tr!("Discard Draft"),
+        &tr!("Discard Draft (Esc)"),
+    );
+    discard_btn.connect_clicked(move |_| on_cancel());
+    header.pack_start(&discard_btn);
 
     let (send_button, send_chrome) = build_send_chrome(on_send, on_send_choice);
     header.pack_end(&send_button);

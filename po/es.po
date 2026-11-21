@@ -2210,6 +2210,10 @@ msgstr "Faltan claves públicas de: {recipients}"
 msgid "Discard draft?"
 msgstr "¿Descartar el borrador?"
 
+#: crates/alcedo-ui/src/composer.rs:620
+msgid "Discard Draft"
+msgstr "Descartar borrador"
+
 #: crates/alcedo-ui/src/composer.rs:2492
 msgid "This will also delete the copy saved in Drafts on the server."
 msgstr "También se eliminará la copia guardada en Borradores en el servidor."
@@ -2263,9 +2267,9 @@ msgstr "Enviar"
 msgid "Sending…"
 msgstr "Enviando…"
 
-#: crates/alcedo-ui/src/composer.rs:617
-msgid "Back (Esc)"
-msgstr "Atrás (Esc)"
+#: crates/alcedo-ui/src/composer.rs:621
+msgid "Discard Draft (Esc)"
+msgstr "Descartar borrador (Esc)"
 
 #: crates/alcedo-ui/src/composer.rs:824
 msgid "Sending account"

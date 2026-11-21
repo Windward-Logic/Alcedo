@@ -2210,6 +2210,10 @@ msgstr "Chiavi pubbliche mancanti per: {recipients}"
 msgid "Discard draft?"
 msgstr "Scartare la bozza?"
 
+#: crates/alcedo-ui/src/composer.rs:620
+msgid "Discard Draft"
+msgstr "Scarta bozza"
+
 #: crates/alcedo-ui/src/composer.rs:2492
 msgid "This will also delete the copy saved in Drafts on the server."
 msgstr "Verrà eliminata anche la copia salvata in Bozze sul server."
@@ -2263,9 +2267,9 @@ msgstr "Invia"
 msgid "Sending…"
 msgstr "Invio…"
 
-#: crates/alcedo-ui/src/composer.rs:617
-msgid "Back (Esc)"
-msgstr "Indietro (Esc)"
+#: crates/alcedo-ui/src/composer.rs:621
+msgid "Discard Draft (Esc)"
+msgstr "Scarta bozza (Esc)"
 
 #: crates/alcedo-ui/src/composer.rs:824
 msgid "Sending account"

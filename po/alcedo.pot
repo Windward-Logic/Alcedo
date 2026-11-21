@@ -2210,6 +2210,10 @@ msgstr ""
 msgid "Discard draft?"
 msgstr ""
 
+#: crates/alcedo-ui/src/composer.rs:620
+msgid "Discard Draft"
+msgstr ""
+
 #: crates/alcedo-ui/src/composer.rs:2492
 msgid "This will also delete the copy saved in Drafts on the server."
 msgstr ""
@@ -2263,8 +2267,8 @@ msgstr ""
 msgid "Sending…"
 msgstr ""
 
-#: crates/alcedo-ui/src/composer.rs:617
-msgid "Back (Esc)"
+#: crates/alcedo-ui/src/composer.rs:621
+msgid "Discard Draft (Esc)"
 msgstr ""
 
 #: crates/alcedo-ui/src/composer.rs:824

@@ -196,6 +196,11 @@ impl RecipientField {
             .tooltip_text(tr!("Choose recipients"))
             .valign(gtk::Align::Start)
             .css_classes(["flat", "alcedo-recipient-picker-btn"])
+            // Mouse-only, like the compose toolbar buttons: as a Tab stop it sat
+            // between the address and Subject on every message. The entry's
+            // autocomplete is the keyboard route to the same contacts.
+            .can_focus(false)
+            .focus_on_click(false)
             .build();
 
         widget.append(&title_label);
@@ -399,7 +404,13 @@ impl RecipientField {
                         glib::Propagation::Stop
                     }
                     gtk::gdk::Key::Tab => {
-                        field_ref.try_activate_autocomplete_selection(&refresh, false);
+                        // The popover closes on accept, taking the focus the default
+                        // Tab handling would start from. Hand focus back to the
+                        // entry and advance from there so one Tab moves on.
+                        if field_ref.try_activate_autocomplete_selection(&refresh, true) {
+                            entry.emit_move_focus(gtk::DirectionType::TabForward);
+                            return glib::Propagation::Stop;
+                        }
                         glib::Propagation::Proceed
                     }
                     _ => glib::Propagation::Proceed,
@@ -515,11 +526,25 @@ impl RecipientField {
     }
 
     fn rebuild_chips(&self) {
-        while let Some(child) = self.chip_box.first_child() {
-            self.chip_box.remove(&child);
+        self.show_chips();
+        self.notify_changed();
+    }
+
+    /// Replace the chips in front of the entry. The entry stays parented: detaching
+    /// and re-adding it drops keyboard focus, so the next Tab restarted from the
+    /// chips (name, remove button, entry) instead of moving on to the next field.
+    fn show_chips(&self) {
+        let entry: &gtk::Widget = self.entry.upcast_ref();
+        let mut child = self.chip_box.first_child();
+        while let Some(widget) = child {
+            child = widget.next_sibling();
+            if &widget != entry {
+                self.chip_box.remove(&widget);
+            }
         }
         let list = self.tokens.borrow().clone();
         let book = self.book.borrow();
+        let mut previous: Option<gtk::Widget> = None;
         for token in list.iter() {
             let chip = build_chip(
                 token,
@@ -528,11 +553,10 @@ impl RecipientField {
                 self.toast_host.clone(),
                 self.downgrade(),
             );
-            self.chip_box.append(&chip);
+            self.chip_box.insert_child_after(&chip, previous.as_ref());
+            previous = Some(chip.upcast());
         }
-        self.chip_box.append(&self.entry);
         self.sync_entry_hint();
-        self.notify_changed();
     }
 
     fn sync_entry_hint(&self) {
@@ -549,23 +573,7 @@ impl RecipientField {
             let Some(field) = weak_field.upgrade() else {
                 return;
             };
-            while let Some(child) = field.chip_box.first_child() {
-                field.chip_box.remove(&child);
-            }
-            let list = field.tokens.borrow().clone();
-            let book_ref = field.book.borrow();
-            for token in list.iter() {
-                let chip = build_chip(
-                    token,
-                    &book_ref,
-                    field.tokens.clone(),
-                    field.toast_host.clone(),
-                    weak_field.clone(),
-                );
-                field.chip_box.append(&chip);
-            }
-            field.chip_box.append(&field.entry);
-            field.sync_entry_hint();
+            field.show_chips();
         })
     }
 
@@ -1360,6 +1368,74 @@ mod tests {
         assert_eq!(chip_key_action(Key::Left), ChipKeyAction::FocusPrevious);
         assert_eq!(chip_key_action(Key::Right), ChipKeyAction::FocusNext);
         assert_eq!(chip_key_action(Key::Return), ChipKeyAction::None);
+    }
+
+    #[test]
+    fn tab_from_the_address_entry_moves_straight_to_the_next_field() {
+        crate::test_helpers::gtk_test_run(|| {
+            let field = RecipientField::new(
+                "To",
+                Rc::new(RefCell::new(sample_book())),
+                Rc::new(RefCell::new(Vec::new())),
+                gtk::Box::new(gtk::Orientation::Vertical, 0).upcast(),
+            );
+            let subject = gtk::Entry::new();
+            let form = gtk::Box::new(gtk::Orientation::Vertical, 0);
+            form.append(field.widget());
+            form.append(&subject);
+            let window = gtk::Window::builder().child(&form).build();
+            window.present();
+
+            field.focus_entry();
+            window.child_focus(gtk::DirectionType::TabForward);
+
+            let focused =
+                gtk::prelude::GtkWindowExt::focus(&window).expect("a widget has focus after Tab");
+            assert!(
+                focused.is_ancestor(&subject),
+                "Tab from the address entry should land in the next field, not on {focused:?}"
+            );
+            window.destroy();
+        });
+    }
+
+    #[test]
+    fn adding_a_recipient_keeps_focus_in_the_entry_so_tab_moves_on() {
+        crate::test_helpers::gtk_test_run(|| {
+            let field = RecipientField::new(
+                "To",
+                Rc::new(RefCell::new(sample_book())),
+                Rc::new(RefCell::new(Vec::new())),
+                gtk::Box::new(gtk::Orientation::Vertical, 0).upcast(),
+            );
+            let subject = gtk::Entry::new();
+            let form = gtk::Box::new(gtk::Orientation::Vertical, 0);
+            form.append(field.widget());
+            form.append(&subject);
+            let window = gtk::Window::builder().child(&form).build();
+            window.present();
+
+            field.focus_entry();
+            field.tokens.borrow_mut().push(RecipientToken::Person {
+                email: "alice@example.com".to_string(),
+                name: None,
+            });
+            field.rebuild_chips();
+
+            let focused =
+                gtk::prelude::GtkWindowExt::focus(&window).expect("focus survives adding a chip");
+            assert!(
+                focused.is_ancestor(&field.entry),
+                "focus should stay in the entry, not {focused:?}"
+            );
+            window.child_focus(gtk::DirectionType::TabForward);
+            let focused = gtk::prelude::GtkWindowExt::focus(&window).expect("focus after Tab");
+            assert!(
+                focused.is_ancestor(&subject),
+                "Tab after adding a chip should reach the next field, not {focused:?}"
+            );
+            window.destroy();
+        });
     }
 
     fn sample_book() -> ContactBook {
