@@ -36,7 +36,7 @@ use crate::notifications;
 use crate::preferences::{ACCOUNTS_PAGE_NAME, COMPOSING_PAGE_NAME, build_preferences_dialog};
 use crate::rail::{
     RailSpace, apply_rail_layout, set_badge_count, space_rail_button, update_space_selection,
-    wrap_with_badge,
+    watch_folder_reveal, wrap_with_badge,
 };
 use crate::recipient_picker::mock_sent_recipients;
 use crate::recipient_row::ContactBook;
@@ -437,6 +437,27 @@ impl Component for AppModel {
         mail.emit(MailMsg::SetPreferences(preferences.clone()));
 
         let mail_sender = mail.sender().clone();
+        let mail_is_shown = {
+            let stack = widgets.canvas_stack.downgrade();
+            move || {
+                stack
+                    .upgrade()
+                    .is_some_and(|stack| stack.visible_child_name().as_deref() == Some("mail"))
+            }
+        };
+        watch_folder_reveal(
+            &widgets.rail_split,
+            &widgets.rail,
+            mail_is_shown,
+            {
+                let mail_sender = mail_sender.clone();
+                move |hovered| mail_sender.emit(MailMsg::RailRevealHover(hovered))
+            },
+            {
+                let mail_sender = mail_sender.clone();
+                move |inside| mail_sender.emit(MailMsg::RailPointerInside(inside))
+            },
+        );
         let rail_visible_state = rail_visible();
         let rail_width_state = rail_width();
         apply_rail_layout(&widgets.rail, rail_width_state);

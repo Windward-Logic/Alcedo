@@ -62,6 +62,8 @@ impl MailModel {
             MailMsg::Escape => {
                 if self.mail_content_pane == MailContentPane::Composer {
                     sender.input(MailMsg::CancelCompose);
+                } else if self.layout.overlay_mode && self.layout.folder_overlay.shows_sidebar() {
+                    self.dismiss_folder_overlay();
                 } else if self.layout.single_pane && self.layout.single_show_detail {
                     self.back_to_messages();
                 } else if let MailView::Extension(id) = self.mail_view
@@ -110,6 +112,16 @@ impl MailModel {
                 }
             }
             MailMsg::SetFoldersVisible(visible) => self.set_folders_visible(visible),
+            MailMsg::FolderOverlayChanged => self.sync_folder_chrome(),
+            MailMsg::DismissFolderOverlay => self.dismiss_folder_overlay(),
+            MailMsg::RailRevealHover(hovered) => {
+                self.layout.folder_peek.set_trigger_hovered(hovered);
+            }
+            MailMsg::RailPointerInside(inside) => {
+                self.layout
+                    .folder_peek
+                    .set_keep_zone(super::folder_peek::KeepZone::Rail, inside);
+            }
             MailMsg::SetAdaptiveLayout(applied) => self.apply_adaptive_layout(applied),
             MailMsg::BackToMessages => self.back_to_messages(),
             MailMsg::ApplyTitleButtons => self.apply_title_buttons(),

@@ -118,8 +118,8 @@ use crate::settings::{
     account_order, apply_list_density, clamp_folder_pane_width, cleanup_verification_codes,
     collapsed_accounts, collapsed_folders, collapsed_personal_folders, compose_format_for_account,
     editor_font_size, effective_tracking_pixel_url, ensure_message_list_mode_default,
-    folder_pane_accounts, folder_pane_width, hidden_accounts, last_account, last_folder,
-    list_density, load_remote_images, message_list_mode, on_editor_font_size_changed,
+    folder_pane_accounts, folder_pane_width, folders_docked, hidden_accounts, last_account,
+    last_folder, list_density, load_remote_images, message_list_mode, on_editor_font_size_changed,
     on_folder_pane_accounts_changed, on_list_density_changed, on_load_remote_images_changed,
     on_message_list_mode_changed, on_reader_font_size_changed, on_reading_pane_changed,
     on_show_verification_codes_changed, push_recent_move_folder, reading_pane, recent_move_folders,
@@ -138,6 +138,7 @@ mod compose;
 mod delete;
 mod drafts;
 mod folder_ops;
+mod folder_peek;
 mod folders;
 mod layout;
 mod list;
@@ -431,8 +432,20 @@ pub enum MailMsg {
     SyncAnimHoldElapsed,
     FocusSearch,
     OpenCommandPalette,
-    /// Folder column, or the overlay sidebar when the window is narrow.
+    /// The folder toggle: dock or undock the column, or open or close the
+    /// overlay sidebar when the window is narrow.
     SetFoldersVisible(bool),
+    /// The overlay sidebar opened or closed on its own (edge hover, scrim
+    /// click, swipe); bring the toggle and header buttons in line.
+    FolderOverlayChanged,
+    /// A folder row was picked: slide an overlay sidebar away.
+    DismissFolderOverlay,
+    /// The pointer is on, or left, the part of the app rail that reveals a
+    /// hidden folder sidebar.
+    RailRevealHover(bool),
+    /// The pointer entered or left the app rail, which keeps a revealed
+    /// folder sidebar open.
+    RailPointerInside(bool),
     /// Width breakpoints applied to the main window.
     SetAdaptiveLayout(alcedo_core::layout_policy::WidthBreakpoints),
     BackToMessages,
@@ -1346,8 +1359,16 @@ impl Component for MailModel {
 
         let mut account_switcher = build_account_switcher();
         widgets.folder_pane.prepend(&account_switcher.button);
-        let (folder_header, folder_start, folder_compose, menu_button) =
-            layout::build_folder_chrome();
+        let layout::FolderChrome {
+            header: folder_header,
+            start: folder_start,
+            compose: folder_compose,
+            menu: menu_button,
+            close: folder_close,
+        } = layout::build_folder_chrome({
+            let sender = sender.clone();
+            move || sender.input(MailMsg::DismissFolderOverlay)
+        });
         let folder_body = gtk::Box::new(gtk::Orientation::Vertical, 0);
         folder_body.set_vexpand(true);
         while let Some(child) = widgets.folder_pane.first_child() {
@@ -1366,18 +1387,22 @@ impl Component for MailModel {
         folder_overlay.set_show_sidebar(false);
         folder_overlay.set_vexpand(true);
         folder_overlay.set_hexpand(true);
+        let overlay_host = gtk::Overlay::new();
+        overlay_host.set_child(Some(&folder_overlay));
         widgets
             .mail_layout
-            .add_named(&folder_overlay, Some("overlay"));
+            .add_named(&overlay_host, Some("overlay"));
+        let folder_peek =
+            folder_peek::FolderPeek::install(&overlay_host, &folder_overlay, &widgets.folder_pane);
         let sidebar_notify_suppress = Rc::new(Cell::new(false));
         folder_overlay.connect_show_sidebar_notify({
             let sender = sender.clone();
             let sidebar_notify_suppress = sidebar_notify_suppress.clone();
-            move |overlay| {
+            move |_| {
                 if sidebar_notify_suppress.get() {
                     return;
                 }
-                sender.input(MailMsg::SetFoldersVisible(overlay.shows_sidebar()));
+                sender.input(MailMsg::FolderOverlayChanged);
             }
         });
         refresh_account_switcher(
@@ -1574,6 +1599,7 @@ impl Component for MailModel {
                 folder_header,
                 folder_start,
                 folder_compose,
+                folder_close,
                 list_header,
                 list_start,
                 reader_header,
@@ -1586,9 +1612,11 @@ impl Component for MailModel {
                 messages_placeholder: widgets.messages_placeholder.clone(),
                 content_placeholder: widgets.content_placeholder.clone(),
                 overlay_mode: false,
+                overlay_forced: false,
+                folder_peek,
                 sidebar_notify_suppress,
                 single_pane: false,
-                folders_user_visible: true,
+                folders_docked: folders_docked(),
                 single_show_detail: false,
             },
         };
@@ -1641,15 +1669,24 @@ impl Component for MailModel {
             &model.folder_lists,
             {
                 let sender = sender.clone();
-                move || sender.input(MailMsg::SelectUnifiedInbox)
+                move || {
+                    sender.input(MailMsg::DismissFolderOverlay);
+                    sender.input(MailMsg::SelectUnifiedInbox);
+                }
             },
             {
                 let sender = sender.clone();
-                move |id| sender.input(MailMsg::ShowExtensionView(id))
+                move |id| {
+                    sender.input(MailMsg::DismissFolderOverlay);
+                    sender.input(MailMsg::ShowExtensionView(id));
+                }
             },
             {
                 let sender = sender.clone();
-                move |folder_id| sender.input(MailMsg::SelectFolder(folder_id))
+                move |folder_id| {
+                    sender.input(MailMsg::DismissFolderOverlay);
+                    sender.input(MailMsg::SelectFolder(folder_id));
+                }
             },
             {
                 let sender = sender.clone();
@@ -1685,7 +1722,8 @@ impl Component for MailModel {
         });
 
         apply_reading_pane(&model.mail_paned, reading_pane());
-        model.apply_title_buttons();
+        model.sync_folder_placement();
+        model.sync_folder_chrome();
         on_reading_pane_changed({
             let mail_paned = model.mail_paned.clone();
             let sender = sender.clone();
@@ -1800,6 +1838,10 @@ impl Component for MailModel {
             | MailMsg::Escape
             | MailMsg::OpenCommandPalette
             | MailMsg::SetFoldersVisible(_)
+            | MailMsg::FolderOverlayChanged
+            | MailMsg::DismissFolderOverlay
+            | MailMsg::RailRevealHover(_)
+            | MailMsg::RailPointerInside(_)
             | MailMsg::SetAdaptiveLayout(_)
             | MailMsg::BackToMessages
             | MailMsg::ApplyTitleButtons

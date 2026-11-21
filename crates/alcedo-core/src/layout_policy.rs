@@ -67,6 +67,12 @@ pub fn adaptive_mail_layout(applied: WidthBreakpoints) -> AdaptiveMailLayout {
     }
 }
 
+/// Folders slide over the list when the window forces it or the user undocked
+/// them; otherwise they are a column beside the list.
+pub fn folders_as_overlay(forced_by_width: bool, docked: bool) -> bool {
+    forced_by_width || !docked
+}
+
 /// Which edge of a header bar draws window controls.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct HeaderTitleButtons {
@@ -241,5 +247,17 @@ mod tests {
         assert!(narrow.hide_rail && narrow.folders_overlay && narrow.single_pane);
         assert!(narrow.list_compose && narrow.reply_icon_only);
         assert!(narrow.compact_composer);
+    }
+
+    #[test]
+    fn docked_folders_are_a_column_only_while_the_window_is_wide() {
+        assert!(!folders_as_overlay(false, true));
+        assert!(folders_as_overlay(true, true));
+    }
+
+    #[test]
+    fn undocked_folders_slide_over_the_list_at_any_width() {
+        assert!(folders_as_overlay(false, false));
+        assert!(folders_as_overlay(true, false));
     }
 }

@@ -325,6 +325,15 @@
         Clamped to 180–560.
       </description>
     </key>
+    <key name="folders-docked" type="b">
+      <default>true</default>
+      <summary>Dock the folders column</summary>
+      <description>
+        When true, the folders column stays beside the message list.
+        When false, folders are hidden and slide out over the list while
+        the pointer rests on the left edge of the window.
+      </description>
+    </key>
     <key name="rail-expanded" type="b">
       <default>false</default>
       <summary>Expanded app rail</summary>

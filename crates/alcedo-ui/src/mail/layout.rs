@@ -6,7 +6,7 @@ use std::rc::Rc;
 
 use alcedo_core::layout_policy::{
     HeaderTitleButtons, ReadingPanePlacement, WidthBreakpoints, adaptive_mail_layout,
-    title_button_placement,
+    folders_as_overlay, title_button_placement,
 };
 use relm4::adw;
 use relm4::adw::prelude::*;
@@ -18,9 +18,15 @@ use crate::composer::ComposerHeaderChrome;
 use crate::icons;
 use crate::menu::ACTION_COMPOSE;
 use crate::reader::{refresh_reader_shortcut_tooltips, set_reader_reply_icon_only};
-use crate::settings::{ReadingPane, folder_pane_width, reading_pane};
+use crate::settings::{ReadingPane, folder_pane_width, reading_pane, set_folders_docked};
 
+use super::folder_peek::FolderPeek;
 use super::{MailContentPane, MailModel};
+
+// libadwaita's `OverlaySplitView` defaults, restored when the window (not the
+// user's undocking) is what makes the folders an overlay.
+const DEFAULT_MIN_SIDEBAR_WIDTH: f64 = 180.0;
+const DEFAULT_MAX_SIDEBAR_WIDTH: f64 = 280.0;
 
 pub(super) struct MailLayout {
     pub mail_layout: gtk::Stack,
@@ -28,6 +34,8 @@ pub(super) struct MailLayout {
     pub folder_header: adw::HeaderBar,
     pub folder_start: gtk::Box,
     pub folder_compose: gtk::Button,
+    /// Hides the overlay sidebar; only shown while folders are an overlay.
+    pub folder_close: gtk::Button,
     pub list_header: adw::HeaderBar,
     pub list_start: gtk::Box,
     pub reader_header: adw::HeaderBar,
@@ -40,14 +48,26 @@ pub(super) struct MailLayout {
     pub messages_placeholder: gtk::Box,
     pub content_placeholder: gtk::Box,
     pub overlay_mode: bool,
+    /// The window is too narrow for a folder column.
+    pub overlay_forced: bool,
+    pub folder_peek: FolderPeek,
     /// Set while panes are reparented so a sidebar notification cannot hide them.
     pub sidebar_notify_suppress: Rc<Cell<bool>>,
     pub single_pane: bool,
-    pub folders_user_visible: bool,
+    /// The user wants the folders as a column beside the list (saved).
+    pub folders_docked: bool,
     pub single_show_detail: bool,
 }
 
-pub(super) fn build_folder_chrome() -> (adw::HeaderBar, gtk::Box, gtk::Button, gtk::MenuButton) {
+pub(super) struct FolderChrome {
+    pub header: adw::HeaderBar,
+    pub start: gtk::Box,
+    pub compose: gtk::Button,
+    pub menu: gtk::MenuButton,
+    pub close: gtk::Button,
+}
+
+pub(super) fn build_folder_chrome(on_close: impl Fn() + 'static) -> FolderChrome {
     let header = adw::HeaderBar::new();
     header.set_centering_policy(adw::CenteringPolicy::Loose);
     header.set_title_widget(Some(&adw::WindowTitle::new("Alcedo", "")));
@@ -70,7 +90,24 @@ pub(super) fn build_folder_chrome() -> (adw::HeaderBar, gtk::Box, gtk::Button, g
     start.append(&menu);
     start.append(&compose);
     header.pack_start(&start);
-    (header, start, compose, menu)
+
+    // The list header's toggle sits under the open sidebar, so the sidebar
+    // carries its own way out.
+    let close = gtk::Button::builder()
+        .css_classes(["flat"])
+        .visible(false)
+        .build();
+    icons::set_button_icon(&close, icons::FOLDER_PANE, icons::TOOLBAR_PIXEL_SIZE);
+    a11y::label_icon_control(&close, &tr!("Hide Folders"));
+    close.connect_clicked(move |_| on_close());
+    header.pack_end(&close);
+    FolderChrome {
+        header,
+        start,
+        compose,
+        menu,
+        close,
+    }
 }
 
 impl MailModel {
@@ -82,42 +119,88 @@ impl MailModel {
         self.layout
             .composer_chrome
             .set_compact(spec.compact_composer);
-        if spec.folders_overlay != self.layout.overlay_mode {
-            self.set_overlay_mode(spec.folders_overlay);
-        }
+        self.layout.overlay_forced = spec.folders_overlay;
+        self.sync_folder_placement();
         if !spec.single_pane {
             self.layout.single_show_detail = false;
         }
         self.sync_single_pane();
-        self.place_menu_button();
-        self.apply_title_buttons();
+        self.sync_folder_chrome();
     }
 
+    /// The folder toggle was used. In a wide window it docks or undocks the
+    /// column; where the folders are always an overlay it opens or closes it.
     pub(super) fn set_folders_visible(&mut self, visible: bool) {
-        self.layout.folders_user_visible = visible;
-        if self.layout.folder_toggle.is_active() != visible {
-            self.layout.folder_toggle.set_active(visible);
+        if self.layout.overlay_forced {
+            self.layout.folder_overlay.set_show_sidebar(visible);
+        } else {
+            self.layout.folders_docked = visible;
+            set_folders_docked(visible);
+            self.sync_folder_placement();
+        }
+        self.sync_folder_chrome();
+    }
+
+    /// Slide the overlay sidebar away. Does nothing for a docked column.
+    pub(super) fn dismiss_folder_overlay(&self) {
+        if self.layout.overlay_mode {
+            self.layout.folder_overlay.set_show_sidebar(false);
+        }
+    }
+
+    /// Put the folders in a column or an overlay, whichever the window and the
+    /// user's choice call for.
+    pub(super) fn sync_folder_placement(&mut self) {
+        let overlay = folders_as_overlay(self.layout.overlay_forced, self.layout.folders_docked);
+        if overlay != self.layout.overlay_mode {
+            self.set_overlay_mode(overlay);
+        }
+        self.apply_overlay_width();
+    }
+
+    /// Bring the toggle, the sidebar's close button, the menu button and the
+    /// window controls in line with where the folders are now.
+    pub(super) fn sync_folder_chrome(&self) {
+        let shown = if self.layout.overlay_forced {
+            self.layout.folder_overlay.shows_sidebar()
+        } else {
+            self.layout.folders_docked
+        };
+        if self.layout.folder_toggle.is_active() != shown {
+            self.layout.folder_toggle.set_active(shown);
         }
         a11y::label_icon_control(
             &self.layout.folder_toggle,
-            if visible {
+            if shown {
                 trs!("Hide Folders")
             } else {
                 trs!("Show Folders")
             },
         );
-        if self.layout.overlay_mode {
-            if self.layout.folder_overlay.shows_sidebar() != visible {
-                self.layout.folder_overlay.set_show_sidebar(visible);
-            }
-        } else if let Some(start) = self.folder_split.start_child() {
-            start.set_visible(visible);
-            if visible {
-                self.folder_split.set_position(folder_pane_width());
-            }
-        }
+        self.layout
+            .folder_close
+            .set_visible(self.layout.overlay_mode);
         self.place_menu_button();
         self.apply_title_buttons();
+    }
+
+    /// The folders are on screen: a column, or an overlay that is open.
+    fn folders_open(&self) -> bool {
+        !self.layout.overlay_mode || self.layout.folder_overlay.shows_sidebar()
+    }
+
+    /// A peeking sidebar keeps the docked column's width. When the window
+    /// forces the overlay, the sidebar follows libadwaita's default sizing.
+    fn apply_overlay_width(&self) {
+        let overlay = &self.layout.folder_overlay;
+        if self.layout.overlay_forced {
+            overlay.set_min_sidebar_width(DEFAULT_MIN_SIDEBAR_WIDTH);
+            overlay.set_max_sidebar_width(DEFAULT_MAX_SIDEBAR_WIDTH);
+        } else {
+            let width = f64::from(folder_pane_width());
+            overlay.set_min_sidebar_width(width);
+            overlay.set_max_sidebar_width(width);
+        }
     }
 
     pub(super) fn note_single_pane_detail(&mut self) {
@@ -147,11 +230,7 @@ impl MailModel {
     }
 
     pub(super) fn apply_title_buttons(&self) {
-        let folders_column = if self.layout.overlay_mode {
-            self.layout.folder_overlay.shows_sidebar()
-        } else {
-            self.layout.folders_user_visible
-        };
+        let folders_column = self.folders_open();
         let pane = match reading_pane() {
             ReadingPane::Bottom => ReadingPanePlacement::Bottom,
             ReadingPane::Right => ReadingPanePlacement::Right,
@@ -212,9 +291,9 @@ impl MailModel {
             folder.set_visible(true);
             self.layout.folder_overlay.set_sidebar(Some(&folder));
             self.layout.folder_overlay.set_content(Some(&content));
-            self.layout
-                .folder_overlay
-                .set_show_sidebar(self.layout.folders_user_visible);
+            // The overlay always starts closed: a window that narrows should
+            // land on the list, and the toggle or the edge opens the folders.
+            self.layout.folder_overlay.set_show_sidebar(false);
             self.layout.mail_layout.set_visible_child_name("overlay");
         } else {
             let Some(folder) = self.layout.folder_overlay.sidebar() else {
@@ -225,29 +304,25 @@ impl MailModel {
                 self.layout.sidebar_notify_suppress.set(false);
                 return;
             };
+            self.layout.folder_overlay.set_show_sidebar(false);
             self.layout.folder_overlay.set_sidebar(None::<&gtk::Widget>);
             self.layout.folder_overlay.set_content(None::<&gtk::Widget>);
             self.folder_split.set_start_child(Some(&folder));
             self.folder_split.set_end_child(Some(&content));
-            folder.set_visible(self.layout.folders_user_visible);
-            if self.layout.folders_user_visible {
-                self.folder_split.set_position(folder_pane_width());
-            }
+            folder.set_visible(true);
+            self.folder_split.set_position(folder_pane_width());
             self.layout.mail_layout.set_visible_child_name("paned");
         }
         self.layout.overlay_mode = overlay;
+        self.layout.folder_peek.reset();
+        self.layout.folder_peek.set_enabled(overlay);
         self.layout.sidebar_notify_suppress.set(false);
     }
 
     fn place_menu_button(&self) {
         let button = &self.layout.menu_button;
         button.unparent();
-        let in_folder = if self.layout.overlay_mode {
-            self.layout.folder_overlay.shows_sidebar()
-        } else {
-            self.layout.folders_user_visible
-        };
-        if in_folder {
+        if self.folders_open() {
             self.layout.folder_start.prepend(button);
         } else {
             self.layout.list_start.prepend(button);

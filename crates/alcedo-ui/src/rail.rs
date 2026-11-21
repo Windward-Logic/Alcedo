@@ -1,5 +1,8 @@
 //! App rail sidebar (P4).
 
+use std::cell::Cell;
+use std::rc::Rc;
+
 use relm4::gtk;
 use relm4::gtk::prelude::*;
 
@@ -146,6 +149,102 @@ pub fn space_rail_button(title: &str, icon: &gtk::gio::Icon) -> gtk::Button {
     button
 }
 
+/// Fraction of the rail's width, from its right edge (the side facing the mail
+/// view), where resting the pointer reveals a hidden folder sidebar.
+pub const FOLDER_REVEAL_FRACTION: f64 = 0.25;
+
+/// Horizontal extents, in the rail splitter's coordinates, of the rail and of
+/// the content beside it. The gap between them is the drag handle.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct RailSpan {
+    pub left: f64,
+    pub right: f64,
+    pub content_left: f64,
+}
+
+/// Where a pointer at `x` is relative to the rail.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct RailPointer {
+    /// Over the rail or its drag handle.
+    pub on_rail: bool,
+    /// In the right quarter of the rail, or on the drag handle beside it.
+    pub in_reveal_zone: bool,
+}
+
+/// The drag handle belongs to the rail here: it sits between the rail and the
+/// content and takes the pointer from both, so leaving it out would leave a dead
+/// strip right where the pointer arrives from the content.
+pub fn rail_pointer(x: f64, span: RailSpan) -> RailPointer {
+    let width = span.right - span.left;
+    if width <= 0.0 || x < span.left || x >= span.content_left {
+        return RailPointer::default();
+    }
+    RailPointer {
+        on_rail: true,
+        in_reveal_zone: x >= span.right - width * FOLDER_REVEAL_FRACTION,
+    }
+}
+
+/// Report where the pointer is on the rail so a hidden folder sidebar can slide
+/// out. `on_reveal_zone` fires when the pointer enters or leaves the reveal
+/// zone, and `on_inside` when it enters or leaves the rail (handle included).
+/// Both stay false while `active` says the mail view is not the one on screen.
+///
+/// The controller sits on the splitter, not the rail: the drag handle's hit
+/// area overlaps the rail's right edge, so events there never reach the rail.
+pub fn watch_folder_reveal(
+    split: &gtk::Paned,
+    rail: &gtk::Box,
+    active: impl Fn() -> bool + 'static,
+    on_reveal_zone: impl Fn(bool) + 'static,
+    on_inside: impl Fn(bool) + 'static,
+) {
+    let last = Rc::new(Cell::new(RailPointer::default()));
+    let report = Rc::new(move |now: RailPointer, last: &Cell<RailPointer>| {
+        let before = last.replace(now);
+        if before.in_reveal_zone != now.in_reveal_zone {
+            on_reveal_zone(now.in_reveal_zone);
+        }
+        if before.on_rail != now.on_rail {
+            on_inside(now.on_rail);
+        }
+    });
+
+    // Capture, so a child that handles motion (the web view) cannot hide the
+    // pointer leaving the rail.
+    let motion = gtk::EventControllerMotion::new();
+    motion.set_propagation_phase(gtk::PropagationPhase::Capture);
+    motion.connect_motion({
+        let split = split.downgrade();
+        let rail = rail.downgrade();
+        let last = last.clone();
+        let report = report.clone();
+        move |_, x, _| {
+            let pointer = match (split.upgrade(), rail.upgrade()) {
+                (Some(split), Some(rail)) if active() => rail_span(&split, &rail)
+                    .map_or_else(RailPointer::default, |s| rail_pointer(x, s)),
+                _ => RailPointer::default(),
+            };
+            report(pointer, &last);
+        }
+    });
+    motion.connect_leave(move |_| report(RailPointer::default(), &last));
+    split.add_controller(motion);
+}
+
+fn rail_span(split: &gtk::Paned, rail: &gtk::Box) -> Option<RailSpan> {
+    if !rail.is_visible() {
+        return None;
+    }
+    let rail_bounds = rail.compute_bounds(split)?;
+    let content_bounds = split.end_child()?.compute_bounds(split)?;
+    Some(RailSpan {
+        left: f64::from(rail_bounds.x()),
+        right: f64::from(rail_bounds.x() + rail_bounds.width()),
+        content_left: f64::from(content_bounds.x()),
+    })
+}
+
 /// Apply rail layout from paned width: label visibility and expanded styling.
 pub fn apply_rail_layout(rail: &gtk::Box, width: i32) {
     let expanded = width >= crate::settings::RAIL_LABEL_THRESHOLD;
@@ -185,7 +284,10 @@ fn sync_rail_layout(widget: &gtk::Widget, expanded: bool) {
 
 #[cfg(test)]
 mod tests {
-    use super::{RAIL_COLLAPSED_WIDTH, RAIL_EXPANDED_WIDTH, format_badge_count};
+    use super::{
+        RAIL_COLLAPSED_WIDTH, RAIL_EXPANDED_WIDTH, RailPointer, RailSpan, format_badge_count,
+        rail_pointer,
+    };
     use crate::settings::RAIL_LABEL_THRESHOLD;
 
     #[test]
@@ -222,5 +324,53 @@ mod tests {
     fn format_badge_count_over_cap() {
         assert_eq!(format_badge_count(100), "99+");
         assert_eq!(format_badge_count(250), "99+");
+    }
+
+    const SPAN: RailSpan = RailSpan {
+        left: 0.0,
+        right: 56.0,
+        content_left: 64.0,
+    };
+
+    #[test]
+    fn reveal_zone_is_the_right_quarter_of_the_rail() {
+        assert!(rail_pointer(42.0, SPAN).in_reveal_zone);
+        assert!(rail_pointer(55.9, SPAN).in_reveal_zone);
+        assert!(!rail_pointer(41.9, SPAN).in_reveal_zone);
+        assert!(!rail_pointer(0.0, SPAN).in_reveal_zone);
+    }
+
+    #[test]
+    fn reveal_zone_scales_with_an_expanded_rail() {
+        let wide = RailSpan {
+            left: 0.0,
+            right: 240.0,
+            content_left: 248.0,
+        };
+        assert!(rail_pointer(180.0, wide).in_reveal_zone);
+        assert!(!rail_pointer(179.9, wide).in_reveal_zone);
+    }
+
+    #[test]
+    fn the_drag_handle_counts_as_the_reveal_zone() {
+        let on_handle = rail_pointer(60.0, SPAN);
+        assert!(on_handle.on_rail && on_handle.in_reveal_zone);
+    }
+
+    #[test]
+    fn a_pointer_over_the_content_or_beside_the_rail_is_not_on_it() {
+        assert_eq!(rail_pointer(64.0, SPAN), RailPointer::default());
+        assert_eq!(rail_pointer(300.0, SPAN), RailPointer::default());
+        assert_eq!(rail_pointer(-1.0, SPAN), RailPointer::default());
+    }
+
+    #[test]
+    fn a_collapsed_rail_width_of_zero_never_reveals() {
+        let none = RailSpan {
+            left: 0.0,
+            right: 0.0,
+            content_left: 8.0,
+        };
+        assert_eq!(rail_pointer(0.0, none), RailPointer::default());
     }
 }

@@ -260,6 +260,18 @@ pub fn on_close_to_tray_changed<F: Fn(bool) + 'static>(callback: F) {
     });
 }
 
+pub fn folders_docked() -> bool {
+    with_settings(|settings| settings.boolean("folders-docked"))
+}
+
+pub fn set_folders_docked(docked: bool) {
+    with_settings(|settings| {
+        settings
+            .set_boolean("folders-docked", docked)
+            .unwrap_or_else(|err| log_write_failure("folders-docked", &err));
+    });
+}
+
 pub fn rail_expanded() -> bool {
     with_settings(|settings| settings.boolean("rail-expanded"))
 }
