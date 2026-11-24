@@ -1,3 +1,13 @@
+alcedo (1.0.14-1) resolute; urgency=medium
+
+  * Changing a draft's From account moves the saved draft to that account's
+    Drafts folder and removes the old copy.
+  * Discarding a draft deletes the copy it was saved as.
+  * A new message holding only the signature no longer leaves a draft behind.
+  * Signature, draft and send code tidied up.
+
+ -- Windward Logic LLC <alcedo@windwardlogic.com>  Mon, 23 Nov 2026 12:00:00 +0000
+
 alcedo (1.0.13-1) resolute; urgency=medium
 
   * Folders can be docked or undocked. Undocked, they slide out from the left
