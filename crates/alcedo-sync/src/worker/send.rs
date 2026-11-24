@@ -2,7 +2,7 @@
 #![allow(clippy::too_many_arguments)]
 
 use super::auth::{forget_rejected_token, smtp_auth};
-use super::drafts::{delete_imap_draft, drafts_folder, imap_draft_has_server_uid};
+use super::drafts::{delete_imap_draft, imap_draft_has_server_uid};
 use super::pgp::send_pgp_compose;
 use super::sent_copy::{file_sent_copy, publish_local_sent_copy};
 use super::*;
@@ -211,38 +211,6 @@ pub(super) async fn smtp_options_for_compose(
     })
 }
 
-pub(super) async fn delete_imap_draft_after_send(
-    state: &mut WorkerImapState,
-    account: &Account,
-    imap: &ImapDraftRef,
-    store: &StoreHandle,
-    events: &flume::Sender<SyncEvent>,
-    server_rules: &ServerRulesSession,
-) -> Result<()> {
-    let folder_id = if imap.folder_id.0 != 0 {
-        imap.folder_id
-    } else {
-        let Ok(folders) = store.list_folders(account.id).await else {
-            return Ok(());
-        };
-        let Some(drafts) = drafts_folder(&folders) else {
-            return Ok(());
-        };
-        drafts.id
-    };
-    delete_imap_draft(
-        state,
-        account,
-        folder_id,
-        imap.uid,
-        &imap.message_id,
-        store,
-        events,
-        server_rules,
-    )
-    .await
-}
-
 pub(super) async fn finish_send_on_imap(
     state: &mut WorkerImapState,
     account: &Account,
@@ -254,7 +222,7 @@ pub(super) async fn finish_send_on_imap(
     _server_rules: &ServerRulesSession,
 ) -> Result<Option<WorkerCommand>> {
     if let Some(imap) = draft.imap_draft.as_ref() {
-        state.note_sent_compose_session(&imap.message_id);
+        state.note_closed_compose_session(&imap.message_id);
     }
     // The SMTP bytes are already the message. Show them before APPEND so Sent
     // and the reader do not wait on the server accepting a large attachment.
@@ -280,8 +248,17 @@ pub(super) async fn file_sent_on_imap(
     server_rules: &ServerRulesSession,
 ) -> Result<()> {
     if let Some(imap) = should_delete_draft_after_send(&draft).cloned()
-        && let Err(err) =
-            delete_imap_draft_after_send(state, account, &imap, store, events, server_rules).await
+        && let Err(err) = delete_imap_draft(
+            state,
+            account,
+            imap.folder_id,
+            imap.uid,
+            &imap.message_id,
+            store,
+            events,
+            server_rules,
+        )
+        .await
     {
         if is_recoverable_disconnect(&err) || is_auth_failure(&err) {
             return Err(err);

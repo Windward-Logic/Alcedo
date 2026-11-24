@@ -262,6 +262,9 @@ pub struct ComposerWidgets {
     approve_contact_email: Rc<RefCell<Option<String>>>,
     /// Drop late autosave flushes after this composer has been handed to Send.
     autosave_suspended: Rc<Cell<bool>>,
+    /// Account whose Drafts the last server save went to. When From moves to
+    /// another account, that account still holds the copy and must delete it.
+    draft_saved_account: Rc<Cell<Option<AccountId>>>,
 }
 
 impl ComposerWidgets {
@@ -276,6 +279,12 @@ impl ComposerWidgets {
     /// Autosave this composer's current content to its own recovery file.
     pub fn autosave_local(&self, draft: &ComposeDraft) {
         if self.autosave_suspended.get() {
+            return;
+        }
+        if is_untouched_new_compose(draft, self.draft_saved_account()) {
+            // Nothing to recover, and a leftover file would offer
+            // "Restore unsent message?" for an empty compose on next launch.
+            self.clear_local_autosave();
             return;
         }
         save_compose_draft(self.draft_slot(), draft);
@@ -300,6 +309,21 @@ impl ComposerWidgets {
 
     pub fn autosave_is_suspended(&self) -> bool {
         self.autosave_suspended.get()
+    }
+
+    pub fn note_draft_saved_to(&self, account: AccountId) {
+        self.draft_saved_account.set(Some(account));
+    }
+
+    pub fn draft_saved_account(&self) -> Option<AccountId> {
+        self.draft_saved_account.get()
+    }
+
+    /// Detach the server draft from this composer, e.g. after From moved to
+    /// another account. The next save starts a new Message-ID.
+    pub fn take_imap_draft(&self) -> Option<ImapDraftRef> {
+        self.draft_saved_account.set(None);
+        self.imap_draft.borrow_mut().take()
     }
 
     /// Show the draft's save state under the composer title.
@@ -1882,6 +1906,7 @@ fn build_composer_form(
 
     let draft_slot = Rc::new(Cell::new(DraftSlot::INLINE));
     let autosave_suspended = Rc::new(Cell::new(false));
+    let draft_saved_account = Rc::new(Cell::new(None));
     let header_title = adw::WindowTitle::new(&tr!("Compose"), "");
     header_title.add_css_class("alcedo-composer-title");
     let widgets_for_cc = ComposerWidgets {
@@ -1928,6 +1953,7 @@ fn build_composer_form(
         thread_id: Rc::new(Cell::new(None)),
         approve_contact_email: Rc::new(RefCell::new(None)),
         autosave_suspended: autosave_suspended.clone(),
+        draft_saved_account: draft_saved_account.clone(),
     };
 
     *composer_widgets_holder.borrow_mut() = Some(widgets_for_cc.clone());
@@ -2024,6 +2050,7 @@ fn build_composer_form(
         thread_id: Rc::new(Cell::new(None)),
         approve_contact_email: Rc::new(RefCell::new(None)),
         autosave_suspended,
+        draft_saved_account,
     };
     let refresh_recipient_pgp = {
         let widgets_holder = Rc::downgrade(&composer_widgets_holder);
@@ -2207,6 +2234,20 @@ pub(crate) fn imap_draft_has_server_uid(imap: &ImapDraftRef) -> bool {
     imap.uid != 0
 }
 
+/// A compose that holds only the signature and has never been saved. It is
+/// kept off Drafts; once a server copy exists, saves continue as normal so
+/// that copy does not go stale.
+pub(crate) fn is_untouched_new_compose(draft: &ComposeDraft, saved_to: Option<AccountId>) -> bool {
+    saved_to.is_none() && alcedo_html::draft_is_only_signature(draft)
+}
+
+/// Whether a server copy may exist for this ref. A composer whose first save
+/// is still in flight, or whose APPEND never reported a UID, has only its
+/// Message-ID; the worker finds the copy by that.
+pub(crate) fn imap_draft_may_be_on_server(imap: &ImapDraftRef) -> bool {
+    imap_draft_has_server_uid(imap) || !imap.message_id.trim().is_empty()
+}
+
 pub(crate) fn placeholder_imap_draft(message_id: String) -> ImapDraftRef {
     ImapDraftRef {
         folder_id: FolderId(0),
@@ -2326,6 +2367,9 @@ pub fn apply_compose_draft(
     refresh_disclosure_banner(&widgets.disclosure_banner);
     sync_cc_bcc_visibility(widgets);
     *widgets.imap_draft.borrow_mut() = draft.imap_draft.clone();
+    widgets
+        .draft_saved_account
+        .set(draft.imap_draft.as_ref().map(|_| draft.account_id));
     widgets.include_signature.set(true);
     widgets.toolbar.include_signature.set_active(true);
     widgets.from_syncing.set(true);
@@ -2519,6 +2563,7 @@ pub fn clear_composer(widgets: &ComposerWidgets) {
     widgets.thread_id.set(None);
     widgets.approve_contact_email.replace(None);
     *widgets.imap_draft.borrow_mut() = None;
+    widgets.draft_saved_account.set(None);
     widgets.include_signature.set(true);
     widgets.toolbar.include_signature.set_active(true);
     let prefill = MAILTO_PREFILL.lock().ok().and_then(|mut slot| slot.take());

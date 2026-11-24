@@ -254,9 +254,18 @@ impl MailModel {
         let cmd = self.cmd.clone();
         let widgets_for_flush = widgets.clone();
         flush_compose_draft_then(widgets, move |draft| {
-            if widgets_for_flush.autosave_is_suspended() {
+            if !flushed_draft_still_current(
+                widgets_for_flush.autosave_is_suspended(),
+                draft.account_id,
+                widgets_for_flush.from_account_id(),
+            ) {
                 return;
             }
+            // Compose, then click elsewhere, must not file a signature-only draft.
+            if is_untouched_new_compose(&draft, widgets_for_flush.draft_saved_account()) {
+                return;
+            }
+            widgets_for_flush.note_draft_saved_to(draft.account_id);
             cmd.emit(UiCommand::SaveImapDraft(draft));
         });
     }
@@ -351,6 +360,7 @@ impl MailModel {
         };
         if should_stamp {
             *widgets.imap_draft.borrow_mut() = Some(saved.clone());
+            widgets.note_draft_saved_to(account_id);
         }
     }
 
@@ -454,6 +464,17 @@ impl MailModel {
     }
 }
 
+/// Whether a save whose editor flush just finished may still go to the server.
+/// The composer may have been sent or discarded meanwhile (autosave suspended),
+/// or From moved to another account, whose old copy was just retired.
+pub(super) fn flushed_draft_still_current(
+    autosave_suspended: bool,
+    draft_account: AccountId,
+    composer_account: AccountId,
+) -> bool {
+    !autosave_suspended && draft_account == composer_account
+}
+
 pub(super) fn normalize_message_id(id: &str) -> String {
     let id = id.trim();
     let id = id.strip_prefix('<').unwrap_or(id);
@@ -541,6 +562,36 @@ mod tests {
             message_id: message_id.to_string(),
             last_internaldate: None,
         }
+    }
+
+    #[test]
+    fn signature_only_compose_stays_off_drafts_until_it_has_a_server_copy() {
+        let draft: ComposeDraft = serde_json::from_value(serde_json::json!({
+            "account_id": "00000000-0000-0000-0000-000000000001", "to": [], "cc": [], "bcc": [],
+            "subject": "", "body_text": "-- \nCarol", "format": "plain",
+            "request_mdn": false, "tracking_pixel_url": null
+        }))
+        .unwrap();
+        assert!(is_untouched_new_compose(&draft, None));
+        // A copy already on the server keeps receiving saves, or it would go stale.
+        assert!(!is_untouched_new_compose(
+            &draft,
+            Some(AccountId(Uuid::from_u128(1)))
+        ));
+        let typed = ComposeDraft {
+            body_text: "Hi\n-- \nCarol".to_string(),
+            ..draft
+        };
+        assert!(!is_untouched_new_compose(&typed, None));
+    }
+
+    #[test]
+    fn a_flush_finishing_after_discard_or_account_switch_is_not_saved() {
+        let first = AccountId(Uuid::from_u128(1));
+        let second = AccountId(Uuid::from_u128(2));
+        assert!(flushed_draft_still_current(false, first, first));
+        assert!(!flushed_draft_still_current(true, first, first));
+        assert!(!flushed_draft_still_current(false, first, second));
     }
 
     #[test]

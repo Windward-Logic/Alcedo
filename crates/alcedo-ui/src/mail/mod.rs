@@ -64,9 +64,10 @@ use crate::compose_snippets::{open_snippet_editor, refresh_snippets_prefs};
 use crate::composer::{
     ComposeSendChrome, ComposerHooks, ComposerWidgets, ComposerWindow, apply_compose_draft,
     apply_compose_plain_spacing, build_composer_page, clear_composer, compose_draft_from_widgets,
-    composer_has_draft, confirm_discard_composer, flush_compose_draft_then, focus_composer_to,
-    imap_draft_has_server_uid, open_composer_window, ready_to_send, refresh_pgp_disclosure,
-    sync_composer_from_accounts,
+    composer_has_draft, confirm_discard_composer, ensure_compose_draft_identity,
+    flush_compose_draft_then, focus_composer_to, imap_draft_has_server_uid,
+    imap_draft_may_be_on_server, is_untouched_new_compose, open_composer_window, ready_to_send,
+    refresh_pgp_disclosure, sync_composer_from_accounts,
 };
 use crate::folder_bar::{
     FolderRestoreMatch, MailView, account_added_toast_title, bind_folder_bar,

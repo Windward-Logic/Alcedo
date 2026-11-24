@@ -368,9 +368,9 @@ struct UnresolvedDraftAppend {
     at: Instant,
 }
 
-/// A compose session (draft Message-ID) whose message was sent; a late autosave
-/// for it must not put the row back in Drafts.
-struct SentComposeSession {
+/// A compose session (draft Message-ID) that was sent, discarded or moved to
+/// another account; a late autosave for it must not put the row back in Drafts.
+struct ClosedComposeSession {
     message_id: String,
     at: Instant,
 }
@@ -396,7 +396,7 @@ struct WorkerImapState {
     inbox: Folder,
     recent_draft_append: Option<RecentDraftAppend>,
     unresolved_draft_append: Option<UnresolvedDraftAppend>,
-    sent_compose_sessions: Vec<SentComposeSession>,
+    closed_compose_sessions: Vec<ClosedComposeSession>,
     pending_sent: Vec<PendingSentAttachments>,
     watched: WatchedFolders,
     search_import_generation: Arc<AtomicU64>,
@@ -484,32 +484,33 @@ impl WorkerImapState {
         folder_id: FolderId,
         message_id: &str,
     ) -> Option<&UnresolvedDraftAppend> {
+        // No wildcard on an empty Message-ID: the record belongs to one compose
+        // session, and a delete of some other draft must not sweep it up.
         self.unresolved_draft_append.as_ref().filter(|record| {
             record.folder_id == folder_id
                 && record.at.elapsed() <= COMPOSE_SESSION_WINDOW
-                && (message_id.trim().is_empty()
-                    || draft_message_id_eq(&record.message_id, message_id))
+                && draft_message_id_eq(&record.message_id, message_id)
         })
     }
 
-    fn note_sent_compose_session(&mut self, message_id: &str) {
+    fn note_closed_compose_session(&mut self, message_id: &str) {
         let message_id = normalize_draft_message_id(message_id);
         if message_id.is_empty() {
             return;
         }
-        self.sent_compose_sessions.retain(|session| {
+        self.closed_compose_sessions.retain(|session| {
             session.at.elapsed() <= COMPOSE_SESSION_WINDOW && session.message_id != message_id
         });
-        self.sent_compose_sessions.push(SentComposeSession {
+        self.closed_compose_sessions.push(ClosedComposeSession {
             message_id,
             at: Instant::now(),
         });
     }
 
-    fn compose_session_sent(&self, message_id: &str) -> bool {
+    fn compose_session_closed(&self, message_id: &str) -> bool {
         let message_id = normalize_draft_message_id(message_id);
         !message_id.is_empty()
-            && self.sent_compose_sessions.iter().any(|session| {
+            && self.closed_compose_sessions.iter().any(|session| {
                 session.message_id == message_id && session.at.elapsed() <= COMPOSE_SESSION_WINDOW
             })
     }
@@ -937,7 +938,7 @@ mod tests {
             inbox: folder_with(Some(1), None),
             recent_draft_append: None,
             unresolved_draft_append: None,
-            sent_compose_sessions: Vec::new(),
+            closed_compose_sessions: Vec::new(),
             pending_sent: Vec::new(),
             watched: WatchedFolders::default(),
             search_import_generation: Arc::new(AtomicU64::new(0)),
@@ -969,13 +970,23 @@ mod tests {
     }
 
     #[test]
-    fn sent_compose_session_blocks_late_autosave_for_that_draft_only() {
+    fn unresolved_draft_append_is_not_claimed_by_a_draft_without_message_id() {
+        let drafts = FolderId(9);
         let mut state = imap_state_without_client();
-        state.note_sent_compose_session("<session@example.com>");
+        state.note_unresolved_draft_append(drafts, "<session@example.com>", 40);
 
-        assert!(state.compose_session_sent("session@example.com"));
-        assert!(!state.compose_session_sent("<other@example.com>"));
-        assert!(!state.compose_session_sent(""));
+        assert!(state.unresolved_draft_append_for(drafts, "").is_none());
+        assert!(state.unresolved_draft_append_for(drafts, "  ").is_none());
+    }
+
+    #[test]
+    fn closed_compose_session_blocks_late_autosave_for_that_draft_only() {
+        let mut state = imap_state_without_client();
+        state.note_closed_compose_session("<session@example.com>");
+
+        assert!(state.compose_session_closed("session@example.com"));
+        assert!(!state.compose_session_closed("<other@example.com>"));
+        assert!(!state.compose_session_closed(""));
     }
 
     #[test]

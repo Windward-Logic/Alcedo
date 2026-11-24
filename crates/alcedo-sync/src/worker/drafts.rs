@@ -264,6 +264,44 @@ pub(super) fn imap_draft_has_server_uid(imap: &ImapDraftRef) -> bool {
     imap.uid != 0
 }
 
+/// Keep only what of `old` is meaningful in this account's mailboxes.
+///
+/// A ref whose folder belongs to another account (the From account changed)
+/// names a UID in that account's Drafts. Here the same number is some other
+/// message, so drop the UID and keep the Message-ID.
+pub(crate) fn draft_ref_for_account(
+    old: Option<ImapDraftRef>,
+    account_folders: &[Folder],
+) -> Option<ImapDraftRef> {
+    let old = old?;
+    let in_account = old.folder_id.0 == 0
+        || account_folders
+            .iter()
+            .any(|folder| folder.id == old.folder_id);
+    if in_account {
+        return Some(old);
+    }
+    Some(ImapDraftRef {
+        folder_id: FolderId(0),
+        uid: 0,
+        uidvalidity: 0,
+        message_id: old.message_id,
+        last_internaldate: None,
+    })
+}
+
+/// Folder a draft delete should run in. A composer that has not yet heard back
+/// from its first save only knows the Message-ID (folder `0`), so use Drafts.
+pub(crate) fn draft_delete_folder(
+    requested: FolderId,
+    account_folders: &[Folder],
+) -> Option<FolderId> {
+    if requested.0 != 0 {
+        return Some(requested);
+    }
+    drafts_folder(account_folders).map(|folder| folder.id)
+}
+
 pub(crate) fn draft_uids_to_replace_after_append(found: &[u32], keep: u32) -> Vec<u32> {
     let mut stale: Vec<u32> = found.iter().copied().filter(|uid| *uid != keep).collect();
     stale.sort_unstable();
@@ -619,15 +657,17 @@ pub(super) async fn save_imap_draft(
     events: &flume::Sender<SyncEvent>,
     server_rules: &ServerRulesSession,
 ) -> Result<()> {
-    // An autosave flushed just before Send can reach us after the send finished.
+    // An autosave flushed just before Send or Discard can reach us after the
+    // session's Drafts copy was already deleted.
     if let Some(imap) = draft.imap_draft.as_ref()
-        && state.compose_session_sent(&imap.message_id)
+        && state.compose_session_closed(&imap.message_id)
     {
-        debug!("skipping Drafts save for a compose session that already sent");
+        debug!("skipping Drafts save for a compose session that was sent or discarded");
         return Ok(());
     }
 
     let folders = store.list_folders(account.id).await?;
+    draft.imap_draft = draft_ref_for_account(draft.imap_draft.take(), &folders);
     let Some(drafts) = drafts_folder(&folders) else {
         let _ = events.send(SyncEvent::ImapDraftSaveFailed {
             message: tr!("This account has no Drafts folder"),
@@ -893,6 +933,19 @@ pub(super) async fn delete_imap_draft(
     events: &flume::Sender<SyncEvent>,
     server_rules: &ServerRulesSession,
 ) -> Result<()> {
+    // Before any I/O: an autosave queued behind this delete must not re-create it.
+    state.note_closed_compose_session(message_id);
+
+    let folder_id = if folder_id.0 == 0 {
+        let folders = store.list_folders(account.id).await?;
+        let Some(id) = draft_delete_folder(folder_id, &folders) else {
+            warn!(account = %account.email, "draft delete skipped: account has no Drafts folder");
+            return Ok(());
+        };
+        id
+    } else {
+        folder_id
+    };
     let folder = store
         .get_folder(folder_id)
         .await?
@@ -936,6 +989,10 @@ pub(super) async fn delete_imap_draft(
     }
 
     // Fallback: either Message-ID is missing, or this draft is already gone from the server.
+    // UID 0 is a composer whose first save had not answered yet; there is no UID to try.
+    if uid == 0 {
+        return Ok(());
+    }
     if with_imap_timeout(IMAP_COMMAND_TIMEOUT, state.client_mut().uid_is_present(uid)).await? {
         with_imap_timeout(IMAP_COMMAND_TIMEOUT, state.client_mut().uid_delete(uid)).await?;
         sync_selected_mailbox(state, account, &folder, store, events, server_rules, false).await?;
@@ -1205,6 +1262,57 @@ mod tests {
             vec![604]
         );
         assert!(local_draft_uids_to_hide(&rows, "", 605).is_empty());
+    }
+
+    #[test]
+    fn draft_ref_from_another_account_keeps_message_id_but_not_uid() {
+        use crate::worker::test_support::folder_named;
+        let this_account = [
+            folder_named(20, SpecialUse::Inbox, "INBOX", true),
+            folder_named(21, SpecialUse::Drafts, "Drafts", true),
+        ];
+        // Saved in the other account's Drafts (folder 9), uid 10.
+        let foreign = sample_imap_draft(10, 1);
+        let kept = draft_ref_for_account(Some(foreign), &this_account).unwrap();
+        assert_eq!(kept.uid, 0, "uid 10 here is some other message");
+        assert_eq!(kept.folder_id, FolderId(0));
+        assert_eq!(kept.message_id, "<session@example.com>");
+
+        let local = ImapDraftRef {
+            folder_id: FolderId(21),
+            ..sample_imap_draft(10, 1)
+        };
+        assert_eq!(
+            draft_ref_for_account(Some(local.clone()), &this_account),
+            Some(local)
+        );
+        let placeholder = ImapDraftRef {
+            folder_id: FolderId(0),
+            ..sample_imap_draft(0, 0)
+        };
+        assert_eq!(
+            draft_ref_for_account(Some(placeholder.clone()), &this_account),
+            Some(placeholder)
+        );
+        assert_eq!(draft_ref_for_account(None, &this_account), None);
+    }
+
+    #[test]
+    fn draft_delete_before_first_save_answers_targets_drafts() {
+        use crate::worker::test_support::folder_named;
+        let folders = [
+            folder_named(20, SpecialUse::Inbox, "INBOX", true),
+            folder_named(21, SpecialUse::Drafts, "Drafts", true),
+        ];
+        assert_eq!(
+            draft_delete_folder(FolderId(0), &folders),
+            Some(FolderId(21))
+        );
+        assert_eq!(
+            draft_delete_folder(FolderId(7), &folders),
+            Some(FolderId(7))
+        );
+        assert_eq!(draft_delete_folder(FolderId(0), &folders[..1]), None);
     }
 
     #[test]

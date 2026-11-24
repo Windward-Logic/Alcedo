@@ -1,6 +1,6 @@
 //! Compose signature insertion and stripping.
 
-use alcedo_core::{AccountSignature, ComposeFormat, ComposeInline};
+use alcedo_core::{AccountSignature, ComposeDraft, ComposeFormat, ComposeInline};
 
 use crate::compose::{convert_compose_format, html_to_plain_email, sanitize_compose_html};
 use crate::trackers::{find_tag_end, parse_tag_attributes, remove_img_tags};
@@ -166,6 +166,33 @@ pub fn apply_signature(
     join_compose_body(&draft, &parts.quote)
 }
 
+/// True when the body has nothing the user wrote: once the signature is
+/// removed, no visible text or image remains (an editor may leave an empty
+/// `<p><br></p>` for the caret).
+pub fn body_is_only_signature(body: &str, format: ComposeFormat) -> bool {
+    let rest = strip_signature(body, format);
+    match format {
+        ComposeFormat::Html => {
+            !rest.to_ascii_lowercase().contains("<img")
+                && html_to_plain_email(&rest).trim().is_empty()
+        }
+        ComposeFormat::Plain | ComposeFormat::Markdown => rest.trim().is_empty(),
+    }
+}
+
+/// A new compose the user has not written anything into: no recipients,
+/// subject or attachments, and a body that is only the signature. Signature
+/// images arrive as inlines, so inlines alone do not count.
+pub fn draft_is_only_signature(draft: &ComposeDraft) -> bool {
+    let blank = |field: &[String]| field.iter().all(|value| value.trim().is_empty());
+    blank(&draft.to)
+        && blank(&draft.cc)
+        && blank(&draft.bcc)
+        && draft.subject.trim().is_empty()
+        && draft.attachments.is_empty()
+        && body_is_only_signature(&draft.body_text, draft.format)
+}
+
 fn body_references_cid(body: &str, cid: &str) -> bool {
     let needle = format!("cid:{cid}");
     body.to_ascii_lowercase()
@@ -321,6 +348,102 @@ mod tests {
             body: body.to_string(),
             inlines,
         }
+    }
+
+    fn new_compose(format: ComposeFormat, body: &str) -> ComposeDraft {
+        ComposeDraft {
+            account_id: AccountId(Uuid::nil()),
+            to: Vec::new(),
+            cc: Vec::new(),
+            bcc: Vec::new(),
+            subject: String::new(),
+            body_text: body.to_string(),
+            format,
+            request_mdn: false,
+            tracking_pixel_url: None,
+            attachments: Vec::new(),
+            inlines: Vec::new(),
+            collect_outgoing_contacts: true,
+            in_reply_to: None,
+            references: None,
+            thread_id: None,
+            approve_contact_email: None,
+            sign: false,
+            encrypt: false,
+            autocrypt_header: None,
+            identity_id: None,
+            custom_from: None,
+            imap_draft: None,
+            reaction_emoji: None,
+        }
+    }
+
+    #[test]
+    fn untouched_compose_with_signature_is_only_signature() {
+        let html_sig = sig("<p>Carol<br>Example Co</p>", ComposeFormat::Html);
+        let html = apply_signature("", ComposeFormat::Html, Some(&html_sig), true);
+        assert!(draft_is_only_signature(&new_compose(
+            ComposeFormat::Html,
+            &html
+        )));
+        // The editor keeps an empty paragraph above the signature for the caret.
+        let with_caret = format!("<p><br></p>{html}");
+        assert!(draft_is_only_signature(&new_compose(
+            ComposeFormat::Html,
+            &with_caret
+        )));
+
+        let plain_sig = sig("Carol", ComposeFormat::Plain);
+        let plain = apply_signature("", ComposeFormat::Plain, Some(&plain_sig), true);
+        assert!(draft_is_only_signature(&new_compose(
+            ComposeFormat::Plain,
+            &plain
+        )));
+        assert!(draft_is_only_signature(&new_compose(
+            ComposeFormat::Plain,
+            ""
+        )));
+    }
+
+    #[test]
+    fn anything_the_user_wrote_makes_it_a_real_draft() {
+        let html_sig = sig("<p>Carol</p>", ComposeFormat::Html);
+        let typed = apply_signature("<p>Hi Dave</p>", ComposeFormat::Html, Some(&html_sig), true);
+        assert!(!draft_is_only_signature(&new_compose(
+            ComposeFormat::Html,
+            &typed
+        )));
+        let pasted_image = apply_signature(
+            "<p><img src=\"cid:photo@x\"></p>",
+            ComposeFormat::Html,
+            Some(&html_sig),
+            true,
+        );
+        assert!(!draft_is_only_signature(&new_compose(
+            ComposeFormat::Html,
+            &pasted_image
+        )));
+
+        let plain_sig = sig("Carol", ComposeFormat::Plain);
+        let plain = apply_signature("", ComposeFormat::Plain, Some(&plain_sig), true);
+        let mut with_recipient = new_compose(ComposeFormat::Plain, &plain);
+        with_recipient.to = vec!["dave@example.com".to_string()];
+        assert!(!draft_is_only_signature(&with_recipient));
+        let mut with_subject = new_compose(ComposeFormat::Plain, &plain);
+        with_subject.subject = "Lunch".to_string();
+        assert!(!draft_is_only_signature(&with_subject));
+        let mut with_file = new_compose(ComposeFormat::Plain, &plain);
+        with_file.attachments.push(alcedo_core::ComposeAttachment {
+            filename: "a.pdf".to_string(),
+            mime: "application/pdf".to_string(),
+            bytes: vec![1],
+        });
+        assert!(!draft_is_only_signature(&with_file));
+        let typed_plain = apply_signature("Hi", ComposeFormat::Plain, Some(&plain_sig), true);
+        assert!(!draft_is_only_signature(&new_compose(
+            ComposeFormat::Plain,
+            &typed_plain
+        )));
     }
 
     #[test]

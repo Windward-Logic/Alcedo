@@ -25,7 +25,8 @@ pub use sanitize::{
     looks_like_escaped_html, looks_like_generated_plaintext_html, looks_like_html, sanitize_html,
 };
 pub use signature::{
-    apply_signature, remove_inline_imgs, render_signature_for_format, sanitize_signature_html,
-    signature_inlines_for_body, signature_plain_mail_preview, strip_signature,
+    apply_signature, body_is_only_signature, draft_is_only_signature, remove_inline_imgs,
+    render_signature_for_format, sanitize_signature_html, signature_inlines_for_body,
+    signature_plain_mail_preview, strip_signature,
 };
 pub use trackers::strip_trackers;

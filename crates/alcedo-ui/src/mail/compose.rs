@@ -69,20 +69,22 @@ impl MailModel {
                 if self.pending_send_draft.is_some() && !self.send_surface_released {
                     return;
                 }
-                let imap_draft_cell = self.composer.imap_draft.clone();
-                let account_id = self.composer.from_account_id();
+                let composer = self.composer.clone();
                 let cmd = self.cmd.clone();
                 let sender = sender.clone();
                 confirm_discard_composer(&self.composer, Some(&self.window), move || {
-                    if let Some(draft_ref) = imap_draft_cell.borrow().clone()
-                        && imap_draft_has_server_uid(&draft_ref)
+                    // A flush already under way must not save the discarded draft back.
+                    composer.suspend_autosave();
+                    let account = composer
+                        .draft_saved_account()
+                        .unwrap_or_else(|| composer.from_account_id());
+                    if let Some(command) = composer
+                        .imap_draft
+                        .borrow()
+                        .as_ref()
+                        .and_then(|imap| delete_imap_draft_command(account, imap))
                     {
-                        cmd.emit(UiCommand::DeleteImapDraft {
-                            account: account_id,
-                            folder: draft_ref.folder_id,
-                            uid: draft_ref.uid,
-                            message_id: draft_ref.message_id,
-                        });
+                        cmd.emit(command);
                     }
                     sender.input(MailMsg::ComposerDiscarded);
                 });
@@ -142,19 +144,23 @@ impl MailModel {
                 focus_composer_to(&self.composer);
             }
             MailMsg::ComposerWindowClosed(id) => {
-                if let Some(window) = self.composer_windows.get(&id)
-                    && let Some(ref imap_draft) = *window.widgets.imap_draft.borrow()
-                    && imap_draft_has_server_uid(imap_draft)
-                {
-                    self.cmd.emit(UiCommand::DeleteImapDraft {
-                        account: window.widgets.from_account_id(),
-                        folder: imap_draft.folder_id,
-                        uid: imap_draft.uid,
-                        message_id: imap_draft.message_id.clone(),
-                    });
-                }
+                // Windows released for Send are removed before they close, so
+                // reaching here means the user discarded this one.
                 if let Some(window) = self.composer_windows.remove(&id) {
-                    window.widgets.clear_local_autosave();
+                    let widgets = &window.widgets;
+                    widgets.suspend_autosave();
+                    let account = widgets
+                        .draft_saved_account()
+                        .unwrap_or_else(|| widgets.from_account_id());
+                    if let Some(command) = widgets
+                        .imap_draft
+                        .borrow()
+                        .as_ref()
+                        .and_then(|imap| delete_imap_draft_command(account, imap))
+                    {
+                        self.cmd.emit(command);
+                    }
+                    widgets.clear_local_autosave();
                 }
             }
             MailMsg::PopOutComposer => {
@@ -198,6 +204,7 @@ impl MailModel {
             }
             MailMsg::ComposeFromChanged(window_id) => {
                 if let Some(widgets) = self.composer_widgets(window_id) {
+                    self.retire_draft_left_in_previous_account(widgets);
                     self.reapply_composer_signature(widgets, widgets.include_signature.get());
                     self.reapply_composer_account_format(widgets);
                 }
@@ -276,20 +283,32 @@ impl MailModel {
         ) {
             return;
         }
-        let previous = self.composer.from_account_id();
-        if let Some(imap) = self.composer.imap_draft.borrow_mut().take()
-            && imap_draft_has_server_uid(&imap)
-        {
-            self.cmd.emit(UiCommand::DeleteImapDraft {
-                account: previous,
-                folder: imap.folder_id,
-                uid: imap.uid,
-                message_id: imap.message_id.clone(),
-            });
-        }
         self.bind_composer_from_identity(&self.composer, account_id, None);
+        self.retire_draft_left_in_previous_account(&self.composer);
+        // A placeholder that never reached a server was minted from the old
+        // account's address; start this composer's Drafts identity afresh.
+        let _ = self.composer.take_imap_draft();
+        ensure_compose_draft_identity(&self.composer);
         self.reapply_composer_signature(&self.composer, self.composer.include_signature.get());
         self.reapply_composer_account_format(&self.composer);
+    }
+
+    /// From moved to another account: the old account's Drafts still holds
+    /// this composer's copy. Delete it there; the next save starts afresh in
+    /// the new account.
+    pub(super) fn retire_draft_left_in_previous_account(&self, widgets: &ComposerWidgets) {
+        let Some(previous) =
+            account_left_by_draft(widgets.draft_saved_account(), widgets.from_account_id())
+        else {
+            return;
+        };
+        let retired = widgets.take_imap_draft();
+        // Never leave a live composer without a ref: a save answer for another
+        // composer on this account would otherwise stamp its Message-ID here.
+        ensure_compose_draft_identity(widgets);
+        if let Some(command) = retired.and_then(|imap| delete_imap_draft_command(previous, &imap)) {
+            self.cmd.emit(command);
+        }
     }
 
     pub(super) fn compose_send_from_email(&self, draft: &ComposeDraft) -> String {
@@ -651,6 +670,27 @@ impl MailModel {
     }
 }
 
+/// The account a draft's server copy was left in, when From now names another.
+pub(super) fn account_left_by_draft(
+    saved_to: Option<AccountId>,
+    current: AccountId,
+) -> Option<AccountId> {
+    saved_to.filter(|account| *account != current)
+}
+
+/// Delete this composer's server copy in `account`, if it may have one.
+pub(super) fn delete_imap_draft_command(
+    account: AccountId,
+    imap: &ImapDraftRef,
+) -> Option<UiCommand> {
+    imap_draft_may_be_on_server(imap).then(|| UiCommand::DeleteImapDraft {
+        account,
+        folder: imap.folder_id,
+        uid: imap.uid,
+        message_id: imap.message_id.clone(),
+    })
+}
+
 pub(super) fn should_retarget_composer_from(
     composer_account: AccountId,
     selected_account: AccountId,
@@ -670,5 +710,45 @@ mod tests {
         assert!(should_retarget_composer_from(alcedo, codeinfusion, false));
         assert!(!should_retarget_composer_from(alcedo, alcedo, false));
         assert!(!should_retarget_composer_from(alcedo, codeinfusion, true));
+    }
+
+    fn draft_ref(folder: i64, uid: u32, message_id: &str) -> ImapDraftRef {
+        ImapDraftRef {
+            folder_id: FolderId(folder),
+            uid,
+            uidvalidity: 1,
+            message_id: message_id.to_string(),
+            last_internaldate: None,
+        }
+    }
+
+    #[test]
+    fn discarding_before_the_first_save_answers_still_deletes_by_message_id() {
+        let account = AccountId(Uuid::from_u128(1));
+        let in_flight = draft_ref(0, 0, "<session@example.com>");
+        let Some(UiCommand::DeleteImapDraft {
+            account: target,
+            folder,
+            uid,
+            message_id,
+        }) = delete_imap_draft_command(account, &in_flight)
+        else {
+            panic!("a draft with a Message-ID may already be on the server");
+        };
+        assert_eq!(target, account);
+        assert_eq!((folder, uid), (FolderId(0), 0));
+        assert_eq!(message_id, "<session@example.com>");
+
+        assert!(delete_imap_draft_command(account, &draft_ref(9, 42, "")).is_some());
+        assert!(delete_imap_draft_command(account, &draft_ref(0, 0, "  ")).is_none());
+    }
+
+    #[test]
+    fn switching_from_account_retires_the_copy_in_the_old_account() {
+        let first = AccountId(Uuid::from_u128(1));
+        let second = AccountId(Uuid::from_u128(2));
+        assert_eq!(account_left_by_draft(Some(first), second), Some(first));
+        assert_eq!(account_left_by_draft(Some(second), second), None);
+        assert_eq!(account_left_by_draft(None, second), None);
     }
 }
